@@ -15,8 +15,9 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\AlmondCore.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\AlmondShell.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\LoadSave.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\ModManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types_Posix.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types_Win32.h" />
@@ -49,7 +50,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\WaitFreeQueue.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\AlmondCore.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\AlmondShell.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\LoadSave.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.cpp" />
@@ -58,6 +59,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Win32.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\Exports_DLL.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\ModManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\CMakeLists.txt">

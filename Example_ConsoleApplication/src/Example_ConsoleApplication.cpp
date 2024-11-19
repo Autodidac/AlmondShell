@@ -1,16 +1,24 @@
-#include <AlmondCore.h>
+#include <AlmondShell.h>
 
 #include <chrono>
 #include <iostream>
+#include <string>
 #include <memory>
 #include <stdexcept>
 #include <thread>
 #include <vector>
 
+/*
+#include <SDL3/SDL.h>
+
+#include <raylib.h>
+*/
+
 // Entry point does not require int main() explicitly
 int width = 800;
 int height = 600;
-const wchar_t* title = L"Almond Core Example";
+const wchar_t* title = L"Almond Shell Example";
+
 /*
 // FPS Class
 class FPS {
@@ -76,9 +84,12 @@ struct NewScene : public almond::Scene {
   //  }   
 };
 */
+
 // Entry Point Initialization Structure
 struct myInitializer {
     myInitializer(int width, int height, const wchar_t* title) {
+
+        std::cout << "AlmondShell v" << GetEngineVersion() << std::endl;
 
         // Create an instance of EntryPoint using the factory function from the DLL
         //almond::EntryPoint* entryPoint = almond::CreateEntryPoint(800, 600, L"Example Console App");
@@ -94,19 +105,19 @@ struct myInitializer {
         size_t threadCount = 1;
         int maxBuffer = 100;
 
-       almond::AlmondCore* myAlmondCore = almond::CreateAlmondCore(threadCount, true, &scene, maxBuffer);
-       //myAlmondCore->SetRunning(true);  // Set running state
+       almond::AlmondShell* myAlmondShell = almond::CreateAlmondShell(threadCount, true, &scene, maxBuffer);
+       //myAlmondShell->SetRunning(true);  // Set running state
 
         // Optional: Register callbacks here if needed
         RegisterAlmondCallback([&scene]() {
            // scene.load();
             });
 */
-        //almond::Run(*myAlmondCore);  // Start AlmondCore's main loop
+        //almond::Run(*myAlmondShell);  // Start AlmondShell's main loop
      /*
-        if (almond::IsRunning(*myAlmondCore))
+        if (almond::IsRunning(*myAlmondShell))
         {
-            almond::PrintFPS(*myAlmondCore);
+            almond::PrintFPS(*myAlmondShell);
         }*/
         
     }

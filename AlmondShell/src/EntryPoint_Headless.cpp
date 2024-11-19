@@ -1,7 +1,7 @@
 //#include "Coroutine.h"
 #include "EntryPoint.h"
 #include "EntryPoint_Headless.h"
-#include "AlmondCore.h"
+#include "AlmondShell.h"
 //#include "ThreadPool.h"
 
 #include <iostream>
@@ -82,7 +82,7 @@ struct NewScene : public almond::Scene {
 
     void load() override {
         // Sample Update Logic
-        FPS fpsCounter;
+  /*     FPS fpsCounter;
         std::vector<std::thread> threads;
 
         // Create multiple threads running the FPS counter
@@ -94,6 +94,7 @@ struct NewScene : public almond::Scene {
         for (auto& t : threads) {
             t.join();
         }
+        */ 
         // std::cout << "scene loaded\n";
     }
 
@@ -112,14 +113,14 @@ int main() {
     size_t threadCount = 1;
     size_t maxBuffer = 100;
 
-    almond::AlmondCore* myAlmondCore = almond::CreateAlmondCore(threadCount, true, &scene, maxBuffer);
+    almond::AlmondShell* myAlmondShell = almond::CreateAlmondShell(threadCount, true, &scene, maxBuffer);
 
     // Optional: Register callbacks here if needed
     RegisterAlmondCallback([&scene]() {
          scene.load();
         });
 
-    almond::Run(*myAlmondCore);  // Start AlmondCore's main loop
+    almond::Run(*myAlmondShell);  // Start AlmondShell's main loop
     // Initialize thread pool with available hardware concurrency minus 1 thread
    // almond::ThreadPool threadPool(std::thread::hardware_concurrency() - 1);
 /*

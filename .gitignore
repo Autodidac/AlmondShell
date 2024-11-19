@@ -45,3 +45,5 @@ Example_CMake_Project1/obj/x64/
 *.dat
 
 Example_Android_StaticLibrary1/x64/
+
+vcpkg_installed/

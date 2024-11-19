@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example_WindowsProject1", "
 		{7DD2A3C4-CAF8-4F4B-AA36-A3905AC2BD9A} = {7DD2A3C4-CAF8-4F4B-AA36-A3905AC2BD9A}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example_Mod_Dll1", "Example_Mod_Dll1\Example_Mod_Dll1.vcxproj", "{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -138,6 +140,22 @@ Global
 		{8A6311BF-5421-4A7F-AABE-EC8537A64A4B}.Release|x64.Build.0 = Release|x64
 		{8A6311BF-5421-4A7F-AABE-EC8537A64A4B}.Release|x86.ActiveCfg = Release|Win32
 		{8A6311BF-5421-4A7F-AABE-EC8537A64A4B}.Release|x86.Build.0 = Release|Win32
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|ARM.ActiveCfg = Debug|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|ARM.Build.0 = Debug|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|ARM64.ActiveCfg = Debug|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|ARM64.Build.0 = Debug|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|x64.ActiveCfg = Debug|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|x64.Build.0 = Debug|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|x86.ActiveCfg = Debug|Win32
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Debug|x86.Build.0 = Debug|Win32
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|ARM.ActiveCfg = Release|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|ARM.Build.0 = Release|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|ARM64.ActiveCfg = Release|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|ARM64.Build.0 = Release|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|x64.ActiveCfg = Release|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|x64.Build.0 = Release|x64
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|x86.ActiveCfg = Release|Win32
+		{3DE5C394-8A8A-41D0-81D7-EAF9FAEFC782}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -148,6 +166,7 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		AlmondShell\AlmondShell.vcxitems*{11be1d7d-b7c1-4a53-adeb-6a0fe9014ec8}*SharedItemsImports = 4
 		AlmondShell\AlmondShell.vcxitems*{311ca3d3-081c-4e9a-99ee-60371c18b510}*SharedItemsImports = 9
+		AlmondShell\AlmondShell.vcxitems*{3de5c394-8a8a-41d0-81d7-eaf9faefc782}*SharedItemsImports = 4
 		AlmondShell\AlmondShell.vcxitems*{4c3aa9ff-3a9d-4916-9963-700f9549fde6}*SharedItemsImports = 4
 		AlmondShell\AlmondShell.vcxitems*{7dd2a3c4-caf8-4f4b-aa36-a3905ac2bd9a}*SharedItemsImports = 4
 		AlmondShell\AlmondShell.vcxitems*{8a6311bf-5421-4a7f-aabe-ec8537a64a4b}*SharedItemsImports = 4

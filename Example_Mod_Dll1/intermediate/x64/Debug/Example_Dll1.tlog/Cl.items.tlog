@@ -1,0 +1,11 @@
+C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\src\dllmain.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\dllmain.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\AlmondShell.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\AlmondShell.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\LoadSave.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\LoadSave.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\EntryPoint.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\EntryPoint.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\EntryPoint_Crossplatform.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\EntryPoint_Crossplatform.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\EntryPoint_Headless.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\EntryPoint_Headless.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\EntryPoint_Wasm.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\EntryPoint_Wasm.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\EntryPoint_Win32.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\EntryPoint_Win32.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\EntryPoint_X11.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\EntryPoint_X11.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\Exports_DLL.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\Exports_DLL.obj
+C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\ModManager.cpp;C:\Users\iammi\Documents\repos\AlmondShell\Example_Mod_Dll1\intermediate\x64\Debug\ModManager.obj

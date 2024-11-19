@@ -13,12 +13,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.cpp">
       <Filter>backends\entrypoint</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\AlmondCore.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\Exports_DLL.cpp">
-      <Filter>core\support</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\LoadSave.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -26,6 +20,15 @@
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\AlmondShell.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\ModManager.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\Exports_DLL.cpp">
       <Filter>core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -81,9 +84,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\InputSystem.h">
       <Filter>core\events</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\AlmondCore.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types.h">
       <Filter>core\support</Filter>
     </ClInclude>
@@ -101,9 +101,6 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PhysicsSystem2D.h">
       <Filter>backends\physics</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Exports_DLL.h">
-      <Filter>core\support</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\SceneSnapshot.h">
       <Filter>core\scene</Filter>
@@ -124,6 +121,15 @@
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\AlmondShell.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\ModManager.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\Exports_DLL.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
