@@ -21,29 +21,8 @@ const int major = 0;
 // minor features, major updates, breaking compatibility changes
 const int minor = 0;
 // minor bug fixes, alterations, refactors, updates
-const int revision = 3;
+const int revision = 4;
 
-
-int GetMajor()
-{
-    return major;
-}
-int GetMinor()
-{
-    return minor;
-}
-int GetRevision()
-{
-    return revision;
-}
-static char version_string[32] = "";
-
-extern "C" const char* GetEngineVersion()
-{
-    std::snprintf(version_string, sizeof(version_string), "%d.%d.%d", major, minor, revision);
-   // std::cout << "Version String (in library): " << version_string << std::endl;
-    return version_string;
-}
 /*
 static const std::string version_string = std::to_string(major) + "." + std::to_string(minor) + "." + std::to_string(revision);
 
@@ -298,3 +277,23 @@ namespace almond {
 
 } // namespace almond
 
+int GetMajor()
+{
+    return major;
+}
+int GetMinor()
+{
+    return minor;
+}
+int GetRevision()
+{
+    return revision;
+}
+static char version_string[32] = "";
+
+extern "C" const char* GetEngineVersion()
+{
+    std::snprintf(version_string, sizeof(version_string), "%d.%d.%d", major, minor, revision);
+    // std::cout << "Version String (in library): " << version_string << std::endl;
+    return version_string;
+}

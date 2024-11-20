@@ -1,5 +1,8 @@
 #include "ModManager.h"
-#include <Windows.h>
+
+//#include <Windows.h>
+#include "framework.h"
+
 #include <unordered_map>
 #include <iostream>
 #include <iomanip>
@@ -47,14 +50,8 @@ void ModManager::LoadModFilesAndDirectories(const fs::path& path) {
 }
 
 bool ModManager::LoadModDLL(const fs::path& path) {
-
-#ifdef GENERATE_HASH_LIST
-    std::string hash = CalculateFileHash(path);
-    std::cerr << "Mod Hash: " << hash << std::endl;
-#endif // GENERATE_HASH_LIST
-
     if (!ValidateMod(path)) {
-        std::cerr << "Failed to validate mod DLL: " << path << std::endl;
+        std::cerr << "Invalid mod DLL: " << path << std::endl;
         return false;
     }
 
@@ -67,16 +64,15 @@ bool ModManager::LoadModDLL(const fs::path& path) {
         }
         else {
             std::cerr << "WARNING: Loading unsigned mod: " << path << std::endl;
-            // You could display an additional warning to the user here
         }
     }
-/*
+
+    /*
     if (!ValidateFileIntegrity(path)) {
         std::cerr << "File integrity check failed for: " << path << std::endl;
         return false;
     }*/
 
-    // Sandboxing step
     if (!SandboxMod(path)) {
         std::cerr << "Sandboxing failed for mod: " << path << std::endl;
         return false;
@@ -85,28 +81,37 @@ bool ModManager::LoadModDLL(const fs::path& path) {
     HMODULE handle = LoadLibraryW(path.c_str());
     if (!handle) {
         DWORD error = GetLastError();
-        std::cerr << "Failed to load mod DLL: " << path << " with error code: " << error << std::endl;
-        std::cerr << "Error message: " << std::system_category().message(error) << std::endl;
+        std::cerr << "Failed to load mod DLL: " << path
+            << " (Error Code: " << error
+            << ", Message: " << std::system_category().message(error) << ")" << std::endl;
         return false;
     }
 
-    using CreateModFunc = almond::Plugin * (*)();
+    using CreateModFunc = almond::Plugin* (*)();
     using DestroyModFunc = void (*)(almond::Plugin*);
 
     auto CreateMod = reinterpret_cast<CreateModFunc>(GetProcAddress(handle, "CreateMod"));
     auto DestroyMod = reinterpret_cast<DestroyModFunc>(GetProcAddress(handle, "DestroyMod"));
 
     if (!CreateMod || !DestroyMod) {
-        std::cerr << "Failed to get CreateMod/DestroyMod function from: " << path << std::endl;
+        std::cerr << "Missing CreateMod/DestroyMod function in: " << path << std::endl;
         FreeLibrary(handle);
         return false;
     }
 
-    almond::Plugin* plugin = CreateMod();
-    plugins.push_back(std::unique_ptr<almond::Plugin>(plugin));
-    handles.push_back(handle);
+    try {
+        almond::Plugin* plugin = CreateMod();
+        plugins.push_back(std::unique_ptr<almond::Plugin>(plugin));
+        handles.push_back(handle);
 
-    plugin->Initialize(mod);
+        plugin->Initialize(mod);
+    }
+    catch (const std::exception& ex) {
+        std::cerr << "Exception during plugin initialization: " << ex.what() << std::endl;
+        FreeLibrary(handle);
+        return false;
+    }
+
     return true;
 }
 

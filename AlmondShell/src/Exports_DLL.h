@@ -29,21 +29,3 @@
 #else
 #define ALECALLCONV __cdecl
 #endif  // _STDCALL_SUPPORTED
-
-namespace almond {
-    class AlmondShell;
-
-    class ENTRYPOINTLIBRARY_API Plugin {
-    public:
-        virtual ~Plugin() = default;
-        virtual void Initialize(AlmondShell* mod) = 0;
-        virtual void Update(float deltaTime) = 0;
-        virtual void Shutdown() = 0;
-        virtual std::string Version() const = 0;
-    };
-
-extern "C" ENTRYPOINTLIBRARY_API Plugin* CreatePlugin();
-
-extern "C" ENTRYPOINTLIBRARY_API void DestroyPlugin(Plugin* plugin);
-
-}

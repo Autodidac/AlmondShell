@@ -18,7 +18,7 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4251)
-#pragma warning(disable : 4273)
+//#pragma warning(disable : 4273)
 #endif
 
 // major features
@@ -27,9 +27,11 @@ int GetMajor();
 int GetMinor();
 // minor bug fixes, alterations
 int GetRevision();
-extern "C" const char* GetEngineVersion();
 
+// external commands
+extern "C" const char* GetEngineVersion();
 extern "C" std::function<void(void)> m_updateCallback;
+
 void RegisterAlmondCallback(std::function<void(void)> callback);
 
 namespace almond {
@@ -99,10 +101,10 @@ namespace almond {
 
     };
 
-    // C-API compatible function prototypes
+    // external function prototypes
     extern "C" AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize);
     extern "C" void Run(AlmondShell& core);
     extern "C" bool IsRunning(AlmondShell& core);
     extern "C" void PrintFPS(AlmondShell& core);
-   // extern "C" void PrintMessage(const std::string& text);
+    // extern "C" void PrintMessage(const std::string& text);
 } // namespace almond
