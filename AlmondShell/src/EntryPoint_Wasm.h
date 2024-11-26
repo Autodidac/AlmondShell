@@ -11,12 +11,12 @@
 
 namespace almond {
 
-    class WasmEntryPoint : public EntryPointBase {
+    class WasmEntryPoint : public EntryPoint_Crossplatform {
     public:
-        void createEntryPoint(int width, int height, const char* title) override {
+      /* void createEntryPoint(int width, int height, const char* title) override {
             // Initialize WebGL or HTML5 canvas entry point here
             emscripten_set_canvas_element_size("#canvas", width, height);
-        }
+        }*/ 
 
         void show() override {
             emscripten_set_main_loop(mainLoop, 0, 1);

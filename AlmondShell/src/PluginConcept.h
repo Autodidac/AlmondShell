@@ -1,15 +1,18 @@
 #pragma once
-#include <type_traits>
+#include "IPlugin.h"
 #include <concepts>
-#include "PluginManager.h"
+#include <type_traits>
 
 namespace almond::plugin {
+
+    // Concept to check if a class has Initialize() and Shutdown() methods.
     template <typename T>
     concept PluginConcept = requires(T t) {
         { t.Initialize() } -> std::same_as<void>;
         { t.Shutdown() } -> std::same_as<void>;
     };
 
+    // Validated plugin ensures the type satisfies the PluginConcept
     template <PluginConcept T>
     class ValidatedPlugin : public IPlugin {
     public:
@@ -23,4 +26,5 @@ namespace almond::plugin {
             static_cast<T*>(this)->Shutdown();
         }
     };
-}
+
+} // namespace almond::plugin

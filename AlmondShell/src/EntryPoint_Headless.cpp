@@ -1,10 +1,14 @@
 //#include "Coroutine.h"
-#include "EntryPoint.h"
+//#include "EntryPoint.h"
 #include "EntryPoint_Headless.h"
 #include "AlmondShell.h"
-#include "PluginManager.h"
 
+#include "PluginManager.h"
 //#include "ThreadPool.h"
+
+#include "EventSystem.h"
+#include "UI_Manager.h"
+#include "UI_Button.h"
 
 #include <iostream>
 //#include <thread>
@@ -84,7 +88,7 @@ struct NewScene : public almond::Scene {
 
     void load() override {
         // Sample Update Logic
-  /*     FPS fpsCounter;
+       FPS fpsCounter;
         std::vector<std::thread> threads;
 
         // Create multiple threads running the FPS counter
@@ -96,8 +100,8 @@ struct NewScene : public almond::Scene {
         for (auto& t : threads) {
             t.join();
         }
-        */ 
-        // std::cout << "scene loaded\n";
+         
+         //std::cout << "scene loaded\n";
     }
 
     /*
@@ -108,22 +112,8 @@ struct NewScene : public almond::Scene {
        }   */
 };
 
-
 int main() {
     std::cout << "Running headless application...\n";
-
-
-    std::cout << "Loading any available plugins...\n";
-    almond::plugin::PluginManager manager;
-
-    const std::filesystem::path pluginDirectory = ".\\mods";
-    if (std::filesystem::exists(pluginDirectory) && std::filesystem::is_directory(pluginDirectory)) {
-        for (const auto& entry : std::filesystem::directory_iterator(pluginDirectory)) {
-            if (entry.path().extension() == ".dll" || entry.path().extension() == ".so") {
-                manager.LoadPlugin(entry.path());
-            }
-        }
-    }
 
     NewScene scene; 
     size_t threadCount = 1;
@@ -132,9 +122,11 @@ int main() {
     almond::AlmondShell* myAlmondShell = almond::CreateAlmondShell(threadCount, true, &scene, maxBuffer);
 
     // Optional: Register callbacks here if needed
-    RegisterAlmondCallback([&scene]() {
+    almond::RegisterAlmondCallback([&scene]() {
          scene.load();
+        // scene.printEntityPositions();
         });
+    
 
     almond::Run(*myAlmondShell);  // Otherwise Start AlmondShell's internal main loop
 

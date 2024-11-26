@@ -1,9 +1,8 @@
 #pragma once
 
-#include "framework.h"
-
 #include <cstdint>
 //#include <Windows.h>  // For Windows-specific HANDLE type
+#include "framework.h"
 
 namespace almond {
     // Fixed-width integer types
@@ -13,7 +12,7 @@ namespace almond {
 
     // Define platform-specific Handle type for Windows
     using Handle = HANDLE;
-    
+
 
     // Windows DWORD and WORD definitions adapted for 64-bit compatibility
     using DWORD = uint32;

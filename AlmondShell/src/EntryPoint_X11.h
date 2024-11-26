@@ -9,7 +9,7 @@ namespace almond {
 
     class X11EntryPoint : public EntryPoint_Crossplatform {
     public:
-        void createEntryPoint(int width, int height, const char* title) override {
+       /* void createEntryPoint(int width, int height, const char* title) override {
             display = XOpenDisplay(NULL);
             int screen = DefaultScreen(display);
             entryPoint = XCreateSimpleWindow(display, RootWindow(display, screen),
@@ -19,7 +19,7 @@ namespace almond {
 
             XStoreName(display, entryPoint, title);
             XSelectInput(display, entryPoint, ExposureMask | KeyPressMask);
-        }
+        }*/
 
         void show() override {
             XMapWindow(display, entryPoint);

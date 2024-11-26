@@ -5,9 +5,9 @@
 #include "Exports_DLL.h"
 
 namespace almond {
-    class ENTRYPOINTLIBRARY_API HeadlessEntryPoint : public EntryPoint_Crossplatform {
+    class ALMONDSHELL_API HeadlessEntryPoint : public EntryPoint_Crossplatform {
     public:
-        void createEntryPoint(int width, int height, const wchar_t* title) override {}
+       // void createEntryPoint(int width, int height, const wchar_t* title) override {}
 
         void show() override {}
 

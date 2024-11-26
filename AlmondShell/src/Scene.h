@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Entity.h"
 #include "MovementEvent.h" // Ensure you include this for MovementEvent
 
@@ -8,7 +7,7 @@
 #include <vector>
 #include <memory> // Include for std::unique_ptr
 
-namespace almond 
+namespace almond
 {
     class Scene {
     public:
@@ -32,8 +31,8 @@ namespace almond
             loaded = false; // Reset the flag when unloading
         }
 
-        virtual void printEntityPositions() {
-            for (auto& entity : entities) {
+        virtual void printEntityPositions() const {
+            for (const auto& entity : entities) {
                 entity->printPosition(); // Print position of each entity
             }
         }
@@ -74,7 +73,6 @@ namespace almond
             }
             return newScene;
         }
-
 
         bool isLoaded() const { return loaded; } // Check if the scene is loaded
 

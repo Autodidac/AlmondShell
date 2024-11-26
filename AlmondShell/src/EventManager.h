@@ -4,29 +4,50 @@
 
 #include <vector>
 #include <memory>
+#include <map>
 
 namespace almond {
+   /* struct Event {
+        std::string type;
+        std::map<std::string, std::string> data;
+    };*/
 
-class EventManager {
-public:
-    // Add a movement event as a unique pointer
-    void addMovementEvent(std::unique_ptr<MovementEvent> event) {
-        movementEvents.push_back(std::move(event));
-    }
+    enum class EventType {
+        MouseButtonClick,
+        MouseMove,
+        KeyPress,
+        TextInput
+    };
 
-    // Return a vector of movement events as unique pointers and clear the internal storage
-    std::vector<std::unique_ptr<MovementEvent>> getMovementEvents() {
-        std::vector<std::unique_ptr<MovementEvent>> eventsCopy;
-        eventsCopy.swap(movementEvents); // Efficiently swap the contents
-        return eventsCopy; // Return the unique pointers
-    }
+    struct Event {
+        EventType type;
+        std::map<std::string, std::string> data;
+        float x, y;  // Mouse position
+        int key;     // Key press code
+        char text[2]; // Text input (character)
+    };
 
-    // Clear the movement events (if needed, although it's already cleared after getMovementEvents)
-    void clearMovementEvents() {
-        movementEvents.clear(); // Clear the stored events
-    }
+    class EventManager {
+    public:
 
-private:
-    std::vector<std::unique_ptr<MovementEvent>> movementEvents; // Store movement events as unique pointers
-};
+        // Add a movement event as a unique pointer
+        void addMovementEvent(std::unique_ptr<MovementEvent> event) {
+            movementEvents.push_back(std::move(event));
+        }
+
+        // Return a vector of movement events as unique pointers and clear the internal storage
+        std::vector<std::unique_ptr<MovementEvent>> getMovementEvents() {
+            std::vector<std::unique_ptr<MovementEvent>> eventsCopy;
+            eventsCopy.swap(movementEvents); // Efficiently swap the contents
+            return eventsCopy; // Return the unique pointers
+        }
+
+        // Clear the movement events (if needed, although it's already cleared after getMovementEvents)
+        void clearMovementEvents() {
+            movementEvents.clear(); // Clear the stored events
+        }
+
+    private:
+        std::vector<std::unique_ptr<MovementEvent>> movementEvents; // Store movement events as unique pointers
+    };
 } // namespace almond

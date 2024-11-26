@@ -17,13 +17,9 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\AlmondShell.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\AsyncPluginManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\EventSystem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\IPlugin.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\LoadSave.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\ModManager.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PluginConcept.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PluginManager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types.h" />
@@ -35,15 +31,24 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\SceneSnapshot.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Entity.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntityComponentSystem.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Android.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Headless.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Wasm.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Win32.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Event.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EventManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\Event.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\EventManager.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Exports_DLL.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\framework.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\InputSystem.h" />
@@ -54,25 +59,24 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Scene.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\ThreadPool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\TimeKeeper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\UI_Button.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\UI_Manager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Utilities.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\WaitFreeQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\AlmondShell.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\EventSystem.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\LoadSave.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Headless.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Wasm.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Win32.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\Exports_DLL.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\ModManager.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\RenderingSystem.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Button.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\CMakeLists.txt">

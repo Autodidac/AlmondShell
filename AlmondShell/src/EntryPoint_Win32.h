@@ -25,7 +25,7 @@ namespace almond {
         Win32EntryPoint() : hwnd(nullptr), keyCallback(nullptr) {}
 
         // Method to create a window with the given parameters
-        void createEntryPoint(int width, int height, const wchar_t* title) override {
+     /*   void createEntryPoint(int width, int height, const wchar_t* title) override {
             // Define the window class
             WNDCLASS wc = {};
             wc.lpfnWndProc = Win32EntryPoint::WndProc;  // Custom window procedure
@@ -47,9 +47,9 @@ namespace almond {
 
             if (!hwnd) {
                 std::cerr << "Window creation failed: " << GetLastError() << std::endl;
-            }
+           }
         }
-
+*/ 
         // Show the window
         void show() override {
             ShowWindow(hwnd, SW_SHOW);

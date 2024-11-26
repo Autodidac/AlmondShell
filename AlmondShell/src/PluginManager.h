@@ -1,11 +1,16 @@
 #pragma once
 
-#include <string>
-#include <vector>
-#include <memory>
+#include "IPlugin.h"
+#include "Logger.h"
+#include "PluginConcept.h"
+
 #include <filesystem>
 #include <functional>
 #include <iostream>
+#include <memory>
+#include <ranges>
+#include <string>
+#include <vector>
 
 #ifdef _WIN32
 #include "framework.h"
@@ -23,67 +28,80 @@ using PluginHandle = void*;
 
 namespace almond::plugin {
 
-    class IPlugin {
-    public:
-        virtual void Initialize() = 0;
-        virtual void Shutdown() = 0;
-        virtual ~IPlugin() = default;
-    };
-
+    // PluginManager class, header-only
     class PluginManager {
     public:
         using PluginFactoryFunc = IPlugin * (*)();
 
-        PluginManager() = default;
+        // Default constructor with optional logFileName
+        explicit PluginManager(const std::string& logFileName = "default_log.txt")
+            : logger(logFileName) {
+        }
 
         ~PluginManager() {
             UnloadAllPlugins();
         }
 
+        // C++20 use of std::filesystem::path and ranges for efficient operations
         bool LoadPlugin(const std::filesystem::path& path) {
+            logger.log("Attempting to load plugin: " + path.string());
+
+            // Modern handling of the shared library loading
             PluginHandle handle = LoadSharedLibrary(path);
             if (!handle) {
-                LogError("Failed to load plugin: " + path.string());
+                logger.log("ERROR: Failed to load plugin: " + path.string());
                 return false;
             }
 
+            // Use reinterpret_cast to call the function from the plugin
             auto factory = reinterpret_cast<PluginFactoryFunc>(GetSymbol(handle, "CreatePlugin"));
             if (!factory) {
-                LogError("Missing entry point in plugin: " + path.string());
+                logger.log("ERROR: Missing entry point in plugin: " + path.string());
                 CloseLibrary(handle);
                 return false;
             }
 
+            // Using smart pointer to manage plugin instance
             std::unique_ptr<IPlugin> plugin(factory());
             if (plugin) {
                 plugin->Initialize();
                 plugins.emplace_back(std::move(plugin), handle);
-                LogInfo("Successfully loaded plugin: " + path.string());
+                logger.log("Successfully loaded plugin: " + path.string());
                 return true;
             }
 
             CloseLibrary(handle);
+            logger.log("ERROR: Failed to create plugin instance: " + path.string());
             return false;
         }
 
+        // Unloads all plugins
         void UnloadAllPlugins() {
-            for (auto& [plugin, handle] : plugins) {
-                plugin->Shutdown();
-                CloseLibrary(handle);
+            logger.log("Unloading all plugins...");
+
+            // Reverse iteration with std::ranges for modern loop control
+            for (auto& [plugin, handle] : plugins | std::views::reverse) {
+                if (plugin) {
+                    logger.log("Shutting down plugin...");
+                    plugin->Shutdown();
+                }
+
+                logger.log("Destroying plugin instance...");
+                plugin.reset();
+
+                if (handle) {
+                    logger.log("Closing library handle...");
+                    CloseLibrary(handle);
+                }
             }
+
             plugins.clear();
+            logger.log("All plugins unloaded.");
         }
 
     private:
         std::vector<std::pair<std::unique_ptr<IPlugin>, PluginHandle>> plugins;
-
-        void LogInfo(const std::string& message) const {
-            std::cout << "[PluginManager] INFO: " << message << '\n';
-        }
-
-        void LogError(const std::string& message) const {
-            std::cerr << "[PluginManager] ERROR: " << message << '\n';
-        }
+        almond::Logger logger; // Logger instance
     };
 
 } // namespace almond::plugin

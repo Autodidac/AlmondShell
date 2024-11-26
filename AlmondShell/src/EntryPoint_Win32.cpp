@@ -1,5 +1,5 @@
 
-#include "EntryPoint.h"
+//#include "EntryPoint.h"
 #include "EntryPoint_Win32.h"
 
 #ifdef _WIN32
@@ -7,8 +7,8 @@
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
     almond::Win32EntryPoint entryPoint;
-    entryPoint.createEntryPoint(1280, 720, L"Almond Shell - Windows");
-
+  /* entryPoint.createEntryPoint(1280, 720, L"Almond Shell - Windows");
+*/ 
     // Register a key callback function
     entryPoint.setKeyCallback([](WPARAM key) {
         // Simple key event handling: print key value to debug output

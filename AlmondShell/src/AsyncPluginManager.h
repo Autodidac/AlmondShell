@@ -1,9 +1,11 @@
 #pragma once
+#include "PluginManager.h"
 #include <future>
 #include <thread>
-#include "PluginManager.h"
 
 namespace almond::plugin {
+
+    // AsyncPluginManager extends PluginManager to add async loading of plugins
     class AsyncPluginManager : public PluginManager {
     public:
         std::future<bool> LoadPluginAsync(const std::filesystem::path& path) {
@@ -12,4 +14,5 @@ namespace almond::plugin {
                 });
         }
     };
-}
+
+} // namespace almond::plugin

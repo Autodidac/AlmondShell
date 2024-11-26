@@ -13,9 +13,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.cpp">
       <Filter>backends\entrypoint</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.cpp">
       <Filter>core</Filter>
     </ClCompile>
@@ -28,8 +25,17 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\LoadSave.cpp">
       <Filter>core\scene</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\ModManager.cpp">
-      <Filter>core\plugins</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\EventSystem.cpp">
+      <Filter>core\events</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Button.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Manager.cpp">
+      <Filter>core\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\RenderingSystem.cpp">
+      <Filter>backends\rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -114,9 +120,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Logger.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -129,9 +132,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\LoadSave.h">
       <Filter>core\scene</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\ModManager.h">
-      <Filter>core\plugins</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PluginManager.h">
       <Filter>core\plugins</Filter>
     </ClInclude>
@@ -139,6 +139,18 @@
       <Filter>core\plugins</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PluginConcept.h">
+      <Filter>core\plugins</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\EventSystem.h">
+      <Filter>core\events</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\UI_Button.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\UI_Manager.h">
+      <Filter>core\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\IPlugin.h">
       <Filter>core\plugins</Filter>
     </ClInclude>
   </ItemGroup>
@@ -178,6 +190,9 @@
     </Filter>
     <Filter Include="core\plugins">
       <UniqueIdentifier>{7e32bc90-e2e3-4957-8209-e268579b2183}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\ui">
+      <UniqueIdentifier>{380cb480-3c8a-4316-a202-01c794910e9f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

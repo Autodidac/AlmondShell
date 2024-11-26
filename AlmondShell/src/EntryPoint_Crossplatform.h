@@ -6,12 +6,12 @@
 
 namespace almond {
 
-    class ENTRYPOINTLIBRARY_API EntryPoint_Crossplatform {
+    class ALMONDSHELL_API EntryPoint_Crossplatform {
     public:
         virtual ~EntryPoint_Crossplatform() = default;
 
         // Creates the entry point for the application with specified width, height, and title.
-        virtual void createEntryPoint(int width, int height, const wchar_t* title) = 0;
+        //virtual void createEntryPoint(int width, int height, const wchar_t* title) = 0;
 
         // Displays the created entry point (window, etc.).
         virtual void show() = 0;
@@ -21,6 +21,13 @@ namespace almond {
 
         // Factory method to create platform-specific entry points
         [[nodiscard]] std::unique_ptr<EntryPoint_Crossplatform> create(); 
+/*
+    private:
+        // Class now handles all logic directly (no more Impl class)
+        int width;
+        int height;
+        std::wstring title;
+*/
     };
 
 } // namespace almond

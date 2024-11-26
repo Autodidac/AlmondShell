@@ -84,12 +84,21 @@ struct NewScene : public almond::Scene {
   //  }   
 };
 */
-
+void MyCallback() {
+    std::cout << "Callback triggered!" << std::endl;
+}
 // Entry Point Initialization Structure
 struct myInitializer {
     myInitializer(int width, int height, const wchar_t* title) {
 
-        std::cout << "AlmondShell v" << GetEngineVersion() << std::endl;
+        //std::cout << "AlmondShell v" << almond::AlmondShell::GetEngineVersion() << std::endl;
+
+        /*
+        almond::RegisterAlmondCallback(MyCallback);
+        almond::AlmondShell* engine = almond::CreateAlmondShell(4, true, nullptr, 10);
+        almond::Run(*engine);
+        delete engine;*/
+
 
         // Create an instance of EntryPoint using the factory function from the DLL
         //almond::EntryPoint* entryPoint = almond::CreateEntryPoint(800, 600, L"Example Console App");

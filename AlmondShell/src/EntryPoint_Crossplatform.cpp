@@ -28,14 +28,6 @@
     #include "EntryPoint_PS5.h"
 #endif
 
-// fixed em :)
-//I'll remove this soon
-//#ifdef _MSC_VER
-// Only for MSVC compilers
-//#pragma warning(disable : 4251)
-//#pragma warning(disable : 4273)
-//#endif
-
 namespace almond {
    /// @brief  Crossplatform Factory Function
    /// @return Returns Contextual Entry Point
