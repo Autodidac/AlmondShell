@@ -1,8 +1,7 @@
 #pragma once
-
 #include "Types.h"  // Ensures almond types are defined, like uint32, uint16, uint64, etc.
 
-#include <cstddef>
+#ifdef __linux__
 
 namespace almond {
     // Ensure 1-byte packing for consistent layout across platforms
@@ -25,3 +24,4 @@ namespace almond {
 
     #pragma pack(pop)  // Restore default packing after struct definition
 }  // namespace almond
+#endif

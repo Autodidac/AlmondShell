@@ -74,7 +74,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
   <ImportGroup Label="Shared">
-    <Import Project="..\AlmondShell\AlmondShell.vcxitems" Label="Shared" />
+    <Import Project="..\..\AlmondShell.vcxitems" Label="Shared" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Label="Vcpkg">
@@ -82,12 +82,14 @@
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
-    <VcpkgInstalledDir>C:\Users\iammi\Documents\repos\vcpkg\</VcpkgInstalledDir>
+    <VcpkgInstalledDir>
+    </VcpkgInstalledDir>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
-    <VcpkgInstalledDir>C:\Users\iammi\Documents\repos\vcpkg\</VcpkgInstalledDir>
+    <VcpkgInstalledDir>
+    </VcpkgInstalledDir>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <!-- Compiler and linker settings for each configuration -->
@@ -139,12 +141,12 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\AlmondShell\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\bin\x64\Debug\;..\vcpkg_installed\x64-windows\x64-windows\include\SDL3;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Example_Dll1.lib;SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Example_Dll1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
@@ -160,12 +162,12 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>..\AlmondShell\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>..\bin\x64\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Example_Dll1.lib;SDL3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Example_Dll1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
@@ -173,4 +175,9 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
+  <ItemGroup>
+    <ClInclude Update="C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\almondshell">
+      <FileType>Document</FileType>
+    </ClInclude>
+  </ItemGroup>
 </Project>

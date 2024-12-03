@@ -1,7 +1,11 @@
 #pragma once
 
+#ifdef _WIN32
 #include <cstdint>
+#endif
+#ifdef __linux__
 #include <cstddef>
+#endif
 
 namespace almond {
     // Define fixed-width integer types for cross-platform compatibility

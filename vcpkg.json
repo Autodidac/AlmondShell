@@ -1,6 +1,8 @@
 {
   "builtin-baseline": "84a143e4caf6b70db57f28d04c41df4a85c480fa",
   "dependencies": [
+    "glad",
+    "glfw3",
     "raylib",
     "zlib",
     "sdl3"

@@ -1,4 +1,4 @@
-#include "AlmondShell.h"
+#include "Engine.h"
 
 #include <iostream>
 #include <fstream>
@@ -8,26 +8,16 @@
 #include <stdexcept>
 
 namespace almond {
-
+    //class RenderingSystem;
     // Mutex for callback thread safety
-    std::shared_mutex callbackMutex;
+    std::shared_mutex m_callbackMutex;
     std::function<void()> m_updateCallback;
 
     // Register a callback for updates
     void RegisterAlmondCallback(const std::function<void()> callback) {
-        std::unique_lock lock(callbackMutex);
+        std::unique_lock lock(m_callbackMutex);
         m_updateCallback = callback;
     }
-
-    // Version information
-    const int major = 0;
-    const int minor = 0;
-    const int revision = 5;
-    static char version_string[32] = "";
-
-    int GetMajor() { return major; }
-    int GetMinor() { return minor; }
-    int GetRevision() { return revision; }
 
     // Constructor and Destructor
     AlmondShell::AlmondShell(size_t numThreads, bool running, almond::Scene* scene, size_t maxBufferSize)
@@ -36,15 +26,13 @@ namespace almond {
         m_maxBufferSize(maxBufferSize), m_targetTime(0.0f), m_targetFPS(120),
         m_frameLimitingEnabled(false), m_saveIntervalMinutes(1),
         m_frameCount(0), m_fps(0.0f) {
+        // Create renderer instance      
+       // m_renderer = std::make_unique<RenderingSystem>();
+        InitializeRenderer("Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
     }
 
-    AlmondShell::~AlmondShell() {}
-
-    // Version string getter
-    extern "C" const char* GetEngineVersion() {
-        std::snprintf(version_string, sizeof(version_string), "%d.%d.%d", major, minor, revision);
-        return version_string;
-    }
+    // Destructor
+    AlmondShell::~AlmondShell() = default;
 
     // Snapshot management
     void AlmondShell::CaptureSnapshot() {
@@ -62,13 +50,18 @@ namespace almond {
 
         try {
             std::ofstream ofs("savegame.dat", std::ios::binary | std::ios::app);
-            if (!ofs) throw std::ios_base::failure("Failed to open save file.");
+            if (!ofs.is_open()) {
+                throw std::ios_base::failure("Failed to open save file for writing.");
+            }
 
             const SceneSnapshot& snapshot = m_recentStates.back();
             ofs.write(reinterpret_cast<const char*>(&snapshot), sizeof(SceneSnapshot));
+            if (!ofs) {
+                throw std::ios_base::failure("Error occurred while writing to save file.");
+            }
         }
         catch (const std::ios_base::failure& e) {
-            std::cerr << e.what() << std::endl;
+            std::cerr << "SaveBinaryState Error: " << e.what() << std::endl;
         }
     }
 
@@ -134,10 +127,66 @@ namespace almond {
         lastFrame = std::chrono::steady_clock::now();
     }
 
+    void AlmondShell::InitializeRenderer(const std::string& title, float x, float y, float width, float height, unsigned int color, void* texture) {
+        // Ensure m_renderer is created only once
+        if (!m_renderer) {
+            std::cout << "Creating a new RenderingSystem instance.\n"; // Logging
+            // Pass componentManager and jobSystem when constructing RenderingSystem
+            m_renderer = std::make_unique<RenderingSystem>(title, x, y, width, height, color, texture);
+        }
+
+        // Initialize the context renderer, but only if it hasn't been set up yet
+        if (!m_renderer->IsInitialized()) {
+            try {
+                std::cout << "Initializing context renderer with title: " << title << ", width: " << width << ", height: " << height << "\n"; // Logging
+                m_renderer->CreateContextRenderer<RenderContext>(title, x, y, width, height, color, texture);
+                std::cout << "Renderer initialized successfully.\n"; // Logging
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error initializing the renderer: " << e.what() << '\n'; // Error handling
+            }
+        }
+        else {
+            std::cout << "Renderer is already initialized.\n"; // Logging
+        }
+    }
+
+    void AlmondShell::RenderFrame() {
+        if (m_renderer) {
+            try {
+                std::cout << "Rendering frame...\n"; // Logging
+
+                // Clear the renderer to prepare for the new frame
+                //m_renderer ->Clear();
+
+                // Check if the scene exists and render it
+                if (m_scene) {
+                    std::cout << "Rendering scene...\n"; // Logging
+                    //m_scene->Render(*m_renderer);
+                }
+                else {
+                    std::cout << "No scene available to render.\n"; // Logging
+                }
+
+                // Render all items managed by the renderer
+                m_renderer->RenderAll();
+
+                std::cout << "Frame rendered successfully.\n"; // Logging
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error during frame rendering: " << e.what() << '\n'; // Error handling
+            }
+        }
+        else {
+            std::cerr << "Renderer is not initialized. Unable to render frame.\n"; // Error handling
+        }
+    }
+
     // Win32-specific functionality
     void AlmondShell::RunWin32Desktop(MSG msg, HACCEL hAccelTable) {
-        auto lastFrame = std::chrono::steady_clock::now();
-        auto lastSave = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+        auto lastFrame = now;
+        auto lastSave = now;
 
         while (m_running) {
             auto currentTime = std::chrono::steady_clock::now();
@@ -149,11 +198,11 @@ namespace almond {
                     DispatchMessage(&msg);
                 }
                 if (msg.message == WM_QUIT) {
-                   m_running = false;
+                    m_running = false;
                 }
             }
             else {
-                std::shared_lock lock(callbackMutex);
+                std::shared_lock lock(m_callbackMutex);
                 if (m_updateCallback) m_updateCallback();
 
                 if (std::chrono::duration_cast<std::chrono::minutes>(currentTime - lastSave).count() >= m_saveIntervalMinutes) {
@@ -171,8 +220,9 @@ namespace almond {
 
     // Main run loop
     void AlmondShell::Run() {
-        auto lastFrame = std::chrono::steady_clock::now();
-        auto lastSave = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+        auto lastFrame = now;
+        auto lastSave = now;
 
         EventSystem eventSystem;
         UIManager uiManager;
@@ -194,6 +244,9 @@ namespace almond {
             }
         }
 
+        // Initialize the renderer
+        //InitializeRenderer("renderer initialized!",800,600);
+
         // headless main loop
         while (m_running) {
             auto currentTime = std::chrono::steady_clock::now();
@@ -201,26 +254,21 @@ namespace almond {
             // Update events
             uiManager.Update(eventSystem);
 
-            // Begin frame drawing
-            //renderer.BeginDraw();
+            RenderFrame(); // Render the frame
 
-            // Render UI
-            //uiManager.Render(renderer);
 
-            // End frame drawing
-            // renderer.EndDraw();
 
-            {
-                std::shared_lock lock(callbackMutex);
-                if (m_updateCallback) m_updateCallback();
-            }
+            std::shared_lock lock(m_callbackMutex);
+            if (m_updateCallback) m_updateCallback();
 
+            // Perform a sequential scene buffer autosave
             if (std::chrono::duration_cast<std::chrono::minutes>(currentTime - lastSave).count() >= m_saveIntervalMinutes) {
                 Serialize("savegame.dat", m_events);
                 lastSave = currentTime;
                 std::cout << "Game auto-saved." << std::endl;
             }
 
+            // Immediately Capture Current Scene Data Snapshot - ordering may need to be changed
             CaptureSnapshot();
 
             if (m_targetTime > 0.0f) {

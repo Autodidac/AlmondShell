@@ -1,4 +1,4 @@
-#include <AlmondShell.h>
+#include <almondshell>
 
 #include <chrono>
 #include <iostream>
@@ -10,9 +10,8 @@
 
 /*
 #include <SDL3/SDL.h>
-
-#include <raylib.h>
 */
+//#include <raylib.h>
 
 // Entry point does not require int main() explicitly
 int width = 800;

@@ -1,6 +1,8 @@
 #pragma once
+#include "Types.h"  // Ensures almond types are defined, like uint32, uint16, uint64, etc.
 
-#include <cstdint>
+#ifdef _WIN32
+
 //#include <Windows.h>  // For Windows-specific HANDLE type
 #include "framework.h"
 
@@ -29,3 +31,4 @@ namespace almond {
     };
     #pragma pack(pop)  // Restore default packing alignment
 }  // namespace almond
+#endif

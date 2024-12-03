@@ -6,7 +6,7 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_Dll1\\Example_Dll1.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_Dll1\\Example_Dll1.vcxproj",
         "/t:Clean"
       ],
       "problemMatcher": [],
@@ -17,13 +17,13 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_Dll1\\Example_Dll1.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_Dll1\\Example_Dll1.vcxproj",
         "/property:GenerateFullPaths=true",
         "/t:Build",
         "/p:Platform=x64",
         "/p:Configuration=Debug",
         "/p:ConfigurationType=DynamicLibrary",
-        "/p:OutDir=${workspaceFolder}\\bin\\x64\\Debug\\",
+        "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\",
         "/p:AdditionalLibraryDirectories=C:\\Users\\iammi\\Documents\\repos\\vcpkg\\installed\\x64-windows\\lib", // Path to zlib lib directory
         "/p:AdditionalDependencies=zlib.lib" // Name of the zlib library to link
       ],
@@ -35,7 +35,7 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_StaticLib1\\Example_StaticLib1.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_StaticLib1\\Example_StaticLib1.vcxproj",
         "/t:Clean"
       ],
       "problemMatcher": [],
@@ -46,12 +46,12 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_StaticLib1\\Example_StaticLib1.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_StaticLib1\\Example_StaticLib1.vcxproj",
         "/property:GenerateFullPaths=true",
         "/t:Build",
         "/p:Platform=x64",
         "/p:Configuration=Debug",
-        "/p:OutDir=${workspaceFolder}\\bin\\x64\\Debug\\",
+        "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\",
         "/p:AdditionalLibraryDirectories=C:\\Users\\iammi\\Documents\\repos\\vcpkg\\installed\\x64-windows\\lib", // Path to zlib lib directory
         "/p:AdditionalDependencies=zlib.lib" // Name of the zlib library to link
       ],
@@ -63,7 +63,7 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_ConsoleApplication\\Example_ConsoleApplication.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_ConsoleApplication\\Example_ConsoleApplication.vcxproj",
         "/t:Clean"
       ],
       "problemMatcher": [],
@@ -74,12 +74,12 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_ConsoleApplication\\Example_ConsoleApplication.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_ConsoleApplication\\Example_ConsoleApplication.vcxproj",
         "/property:GenerateFullPaths=true",
         "/t:Build",
         "/p:Platform=x64",
         "/p:Configuration=Debug",
-        "/p:OutDir=${workspaceFolder}\\bin\\x64\\Debug\\"
+        "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\"
       ],
       "problemMatcher": ["$msCompile"],
       "group": { "kind": "build", "isDefault": false }
@@ -89,7 +89,7 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_WindowsProject1\\Example_WindowsProject1.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_WindowsProject1\\Example_WindowsProject1.vcxproj",
         "/t:Clean"
       ],
       "problemMatcher": [],
@@ -100,12 +100,12 @@
       "type": "shell",
       "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
       "args": [
-        "${workspaceFolder}\\Example_WindowsProject1\\Example_WindowsProject1.vcxproj",
+        "${workspaceFolder}\\AlmondShell\\examples\\Example_WindowsProject1\\Example_WindowsProject1.vcxproj",
         "/property:GenerateFullPaths=true",
         "/t:Build",
         "/p:Platform=x64",
         "/p:Configuration=Debug",
-        "/p:OutDir=${workspaceFolder}\\bin\\x64\\Debug\\"
+        "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\"
       ],
       "problemMatcher": ["$msCompile"],
       "group": { "kind": "build", "isDefault": false }

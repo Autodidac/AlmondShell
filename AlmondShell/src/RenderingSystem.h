@@ -1,35 +1,48 @@
 #pragma once
 
-#include "ComponentManager.h"
-#include "ThreadPool.h"
+//#include "ComponentManager.h"
+//#include "ThreadPool.h"
+#include "Context_Concept.h"
+#include "Context_Renderer.h"
+#include "Exports_DLL.h"
+
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace almond {
-class RenderingSystem {
-public:
-    RenderingSystem(ComponentManager& componentManager, ThreadPool& jobSystem);
-    void render();
 
-private:
-    ComponentManager& componentManager;
-    ThreadPool& jobSystem;
+    class RenderContext;
 
-    // ux/ui
-    void DrawRect(float x, float y, float width, float height, unsigned int color);
-    void DrawText(float x, float y, const std::string& text, unsigned int color);
-    void DrawImage(float x, float y, float width, float height, void* texture);
-    void BeginDraw();
-    void EndDraw();
+    class RenderingSystem {
+    public:
+        RenderingSystem(const std::string& text, float x, float y, float width, float height, unsigned int color, void* texture);
+        ~RenderingSystem();
 
-};
+        bool IsInitialized() const {
+            return m_isInitialized;  // This should be a member variable set to true after initialization
+        }
 
-inline RenderingSystem::RenderingSystem(ComponentManager& componentManager, ThreadPool& jobSystem)
-    : componentManager(componentManager), jobSystem(jobSystem) {}
+        // Managing rendering contexts
+        template<typename T>
+        void CreateContextRenderer(const std::string& text, float x, float y, float width, float height, unsigned int color, void* texture) requires RenderContextConcept<T> {
+            // Create and move unique_ptr into the vector
+            auto context = std::make_unique<T>(text, x, y, width, height, color, texture);
+            contexts.push_back(std::move(context));
+        }
 
-inline void RenderingSystem::render() {
-    // Render graphics
-    // Implement rendering logic here
+        void RenderContextByID(size_t contextID);
+        void RenderAll();
+
+        void DestroyContextRenderer(size_t contextID);
+        std::vector<std::unique_ptr<RenderContext>> contexts;
+
+    private:
+        bool m_isInitialized = false;
+        //std::unique_ptr<RenderContext> m_context;
+
+        void DrawRect(RenderContext& context, float x, float y, float width, float height, unsigned int color);
+        void DrawAlmondText(RenderContext& context, const std::string& text, float x, float y, float width, float height, unsigned int color);
+        void DrawImage(RenderContext& context, float x, float y, float width, float height, void* texture);
+    };
 }
-
-
-
-} // namespace almond

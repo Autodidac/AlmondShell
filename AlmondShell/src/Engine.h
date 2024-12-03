@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Context_Concept.h"
 #include "EventSystem.h"
 #include "Exports_DLL.h"
 #include "LoadSave.h"
 #include "Logger.h"
 #include "PluginManager.h"
+#include "RenderingSystem.h"
 #include "Scene.h"
 #include "SceneSnapshot.h"
 #include "ThreadPool.h"
@@ -12,6 +14,7 @@
 #include "UI_Button.h"
 #include "UI_Manager.h"
 
+// include windows TODO: platform macros
 #include "framework.h"
 
 #include <chrono>
@@ -23,15 +26,11 @@
 #include <vector>
 
 #ifdef _MSC_VER
-    #pragma warning(disable : 4251)
-    #pragma warning(disable : 4273)
+#pragma warning(disable : 4251)
+#pragma warning(disable : 4273)
 #endif
 
 namespace almond {
-
-    int GetMajor();
-    int GetMinor();
-    int GetRevision();
 
     void RegisterAlmondCallback(std::function<void()> callback);
 
@@ -39,8 +38,6 @@ namespace almond {
     public:
         AlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize);
         ~AlmondShell();
-
-        static const char* GetEngineVersion();
 
         void Run();
         void RunWin32Desktop(MSG msg, HACCEL hAccelTable);
@@ -62,22 +59,33 @@ namespace almond {
         }
 
         float m_fps = 0.0f;
+        // New method to handle event processing using the EventSystem
+        //void ProcessEvents();
+        void InitializeRenderer(const std::string& title, float x, float y, float width, float height, unsigned int color, void* texture); // Initialize the renderer
 
     private:
+        bool m_running;
         almond::plugin::PluginManager m_pluginManager;
 
+        // rendering
+        std::unique_ptr<RenderingSystem> m_renderer; // Renderer instance
+        void RenderFrame(); // Render a single frame
+
+        // scene states
         size_t m_maxBufferSize;
         std::deque<SceneSnapshot> m_recentStates;
         std::unique_ptr<almond::Scene> m_scene;
-        bool m_running;
 
+        // multithreading
         ThreadPool m_jobSystem;
         almond::SaveSystem m_saveSystem;
         std::vector<Event> m_events;
 
+        // time playback
         float m_targetTime = 0.0f;
         void UpdatePlayback();
 
+        // framerate and delta time
         void LimitFrameRate(std::chrono::steady_clock::time_point& lastFrame);
         int m_frameCount = 0;
         std::chrono::steady_clock::time_point m_lastSecond;
@@ -87,13 +95,14 @@ namespace almond {
 
         int m_saveIntervalMinutes = 1;
 
+        // event serialization
         void Serialize(const std::string& filename, const std::vector<Event>& events);
         void Deserialize(const std::string& filename, std::vector<Event>& events);
 
-        // New method to handle event processing using the EventSystem
-        void ProcessEvents();
+
     };
 
+    //external functions TODO: move to another file
     extern "C" AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize);
     extern "C" void Run(AlmondShell& core);
     extern "C" bool IsRunning(AlmondShell& core);

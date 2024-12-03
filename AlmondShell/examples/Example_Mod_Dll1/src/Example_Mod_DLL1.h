@@ -1,8 +1,9 @@
 #pragma once
 
-#include <string>
-#include "PluginManager.h"
 #include "Exports_DLL.h"
+#include "PluginManager.h"
+
+#include <string>
 
 namespace almond {
     class AlmondShell; // Forward declaration.
