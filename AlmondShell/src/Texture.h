@@ -17,6 +17,7 @@ namespace almond {
 
         // Factory method to create a texture based on the active graphics driver
         static Texture* Create(const std::string& filepath, Format format);
+        static Texture* Create(const std::string& filepath, Format format, bool generateMipmaps = true);
 
         // Virtual interface for texture operations
         virtual void Bind(unsigned int slot = 0) const = 0;

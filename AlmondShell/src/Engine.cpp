@@ -7,6 +7,8 @@
 #include <filesystem>
 #include <stdexcept>
 
+//#include "ContextFactory.h"
+
 namespace almond {
     //class RenderingSystem;
     // Mutex for callback thread safety
@@ -27,8 +29,7 @@ namespace almond {
         m_frameLimitingEnabled(false), m_saveIntervalMinutes(1),
         m_frameCount(0), m_fps(0.0f) {
         // Create renderer instance      
-       // m_renderer = std::make_unique<RenderingSystem>();
-        InitializeRenderer("Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
+       // InitializeRenderer(L"Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
     }
 
     // Destructor
@@ -127,7 +128,55 @@ namespace almond {
         lastFrame = std::chrono::steady_clock::now();
     }
 
-    void AlmondShell::InitializeRenderer(const std::string& title, float x, float y, float width, float height, unsigned int color, void* texture) {
+    void AlmondShell::InitializeRenderer(const std::wstring& title, float x, float y, float width, float height, unsigned int color, void* texture) {
+        try {
+            // Create a GLFW window context
+            auto windowContext = almond::ContextFactory::CreateWindowContext(almond::WindowBackend::GLFW);
+
+            // Create the window using the context
+            auto windowHandle = windowContext.createWindow(title, static_cast<int>(width), static_cast<int>(height));
+            if (!windowHandle) {
+                throw std::runtime_error("Failed to create window context.");
+            }
+            
+            // Create an OpenGL rendering context
+            auto renderContext = almond::ContextFactory::CreateRenderContext(almond::RenderBackend::OpenGL);
+
+            // Initialize the rendering context with the native window handle
+            renderContext.initialize(windowHandle);
+
+            // Set up triangle
+            unsigned int VAO = renderContext.setupTriangle();
+
+            // Main rendering loop
+            while (!windowContext.shouldClose()) {
+                windowContext.pollEvents();
+
+                // Set clear color and clear the framebuffer
+                renderContext.clearColor(
+                    (color >> 24 & 0xFF) / 255.0f, // Red
+                    (color >> 16 & 0xFF) / 255.0f, // Green
+                    (color >> 8 & 0xFF) / 255.0f,  // Blue
+                    (color & 0xFF) / 255.0f        // Alpha
+                );
+                //  renderContext.clearColor(0.1f, 0.2f, 0.3f, 1.0f);
+                    //   renderContext.clearColor(0.1f, 0.2f, 0.3f, 1.0f);
+                renderContext.clear();
+
+                // Render the triangle
+                renderContext.renderTriangle(VAO);
+
+                // Swap buffers
+                renderContext.swapBuffers(windowHandle);
+            }
+            // Log success
+            std::cout << "Renderer initialized successfully.\n";
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Error initializing the renderer: " << e.what() << '\n';
+        }
+
+/*
         // Ensure m_renderer is created only once
         if (!m_renderer) {
             std::cout << "Creating a new RenderingSystem instance.\n"; // Logging
@@ -139,7 +188,8 @@ namespace almond {
         if (!m_renderer->IsInitialized()) {
             try {
                 std::cout << "Initializing context renderer with title: " << title << ", width: " << width << ", height: " << height << "\n"; // Logging
-                m_renderer->CreateContextRenderer<RenderContext>(title, x, y, width, height, color, texture);
+               // m_renderer->CreateContextRenderer<RenderContext>(title, x, y, width, height, color, texture);
+           
                 std::cout << "Renderer initialized successfully.\n"; // Logging
             }
             catch (const std::exception& e) {
@@ -148,39 +198,26 @@ namespace almond {
         }
         else {
             std::cout << "Renderer is already initialized.\n"; // Logging
-        }
+        }*/
     }
 
-    void AlmondShell::RenderFrame() {
-        if (m_renderer) {
-            try {
-                std::cout << "Rendering frame...\n"; // Logging
+void AlmondShell::RenderFrame() {
+    //if (m_renderer) {
+        try {
+            std::cout << "Rendering frame...\n";
 
-                // Clear the renderer to prepare for the new frame
-                //m_renderer ->Clear();
-
-                // Check if the scene exists and render it
-                if (m_scene) {
-                    std::cout << "Rendering scene...\n"; // Logging
-                    //m_scene->Render(*m_renderer);
-                }
-                else {
-                    std::cout << "No scene available to render.\n"; // Logging
-                }
-
-                // Render all items managed by the renderer
-                m_renderer->RenderAll();
-
-                std::cout << "Frame rendered successfully.\n"; // Logging
-            }
-            catch (const std::exception& e) {
-                std::cerr << "Error during frame rendering: " << e.what() << '\n'; // Error handling
-            }
+            // Render all contexts in the system
+            //m_renderer->clear();
+           // m_renderer->swapBuffers();
+            std::cout << "Frame rendered successfully.\n";
+        } catch (const std::exception& e) {
+            std::cerr << "Error during frame rendering: " << e.what() << '\n';
         }
-        else {
-            std::cerr << "Renderer is not initialized. Unable to render frame.\n"; // Error handling
-        }
-    }
+   // } else {
+     //   std::cerr << "Renderer is not initialized or not available. Unable to render frame.\n";
+   // }
+}
+
 
     // Win32-specific functionality
     void AlmondShell::RunWin32Desktop(MSG msg, HACCEL hAccelTable) {
@@ -224,13 +261,20 @@ namespace almond {
         auto lastFrame = now;
         auto lastSave = now;
 
+        //intialize the render backend
+//        InitializeRenderer(L"Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
+
         EventSystem eventSystem;
         UIManager uiManager;
 
         UIButton* button = new UIButton(50, 50, 200, 50, "Click Me!");
         button->SetOnClick([]() { std::cout << "Button clicked!\n"; });
         uiManager.AddButton(button);
-
+/*
+        auto button = std::make_unique<UIButton>(50, 50, 200, 50, "Click Me!");
+        button->SetOnClick([]() { std::cout << "Button clicked!\n"; });
+        uiManager.AddButton(std::move(button));
+*/
         //load plugins
         std::cout << "Loading any available plugins...\n";
         almond::plugin::PluginManager manager("plugin_manager.log");
@@ -245,7 +289,7 @@ namespace almond {
         }
 
         // Initialize the renderer
-        //InitializeRenderer("renderer initialized!",800,600);
+        InitializeRenderer(L"Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
 
         // headless main loop
         while (m_running) {

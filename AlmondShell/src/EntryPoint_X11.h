@@ -2,12 +2,12 @@
 
 #ifdef __linux__
 
-#include "EntryPoint_Crossplatform.h"
+#include "EntryPoint.h"
 #include <X11/Xlib.h>
 
 namespace almond {
 
-    class X11EntryPoint : public EntryPoint_Crossplatform {
+    class X11EntryPoint : public EntryPoint {
     public:
        /* void createEntryPoint(int width, int height, const char* title) override {
             display = XOpenDisplay(NULL);

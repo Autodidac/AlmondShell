@@ -2,13 +2,13 @@
 
 #ifdef __ANDROID__
 
-#include "EntryPoint_Crossplatform.h"
+#include "EntryPoint.h"
 
 #include <jni.h>
 #include <android/native_activity.h>
 
 namespace almond {
-    class AndroidEntryPoint : public EntryPoint_Crossplatform {
+    class AndroidEntryPoint : public EntryPoint {
     public:
         void createEntryPoint(int width, int height, const char* title) override {
             // NativeActivity automatically creates an entry point, no direct setup is needed

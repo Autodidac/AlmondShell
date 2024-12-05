@@ -1,5 +1,5 @@
 
-#include "EntryPoint_Crossplatform.h"
+#include "EntryPoint.h"
 #include "EntryPoint_Headless.h"
 #include "Utilities.h"
 
@@ -31,7 +31,7 @@
 namespace almond {
    /// @brief  Crossplatform Factory Function
    /// @return Returns Contextual Entry Point
-   [[nodiscard]] std::unique_ptr<EntryPoint_Crossplatform> create() {
+   [[nodiscard]] std::unique_ptr<EntryPoint> create() {
         // Check for console application
         if (isConsoleApplication()) {
 #ifdef _CONSOLE

@@ -46,3 +46,7 @@ vcpkg_installed/
 
 
 
+
+backup/
+
+AlmondShell/examples/Example_ConsoleApplication/default_log.txt

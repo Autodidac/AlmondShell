@@ -3,6 +3,7 @@
   "dependencies": [
     "glad",
     "glfw3",
+    "sfml",
     "raylib",
     "zlib",
     "sdl3"

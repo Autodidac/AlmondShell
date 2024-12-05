@@ -10,6 +10,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example_CMake_Project1", "AlmondShell\examples\Example_CMake_Project1\Example_CMake_Project1.vcxproj", "{2F60C569-2EB2-4BB6-B399-CCD56AB44C8F}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example_ConsoleApplication", "AlmondShell\examples\Example_ConsoleApplication\Example_ConsoleApplication.vcxproj", "{4C3AA9FF-3A9D-4916-9963-700F9549FDE6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{11BE1D7D-B7C1-4A53-ADEB-6A0FE9014EC8} = {11BE1D7D-B7C1-4A53-ADEB-6A0FE9014EC8}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example_Dll1", "AlmondShell\examples\Example_Dll1\Example_Dll1.vcxproj", "{11BE1D7D-B7C1-4A53-ADEB-6A0FE9014EC8}"
 EndProject
@@ -18,6 +21,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example_StaticLib1", "AlmondShell\examples\Example_StaticLib1\Example_StaticLib1.vcxproj", "{7DD2A3C4-CAF8-4F4B-AA36-A3905AC2BD9A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example_WindowsProject1", "AlmondShell\examples\Example_WindowsProject1\Example_WindowsProject1.vcxproj", "{8A6311BF-5421-4A7F-AABE-EC8537A64A4B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7DD2A3C4-CAF8-4F4B-AA36-A3905AC2BD9A} = {7DD2A3C4-CAF8-4F4B-AA36-A3905AC2BD9A}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

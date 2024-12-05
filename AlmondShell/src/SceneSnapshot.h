@@ -8,7 +8,7 @@
 namespace almond {
 
     struct SceneSnapshot {
-        float timeStamp;
+        float timeStamp = 0;
         std::unique_ptr<Scene> currentState;
 
         SceneSnapshot() = default;

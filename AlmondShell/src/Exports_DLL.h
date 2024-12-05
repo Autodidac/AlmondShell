@@ -15,7 +15,8 @@
 #define ALMONDSHELL_API  // Empty for static library usage
 #endif
 #else
-// GCC visibility for Unix-like platforms
+
+// GCC visibility for other platforms
 #if (__GNUC__ >= 4) && !defined(ALMONDSHELL_STATICLIB) && defined(ALMONDSHELL_DLL_EXPORTS)
 #define ALMONDSHELL_API __attribute__((visibility("default")))
 #else
@@ -29,3 +30,4 @@
 #else
 #define ALECALLCONV __cdecl
 #endif  // _STDCALL_SUPPORTED
+

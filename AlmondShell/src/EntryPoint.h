@@ -6,9 +6,9 @@
 
 namespace almond {
 
-    class ALMONDSHELL_API EntryPoint_Crossplatform {
+    class ALMONDSHELL_API EntryPoint {
     public:
-        virtual ~EntryPoint_Crossplatform() = default;
+        virtual ~EntryPoint() = default;
 
         // Creates the entry point for the application with specified width, height, and title.
         //virtual void createEntryPoint(int width, int height, const wchar_t* title) = 0;
@@ -20,7 +20,7 @@ namespace almond {
         virtual bool pollEvents() = 0;
 
         // Factory method to create platform-specific entry points
-        [[nodiscard]] std::unique_ptr<EntryPoint_Crossplatform> create(); 
+        [[nodiscard]] std::unique_ptr<EntryPoint> create(); 
 /*
     private:
         // Class now handles all logic directly (no more Impl class)

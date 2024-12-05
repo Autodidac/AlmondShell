@@ -1,4 +1,5 @@
 #include <almondshell>
+#include "ContextFactory.h"
 
 #include <chrono>
 #include <iostream>
@@ -16,7 +17,7 @@
 // Entry point does not require int main() explicitly
 int width = 800;
 int height = 600;
-const wchar_t* title = L"Almond Shell Example";
+const std::wstring& title = L"Almond Shell Example";
 
 /*
 // FPS Class
@@ -88,7 +89,68 @@ void MyCallback() {
 }
 // Entry Point Initialization Structure
 struct myInitializer {
-    myInitializer(int width, int height, const wchar_t* title) {
+
+    myInitializer(const std::wstring& title, int width, int height) {
+ /*     try {
+            // Initialize window and rendering contexts
+            almond::WindowContext windowContext;
+            almond::RenderContext renderContext;
+
+            std::wcout << L"Creating window with title: 'Agnostic Engine', width: " << width << L", height: " << height << std::endl;
+            auto windowHandle = windowContext.createWindow(L"Agnostic Engine", width, height);
+            if (!windowHandle) {
+                std::cerr << "Failed to create window. Handle is null." << std::endl;
+            }
+            else {
+                std::wcout << L"Window created successfully." << std::endl;
+            }
+
+            std::cout << "Initializing render context..." << std::endl;
+            // Initialize the rendering context
+            renderContext.initialize;// (windowHandle);
+            std::cout << "Render context initialized successfully." << std::endl;
+
+
+            // Main loop
+           while(true){// while (!windowContext.shouldClose()) {
+                windowContext.pollEvents();
+                renderContext.clearColor(0.1f, 0.2f, 0.3f, 1.0f);
+                renderContext.clear();
+                renderContext.swapBuffers;// (windowHandle);
+            }
+        }
+        catch (const std::runtime_error& e) {
+            std::cerr << "Runtime error: " << e.what() << std::endl;
+        }
+        catch (const std::exception& e) {
+            std::cerr << "Error initializing AlmondShell: " << e.what() << std::endl;
+        }
+        catch (...) {
+            std::cerr << "An unknown error occurred during initialization." << std::endl;
+        }
+    }
+
+  */
+/*
+        // Choose windowing system (GLFW or SFML)
+        almond::WindowContext windowContext = almond::WindowContext();
+        // Choose rendering system (OpenGL or DirectX)
+        almond::RenderContext renderContext = almond::RenderContext();
+
+        // Create window and initialize rendering
+        void* windowHandle = windowContext.createWindow("Agnostic Engine", 800, 600);
+        renderContext.initialize(windowHandle);
+
+        while (!windowContext.shouldClose()) {
+            windowContext.pollEvents();
+            renderContext.clearColor(0.1f, 0.2f, 0.3f, 1.0f);
+            renderContext.clear();
+            renderContext.swapBuffers(windowHandle);
+        }
+
+
+*/
+
 
         //std::cout << "AlmondShell v" << almond::AlmondShell::GetEngineVersion() << std::endl;
 
@@ -132,4 +194,4 @@ struct myInitializer {
 };
 
 // Initialize Entry Point at the Global Level
-myInitializer init(width, height, title);
+myInitializer init( title, width, height);

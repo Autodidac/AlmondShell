@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntryPoint_Crossplatform.h"
+#include "EntryPoint.h"
 #include "Utilities.h"
 #include "Exports_DLL.h"
 
@@ -18,7 +18,7 @@
 
 namespace almond {
 
-    class Win32EntryPoint : public EntryPoint_Crossplatform {
+    class Win32EntryPoint : public EntryPoint {
     public:
         using KeyCallback = std::function<void(WPARAM)>;  // Define a callback type for key input
 

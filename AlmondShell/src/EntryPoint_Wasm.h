@@ -5,13 +5,13 @@
 
 #ifdef __EMSCRIPTEN__
 
-#include "EntryPoint_Crossplatform.h"
+#include "EntryPoint.h"
 #include <emscripten.h>
 #include <html5.h>
 
 namespace almond {
 
-    class WasmEntryPoint : public EntryPoint_Crossplatform {
+    class WasmEntryPoint : public EntryPoint {
     public:
       /* void createEntryPoint(int width, int height, const char* title) override {
             // Initialize WebGL or HTML5 canvas entry point here

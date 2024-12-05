@@ -13,17 +13,14 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.cpp">
       <Filter>backends\entrypoint</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\Exports_DLL.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint.cpp">
       <Filter>core</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\LoadSave.cpp">
-      <Filter>core\scene</Filter>
+      <Filter>scene</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\EventSystem.cpp">
-      <Filter>core\events</Filter>
+      <Filter>events</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Button.cpp">
       <Filter>ui</Filter>
@@ -31,32 +28,35 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Manager.cpp">
       <Filter>ui</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\RenderingSystem.cpp">
-      <Filter>core\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\Context_Renderer.cpp">
-      <Filter>core\rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\Context_Renderer_OpenGL.cpp">
-      <Filter>backends\rendering\OpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\Texture_OpenGL.h">
-      <Filter>backends\rendering\OpenGL</Filter>
+      <Filter>backends\rendering\OpenGL3</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\ImageLoader.cpp">
-      <Filter>core\rendering\texture</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\WindowSystem.cpp">
-      <Filter>core\rendering\windowing</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\Context_Window_GLFW.cpp">
-      <Filter>backends\windowing\GLFW</Filter>
+      <Filter>core\texture</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)src\Engine.cpp">
       <Filter>core</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\almondversion.cpp">
-      <Filter>support\version</Filter>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\WindowContextSFML.h">
+      <Filter>backends\windowing\SFML</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\WindowContextGLFW.h">
+      <Filter>backends\windowing\GLFW</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\RenderContextOpenGL.h">
+      <Filter>backends\rendering\OpenGL3</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\RenderContextOpenGL.cpp">
+      <Filter>backends\rendering\OpenGL3</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\WindowContextGLFW.cpp">
+      <Filter>backends\windowing\GLFW</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\ContextFactory.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\StringUtils.cpp">
+      <Filter>core\platform</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,49 +85,37 @@
       <Filter>backends\entrypoint</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Entity.h">
-      <Filter>core\ecs</Filter>
+      <Filter>ecs</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EntityComponentSystem.h">
-      <Filter>core\ecs</Filter>
+      <Filter>ecs</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Components.h">
-      <Filter>core\ecs</Filter>
+      <Filter>ecs</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\ComponentManager.h">
-      <Filter>core\ecs</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EventManager.h">
-      <Filter>core\events</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Event.h">
-      <Filter>core\events</Filter>
+      <Filter>ecs</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\MovementEvent.h">
-      <Filter>core\events</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\RenderingSystem.h">
-      <Filter>core\rendering</Filter>
+      <Filter>events</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PhysicsSystem2D.h">
-      <Filter>core\physics</Filter>
+      <Filter>physics</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\SceneSnapshot.h">
-      <Filter>core\scene</Filter>
+      <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Scene.h">
-      <Filter>core\scene</Filter>
+      <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Crossplatform.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint.h">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Exports_DLL.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\LoadSave.h">
-      <Filter>core\scene</Filter>
+      <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PluginManager.h">
       <Filter>plugins</Filter>
@@ -139,7 +127,7 @@
       <Filter>plugins</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\EventSystem.h">
-      <Filter>core\events</Filter>
+      <Filter>events</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\UI_Button.h">
       <Filter>ui</Filter>
@@ -150,62 +138,56 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\IPlugin.h">
       <Filter>plugins</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Context_Renderer.h">
-      <Filter>core\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\InputSystem.h">
-      <Filter>core\input</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Context_Concept.h">
-      <Filter>core\rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Context_Renderer_OpenGL.h">
-      <Filter>backends\rendering\OpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\resource_dir.h">
-      <Filter>backends\rendering\raylib</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Context_Window.h">
-      <Filter>core\rendering\windowing</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Logger.h">
-      <Filter>support</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\TimeKeeper.h">
-      <Filter>support</Filter>
+      <Filter>backends\engines\raylib5</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\framework.h">
-      <Filter>support\platform</Filter>
+      <Filter>core\platform</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types_Win32.h">
-      <Filter>support\platform</Filter>
+      <Filter>core\platform</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types_Posix.h">
-      <Filter>support\platform</Filter>
+      <Filter>core\platform</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Types.h">
-      <Filter>support\platform</Filter>
+      <Filter>core\platform</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Utilities.h">
-      <Filter>support\platform</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Context_Config.h">
-      <Filter>core\rendering\windowing</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\WindowSystem.h">
-      <Filter>core\rendering\windowing</Filter>
+      <Filter>core\platform</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Texture.h">
-      <Filter>core\rendering\texture</Filter>
+      <Filter>core\texture</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\ImageLoader.h">
-      <Filter>core\rendering\texture</Filter>
+      <Filter>core\texture</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\Engine.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\EngineConfig.h">
+      <Filter>core</Filter>
+    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\almondversion.h">
-      <Filter>support\version</Filter>
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\TimeKeeper.h">
+      <Filter>core\support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\ContextFactory.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\Exports_DLL.h">
+      <Filter>core\platform</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\InputSystem.h">
+      <Filter>core\support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\Logger.h">
+      <Filter>core\support</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\StringUtils.h">
+      <Filter>core\platform</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -224,65 +206,76 @@
     <Filter Include="backends\rendering">
       <UniqueIdentifier>{9240a798-acfc-42bd-9c72-85c4ca64c915}</UniqueIdentifier>
     </Filter>
-    <Filter Include="backends\rendering\SDL3">
-      <UniqueIdentifier>{0af438f2-14ba-49d3-907f-c3e6a2c8ed9a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="backends\rendering\raylib">
-      <UniqueIdentifier>{bdb0a4ed-082d-4ca7-803e-832cdc97fa37}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="backends\rendering\OpenGL">
-      <UniqueIdentifier>{efd86590-1dec-4f11-b1f5-e026395f7afb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="plugins">
-      <UniqueIdentifier>{7e32bc90-e2e3-4957-8209-e268579b2183}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="support">
-      <UniqueIdentifier>{5ea82ab7-0f15-4df0-9b12-90015deb54c1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="support\platform">
-      <UniqueIdentifier>{4f851def-2008-489f-bbd4-5757a7130558}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ui">
-      <UniqueIdentifier>{380cb480-3c8a-4316-a202-01c794910e9f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="backends\windowing">
       <UniqueIdentifier>{4a3a9b9a-12bc-4c69-81b8-76b79e6cf919}</UniqueIdentifier>
     </Filter>
     <Filter Include="backends\windowing\GLFW">
       <UniqueIdentifier>{3cd5a1e1-77b0-4791-842a-4cba097bca9e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\rendering">
-      <UniqueIdentifier>{ad93a682-b57f-4aee-9c8a-6a4b4cac8211}</UniqueIdentifier>
+    <Filter Include="backends\rendering\DirectX12">
+      <UniqueIdentifier>{6e8ca4d6-72ca-4c41-a103-d0e245c6e48a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\rendering\windowing">
-      <UniqueIdentifier>{83a49449-6430-44cd-9c83-1b5bf2f001a8}</UniqueIdentifier>
+    <Filter Include="backends\rendering\OpenGL3">
+      <UniqueIdentifier>{efd86590-1dec-4f11-b1f5-e026395f7afb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\rendering\texture">
-      <UniqueIdentifier>{b00bea93-02a2-4719-a9f1-84bd92a1670e}</UniqueIdentifier>
+    <Filter Include="backends\rendering\Vulkan">
+      <UniqueIdentifier>{f9bd4ddc-45f3-4016-ad6e-e2c21493e24c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\physics">
+    <Filter Include="backends\windowing\SFML">
+      <UniqueIdentifier>{91eaf953-af14-4e8b-aaab-529acb0908e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ecs">
+      <UniqueIdentifier>{05892b79-aa9c-4ae1-8a30-3c2c3d110730}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="events">
+      <UniqueIdentifier>{0a7b7474-0175-4439-9a91-cfb876973539}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="physics">
       <UniqueIdentifier>{3a760668-3ffc-4b16-8e38-7017dc70ff2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{380cb480-3c8a-4316-a202-01c794910e9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scene">
+      <UniqueIdentifier>{d172e931-cada-4c75-a3a8-a55115caac52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="plugins">
+      <UniqueIdentifier>{7e32bc90-e2e3-4957-8209-e268579b2183}</UniqueIdentifier>
     </Filter>
     <Filter Include="core\multithreading">
       <UniqueIdentifier>{33b5f5e3-44f3-460a-8a51-bbfd86b7bd3d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\input">
-      <UniqueIdentifier>{04bbd705-dd3e-43a5-a562-10f31cde3892}</UniqueIdentifier>
+    <Filter Include="core\platform">
+      <UniqueIdentifier>{4f851def-2008-489f-bbd4-5757a7130558}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\ecs">
-      <UniqueIdentifier>{05892b79-aa9c-4ae1-8a30-3c2c3d110730}</UniqueIdentifier>
+    <Filter Include="core\texture">
+      <UniqueIdentifier>{b00bea93-02a2-4719-a9f1-84bd92a1670e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\events">
-      <UniqueIdentifier>{0a7b7474-0175-4439-9a91-cfb876973539}</UniqueIdentifier>
+    <Filter Include="core\support">
+      <UniqueIdentifier>{692e627f-253e-4af2-836d-f60a0fab7a17}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\scene">
-      <UniqueIdentifier>{d172e931-cada-4c75-a3a8-a55115caac52}</UniqueIdentifier>
+    <Filter Include="backends\engines">
+      <UniqueIdentifier>{0b07ffcf-bde4-4968-a0ea-e5c20a466700}</UniqueIdentifier>
     </Filter>
-    <Filter Include="support\version">
-      <UniqueIdentifier>{e1db24db-1b00-49b4-a397-5206613a7707}</UniqueIdentifier>
+    <Filter Include="backends\engines\raylib5">
+      <UniqueIdentifier>{bdb0a4ed-082d-4ca7-803e-832cdc97fa37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="backends\engines\SDL3">
+      <UniqueIdentifier>{0af438f2-14ba-49d3-907f-c3e6a2c8ed9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="backends\rendering\OpenGL3\shaders">
+      <UniqueIdentifier>{8a78979a-8cec-41c6-998a-107d70fec6c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)shaders\fragment_shader.glsl">
+      <Filter>backends\rendering\OpenGL3\shaders</Filter>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)shaders\vertex_shader.glsl">
+      <Filter>backends\rendering\OpenGL3\shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

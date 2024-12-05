@@ -1,11 +1,11 @@
 #pragma once 
 
-#include "EntryPoint_Crossplatform.h"
+#include "EntryPoint.h"
 #include "Utilities.h"
 #include "Exports_DLL.h"
 
 namespace almond {
-    class ALMONDSHELL_API HeadlessEntryPoint : public EntryPoint_Crossplatform {
+    class ALMONDSHELL_API HeadlessEntryPoint : public EntryPoint {
     public:
        // void createEntryPoint(int width, int height, const wchar_t* title) override {}
 
