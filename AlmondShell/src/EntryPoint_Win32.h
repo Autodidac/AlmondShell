@@ -6,9 +6,10 @@
 
 #include <functional>
 #include <iostream>
-
+/*
 #ifdef _WIN32
 #ifndef _CONSOLE
+
 #include "framework.h"
 
 #ifdef _MSC_VER
@@ -25,31 +26,31 @@ namespace almond {
         Win32EntryPoint() : hwnd(nullptr), keyCallback(nullptr) {}
 
         // Method to create a window with the given parameters
-     /*   void createEntryPoint(int width, int height, const wchar_t* title) override {
-            // Define the window class
-            WNDCLASS wc = {};
-            wc.lpfnWndProc = Win32EntryPoint::WndProc;  // Custom window procedure
-            wc.hInstance = GetModuleHandle(nullptr);
-            wc.lpszClassName = L"AlmondEntryPointClass";
-            wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-            wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
-            wc.style = CS_HREDRAW | CS_VREDRAW;
+        //void createEntryPoint(int width, int height, const wchar_t* title) override {
+        //    // Define the window class
+        //    WNDCLASS wc = {};
+        //    wc.lpfnWndProc = Win32EntryPoint::WndProc;  // Custom window procedure
+        //    wc.hInstance = GetModuleHandle(nullptr);
+        //    wc.lpszClassName = L"AlmondEntryPointClass";
+        //    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+        //    wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+        //    wc.style = CS_HREDRAW | CS_VREDRAW;
 
-            if (!RegisterClass(&wc)) {
-                std::cerr << "Failed to register window class: " << GetLastError() << std::endl;
-                return;
-            }
+        //    if (!RegisterClass(&wc)) {
+        //        std::cerr << "Failed to register window class: " << GetLastError() << std::endl;
+        //        return;
+        //    }
 
-            // Create the window
-            hwnd = CreateWindowEx(0, wc.lpszClassName, title, WS_OVERLAPPEDWINDOW,
-                CW_USEDEFAULT, CW_USEDEFAULT, width, height,
-                nullptr, nullptr, wc.hInstance, this);
+        //    // Create the window
+        //    hwnd = CreateWindowEx(0, wc.lpszClassName, title, WS_OVERLAPPEDWINDOW,
+        //        CW_USEDEFAULT, CW_USEDEFAULT, width, height,
+        //        nullptr, nullptr, wc.hInstance, this);
 
-            if (!hwnd) {
-                std::cerr << "Window creation failed: " << GetLastError() << std::endl;
-           }
-        }
-*/ 
+        //    if (!hwnd) {
+        //        std::cerr << "Window creation failed: " << GetLastError() << std::endl;
+        //   }
+        //}
+ 
         // Show the window
         void show() override {
             ShowWindow(hwnd, SW_SHOW);
@@ -117,3 +118,4 @@ namespace almond {
 } // namespace almond
 #endif
 #endif // _WIN32
+*/

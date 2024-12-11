@@ -1,10 +1,10 @@
 #include "Texture.h"
 #include "ImageLoader.h"  // Assuming this is your custom image loader
-#include "RenderContextOpenGL.h"
 #include "EngineConfig.h"
 
+#ifdef ALMOND_USING_OPENGLTEXTURE
+
 #include <stdexcept>
-#ifdef ALMOND_USING_OPENGL
 
 namespace almond {
 
@@ -88,5 +88,4 @@ namespace almond {
     }
 
 } // namespace almond
-
 #endif

@@ -16,10 +16,6 @@
 //#include <chrono>
 //#include <optional>
 
-//#include "raylib.h"
-//#include "resource_dir.h"	// utility header for SearchAndSetResourceDir
-
-
 /*
 // Coroutine function for game logic
 inline almond::Coroutine gameLogicCoroutine() {
@@ -52,7 +48,7 @@ inline almond::Coroutine gameSystemCoroutine() {
         co_yield i;
     }
 }
-*/
+
 // FPS Class
 class FPS {
 private:
@@ -109,67 +105,24 @@ struct NewScene : public almond::Scene {
          
          //std::cout << "scene loaded\n";
     }
-
+*/
     /*
        void AddEntity(int entityId) override {
            m_ecs.AddComponent(entityId, new almond::core::Position());
            m_ecs.AddComponent(entityId, new almond::core::Velocity(1.0f, 1.0f));
            m_entities.push_back(entityId);
-       }   */
+       }   
 };
-
+*/
 int main() {
     std::cout << "Running headless application...\n";
-
     /*
-    // Tell the window to use vsync and work on high DPI displays
-    SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
-
-    // Create the window and OpenGL context
-    InitWindow(1280, 800, "Hello Raylib");
-
-    // Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
-    SearchAndSetResourceDir("resources");
-
-    // Load a texture from the resources directory
-    Texture wabbit = LoadTexture("wabbit_alpha.png");
-
-    // game loop
-    while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
-    {
-        // drawing
-        BeginDrawing();
-
-        // Setup the back buffer for drawing (clear color and depth buffers)
-        ClearBackground(BLACK);
-
-        // draw some text using the default font
-        DrawText("Hello Raylib", 200, 200, 20, WHITE);
-
-        // draw our texture to the screen
-        DrawTexture(wabbit, 400, 200, WHITE);
-
-        // end the frame and get ready for the next one  (display frame, poll input, etc...)
-        EndDrawing();
-    }
-
-    // cleanup
-    // unload our texture so it can be cleaned up
-    UnloadTexture(wabbit);
-
-    // destroy the window and cleanup the OpenGL context
-    //CloseWindow();
-
-*/
-
-
-
     NewScene scene; 
     size_t threadCount = 1;
     size_t maxBuffer = 100;
 
     almond::AlmondShell* myAlmondShell = almond::CreateAlmondShell(threadCount, true, &scene, maxBuffer);
-
+*/
     // Optional: Register callbacks here if needed
 /*    almond::RegisterAlmondCallback([&scene]() {
          scene.load();
@@ -177,7 +130,7 @@ int main() {
         });
  */   
 
-    almond::Run(*myAlmondShell);  // Otherwise Start AlmondShell's internal main loop
+   // almond::Run(*myAlmondShell);  // Otherwise Start AlmondShell's internal main loop
 
     // Initialize thread pool with available hardware concurrency minus 1 thread
    // almond::ThreadPool threadPool(std::thread::hardware_concurrency() - 1);
@@ -228,7 +181,7 @@ int main() {
     }
     catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
-    }
+    }*/
+    return 0;
 
-    return 0;*/
 }

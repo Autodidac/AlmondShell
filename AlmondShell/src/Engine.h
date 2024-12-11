@@ -1,14 +1,11 @@
 #pragma once
 
-//#include "Context_Concept.h"
-//#include "Event.h"
 #include "EventSystem.h"
 #include "Exports_DLL.h"
+#include "EngineConfig.h"
 #include "LoadSave.h"
 #include "Logger.h"
 #include "PluginManager.h"
-#include "RenderingSystem.h"
-#include "ContextFactory.h"
 
 #include "Scene.h"
 #include "SceneSnapshot.h"
@@ -43,7 +40,7 @@ namespace almond {
         ~AlmondShell();
 
         void Run();
-        void RunWin32Desktop(MSG msg, HACCEL hAccelTable);
+        //void RunWin32Desktop(MSG msg, HACCEL hAccelTable);
         bool IsItRunning() const;
         void SetRunning(bool running);
         void PrintMessage(const std::string& text);
@@ -64,14 +61,16 @@ namespace almond {
         float m_fps = 0.0f;
         // New method to handle event processing using the EventSystem
         //void ProcessEvents();
-        void InitializeRenderer(const std::wstring& title, float x, float y, float width, float height, unsigned int color, void* texture); // Initialize the renderer
+        void InitializeRenderer(const char* title, float x, float y, float width, float height, unsigned int color, void* texture); // Initialize the renderer
+       // void InitializeRenderer(const std::string& title, float x, float y, float width, float height, unsigned int color, void* texture); // alternative for sfml workaround
 
     private:
         bool m_running;
         almond::plugin::PluginManager m_pluginManager;
 
+
         // rendering
-        std::unique_ptr<RenderContext> m_renderer; // Renderer instance
+       // std::unique_ptr<RenderContext> m_renderer; // Renderer instance
         void RenderFrame(); // Render a single frame
 
         // scene states

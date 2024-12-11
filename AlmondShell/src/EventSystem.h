@@ -13,6 +13,7 @@
 #ifdef _MSC_VER
 //#pragma warning(disable : 26495) // suppress uninitialized event, it's intialized throughout the engine
 #endif
+
 enum class EventType {
     MouseButtonClick,
     MouseMove,

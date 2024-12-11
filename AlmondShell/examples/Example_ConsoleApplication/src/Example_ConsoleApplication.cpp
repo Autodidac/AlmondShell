@@ -1,5 +1,5 @@
 #include <almondshell>
-#include "ContextFactory.h"
+//#include "ContextFactory.h"
 
 #include <chrono>
 #include <iostream>
@@ -19,7 +19,7 @@ int width = 800;
 int height = 600;
 const std::wstring& title = L"Almond Shell Example";
 
-/*
+/**/
 // FPS Class
 class FPS {
 private:
@@ -83,7 +83,7 @@ struct NewScene : public almond::Scene {
    //     m_entities.push_back(entityId);
   //  }   
 };
-*/
+
 void MyCallback() {
     std::cout << "Callback triggered!" << std::endl;
 }
@@ -170,7 +170,7 @@ struct myInitializer {
 
         // Clean up the EntryPoint instance
        // almond::DestroyEntryPoint(entryPoint);
-/*
+/**/
         NewScene scene;
         size_t threadCount = 1;
         int maxBuffer = 100;
@@ -179,16 +179,19 @@ struct myInitializer {
        //myAlmondShell->SetRunning(true);  // Set running state
 
         // Optional: Register callbacks here if needed
-        RegisterAlmondCallback([&scene]() {
+       // RegisterAlmondCallback([&scene]() {
            // scene.load();
-            });
-*/
-        //almond::Run(*myAlmondShell);  // Start AlmondShell's main loop
-     /*
+       //     });
+       /*
         if (almond::IsRunning(*myAlmondShell))
         {
+            std::cout << "printing fps\n";
             almond::PrintFPS(*myAlmondShell);
-        }*/
+        }
+*/
+        almond::Run(*myAlmondShell);  // Start AlmondShell's main loop
+     
+
         
     }
 };

@@ -41,7 +41,7 @@ namespace almond {
         // Platform-specific instantiation
 #ifdef _WIN32
 #ifndef _CONSOLE
-        return std::make_unique<Win32EntryPoint>();
+        //return std::make_unique<Win32EntryPoint>();
 #endif
 #elif defined(__linux__)
         return std::make_unique<X11EntryPoint>();

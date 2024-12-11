@@ -1,4 +1,6 @@
 #include "Engine.h"
+//#include "ContextFactory.h"
+#include "ContextFunctions.h"
 
 #include <iostream>
 #include <fstream>
@@ -6,8 +8,6 @@
 #include <thread>
 #include <filesystem>
 #include <stdexcept>
-
-//#include "ContextFactory.h"
 
 namespace almond {
     //class RenderingSystem;
@@ -106,9 +106,9 @@ namespace almond {
     void AlmondShell::UpdateFPS() {
         m_frameCount++;
         auto currentTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - m_lastSecond).count();
+        float elapsedTime = std::chrono::duration<float>(currentTime - m_lastSecond).count();
 
-        if (elapsedTime >= 1) {
+        if (elapsedTime >= 1.0f) {
             m_fps = static_cast<float>(m_frameCount) / elapsedTime;
             m_frameCount = 0;
             m_lastSecond = currentTime;
@@ -127,26 +127,28 @@ namespace almond {
         }
         lastFrame = std::chrono::steady_clock::now();
     }
-
-    void AlmondShell::InitializeRenderer(const std::wstring& title, float x, float y, float width, float height, unsigned int color, void* texture) {
+     
+#ifdef ALMOND_USING_GLlFW
+    void AlmondShell::InitializeRenderer(const char* title, float x, float y, float width, float height, unsigned int color, void* texture) {
+        // auto contextOpt = create_window_renderer(Backend::GLFW, "GLFW OpenGL Example", 800, 600);
         try {
             // Create a GLFW window context
-            auto windowContext = almond::ContextFactory::CreateWindowContext(almond::WindowBackend::GLFW);
+            auto windowContext = almond::WindowRendererFactory::CreateWindowContext(almond::WindowBackend::GLFW);
 
             // Create the window using the context
             auto windowHandle = windowContext.createWindow(title, static_cast<int>(width), static_cast<int>(height));
             if (!windowHandle) {
                 throw std::runtime_error("Failed to create window context.");
             }
-            
+
             // Create an OpenGL rendering context
-            auto renderContext = almond::ContextFactory::CreateRenderContext(almond::RenderBackend::OpenGL);
+            auto renderContext = almond::WindowRendererFactory::CreateRenderContext(almond::RenderBackend::OpenGL);
 
             // Initialize the rendering context with the native window handle
             renderContext.initialize(windowHandle);
 
             // Set up triangle
-            unsigned int VAO = renderContext.setupTriangle();
+           // unsigned int VAO = renderContext.setupTriangle();
 
             // Main rendering loop
             while (!windowContext.shouldClose()) {
@@ -164,7 +166,7 @@ namespace almond {
                 renderContext.clear();
 
                 // Render the triangle
-                renderContext.renderTriangle(VAO);
+              //  renderContext.renderTriangle(VAO);
 
                 // Swap buffers
                 renderContext.swapBuffers(windowHandle);
@@ -175,50 +177,105 @@ namespace almond {
         catch (const std::exception& e) {
             std::cerr << "Error initializing the renderer: " << e.what() << '\n';
         }
+    }
+#endif
 
-/*
-        // Ensure m_renderer is created only once
-        if (!m_renderer) {
-            std::cout << "Creating a new RenderingSystem instance.\n"; // Logging
-            // Pass componentManager and jobSystem when constructing RenderingSystem
-            m_renderer = std::make_unique<RenderingSystem>(title, x, y, width, height, color, texture);
-        }
+#ifdef ALMOND_USING_SDL
+    void AlmondShell::InitializeRenderer(const char* title, float x, float y, float width, float height, unsigned int color, void* texture) {
+        try {
+            std::cout << "Select a library:\n";
+            std::cout << "1. GLFW\n";
+            std::cout << "2. SDL3\n";
+            std::cout << "Enter the number corresponding to your choice: ";
 
-        // Initialize the context renderer, but only if it hasn't been set up yet
-        if (!m_renderer->IsInitialized()) {
-            try {
-                std::cout << "Initializing context renderer with title: " << title << ", width: " << width << ", height: " << height << "\n"; // Logging
-               // m_renderer->CreateContextRenderer<RenderContext>(title, x, y, width, height, color, texture);
-           
-                std::cout << "Renderer initialized successfully.\n"; // Logging
+            int selection;
+            std::cin >> selection;
+            std::cin.ignore(); // Clear newline character from input buffer
+
+            std::string selectedLibrary;
+            switch (selection) {
+            case 1:
+                selectedLibrary = "GLFW";
+                break;
+            case 2:
+                selectedLibrary = "SDL3";
+                break;
+            default:
+                std::cerr << "Error: Invalid selection." << std::endl;
+                return;
             }
-            catch (const std::exception& e) {
-                std::cerr << "Error initializing the renderer: " << e.what() << '\n'; // Error handling
+
+            auto contextFuncs = createContextFuncs(selectedLibrary);
+
+            if (std::get<0>(contextFuncs)) {
+                std::cout << "Initializing context..." << std::endl;
+                std::get<0>(contextFuncs)(); // Initialize context
+
+                bool running = true;
+                while (running) {
+                    std::cout << "Processing events..." << std::endl;
+                    running = std::get<1>(contextFuncs)(); // Process events
+                    UpdateFPS();
+                }
+
+                std::cout << "Cleaning up..." << std::endl;
+                std::get<2>(contextFuncs)(); // Cleanup
+                //return;
+            }
+            else {
+                std::cerr << "Error: Unsupported library selected." << std::endl;
             }
         }
-        else {
-            std::cout << "Renderer is already initialized.\n"; // Logging
-        }*/
+        catch (const std::exception& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+        }     
     }
 
-void AlmondShell::RenderFrame() {
-    //if (m_renderer) {
+#endif
+
+    /*
+    // Ensure m_renderer is created only once
+    if (!m_renderer) {
+        std::cout << "Creating a new RenderingSystem instance.\n"; // Logging
+        // Pass componentManager and jobSystem when constructing RenderingSystem
+        m_renderer = std::make_unique<RenderingSystem>(title, x, y, width, height, color, texture);
+    }
+
+    // Initialize the context renderer, but only if it hasn't been set up yet
+    if (!m_renderer->IsInitialized()) {
         try {
-            std::cout << "Rendering frame...\n";
-
-            // Render all contexts in the system
-            //m_renderer->clear();
-           // m_renderer->swapBuffers();
-            std::cout << "Frame rendered successfully.\n";
-        } catch (const std::exception& e) {
-            std::cerr << "Error during frame rendering: " << e.what() << '\n';
+            std::cout << "Initializing context renderer with title: " << title << ", width: " << width << ", height: " << height << "\n"; // Logging
+            // m_renderer->CreateContextRenderer<RenderContext>(title, x, y, width, height, color, texture);
+           
+            std::cout << "Renderer initialized successfully.\n"; // Logging
         }
-   // } else {
-     //   std::cerr << "Renderer is not initialized or not available. Unable to render frame.\n";
-   // }
-}
+        catch (const std::exception& e) {
+            std::cerr << "Error initializing the renderer: " << e.what() << '\n'; // Error handling
+        }
+    }
+    else {
+        std::cout << "Renderer is already initialized.\n"; // Logging
+    }
+    */
 
 
+    void AlmondShell::RenderFrame() {
+        //if (m_renderer) {
+            try {
+                std::cout << "Rendering frame...\n";
+
+                // Render all contexts in the system
+                //m_renderer->clear();
+               // m_renderer->swapBuffers();
+                std::cout << "Frame rendered successfully.\n";
+            } catch (const std::exception& e) {
+                std::cerr << "Error during frame rendering: " << e.what() << '\n';
+            }
+       // } else {
+         //   std::cerr << "Renderer is not initialized or not available. Unable to render frame.\n";
+       // }
+    }
+    /*
     // Win32-specific functionality
     void AlmondShell::RunWin32Desktop(MSG msg, HACCEL hAccelTable) {
         auto now = std::chrono::steady_clock::now();
@@ -253,16 +310,13 @@ void AlmondShell::RenderFrame() {
                 }
             }
         }
-    }
+    }*/
 
     // Main run loop
     void AlmondShell::Run() {
         auto now = std::chrono::steady_clock::now();
         auto lastFrame = now;
         auto lastSave = now;
-
-        //intialize the render backend
-//        InitializeRenderer(L"Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
 
         EventSystem eventSystem;
         UIManager uiManager;
@@ -289,19 +343,22 @@ void AlmondShell::RenderFrame() {
         }
 
         // Initialize the renderer
-        InitializeRenderer(L"Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
+        InitializeRenderer("Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
 
         // headless main loop
         while (m_running) {
             auto currentTime = std::chrono::steady_clock::now();
 
             // Update events
-            uiManager.Update(eventSystem);
+            uiManager.Update(eventSystem); // this should be inside the driver context code
 
-            RenderFrame(); // Render the frame
+           // RenderFrame(); // Render the frame
 
+           //std::cout << "printing fps\n";
+           UpdateFPS();
+     
 
-
+            // run the callbacks
             std::shared_lock lock(m_callbackMutex);
             if (m_updateCallback) m_updateCallback();
 
@@ -313,15 +370,12 @@ void AlmondShell::RenderFrame() {
             }
 
             // Immediately Capture Current Scene Data Snapshot - ordering may need to be changed
-            CaptureSnapshot();
+            CaptureSnapshot(); // record time
 
-            if (m_targetTime > 0.0f) {
-                UpdatePlayback();
-            }
+            // rewind time
+            if (m_targetTime > 0.0f) { UpdatePlayback(); }
 
-            if (m_frameLimitingEnabled) {
-                LimitFrameRate(lastFrame);
-            }
+            if (m_frameLimitingEnabled) { LimitFrameRate(lastFrame); }
         }
     }
 

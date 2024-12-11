@@ -103,12 +103,14 @@
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <VcpkgInstalledDir>C:\Users\iammi\Documents\repos\vcpkg\</VcpkgInstalledDir>
+    <VcpkgInstalledDir>
+    </VcpkgInstalledDir>
     <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
   <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <VcpkgInstalledDir>C:\Users\iammi\Documents\repos\vcpkg\</VcpkgInstalledDir>
+    <VcpkgInstalledDir>
+    </VcpkgInstalledDir>
     <VcpkgHostTriplet>x64-windows</VcpkgHostTriplet>
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
   </PropertyGroup>
@@ -133,6 +135,9 @@
         <AdditionalDependencies>zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       </Lib>
     </Link>
+    <Lib>
+      <SubSystem>POSIX</SubSystem>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -182,6 +187,7 @@
     <Lib>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

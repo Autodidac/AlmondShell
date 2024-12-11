@@ -14,6 +14,13 @@
 
 #ifdef _WIN32
 #include "framework.h"
+/*
+extern "C" {
+    HMODULE __stdcall LoadLibraryA(LPCSTR lpLibFileName);
+    void* __stdcall GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
+    int __stdcall FreeLibrary(HMODULE hLibModule);
+}
+*/
 using PluginHandle = HMODULE;
 #define LoadSharedLibrary(path) LoadLibraryA(path.string().c_str())
 #define GetSymbol(handle, name) GetProcAddress(handle, name)
