@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ComponentManager.h"
-#include "ThreadPool.h"
+#include "alsComponentManager.h"
+#include "alsThreadPool.h"
 
 namespace almond {
     class PhysicsSystem {

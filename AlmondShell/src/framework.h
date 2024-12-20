@@ -2,10 +2,12 @@
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
+/*
 //#define NOMINMAX
 //#define NOGDI
-#include <windows.h>
-/*
+
 #define _WIN64
 
 //just define essential types

@@ -1,5 +1,6 @@
 #pragma once
 
-#include "EntryPoint.h"
-#include "Scene.h"
-#include "Engine.h"
+#include "alsEntryPoint.h"
+#include "alsScene.h"
+#include "alsEngine.h"
+#include "alsVersion.h"

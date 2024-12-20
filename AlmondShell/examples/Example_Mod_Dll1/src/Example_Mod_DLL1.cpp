@@ -47,7 +47,8 @@ extern "C" almond::plugin::IPlugin* CreatePlugin() {
 */
 
 
-#include "PluginManager.h"
+#include "alsPluginManager.h"
+
 #include <iostream>
 
 // Define the mod class that implements the plugin interface.

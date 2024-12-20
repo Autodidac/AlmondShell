@@ -48,7 +48,7 @@ public:
 };
 
 // FPS Counter Function
-void runFPSCounter(FPS& fpsCounter) {
+void runFPSCount(FPS& fpsCounter) {
    // while (true) {
         fpsCounter.update();
         //system("cls");
@@ -66,7 +66,7 @@ struct NewScene : public almond::Scene {
 
         // Create multiple threads running the FPS counter
         for (size_t i = 0; i < std::thread::hardware_concurrency(); ++i) {
-            threads.emplace_back(runFPSCounter, std::ref(fpsCounter));
+            threads.emplace_back(runFPSCount, std::ref(fpsCounter));
         }
 
         // Join threads to the main thread
@@ -170,13 +170,13 @@ struct myInitializer {
 
         // Clean up the EntryPoint instance
        // almond::DestroyEntryPoint(entryPoint);
-/**/
+/*
         NewScene scene;
         size_t threadCount = 1;
         int maxBuffer = 100;
 
        almond::AlmondShell* myAlmondShell = almond::CreateAlmondShell(threadCount, true, &scene, maxBuffer);
-       //myAlmondShell->SetRunning(true);  // Set running state
+*/       //myAlmondShell->SetRunning(true);  // Set running state
 
         // Optional: Register callbacks here if needed
        // RegisterAlmondCallback([&scene]() {
@@ -188,9 +188,9 @@ struct myInitializer {
             std::cout << "printing fps\n";
             almond::PrintFPS(*myAlmondShell);
         }
-*/
+
         almond::Run(*myAlmondShell);  // Start AlmondShell's main loop
-     
+ */    
 
         
     }

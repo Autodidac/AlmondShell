@@ -19,10 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="src\Example_ConsoleApplication.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -177,6 +173,9 @@
   <ImportGroup Label="ExtensionTargets" />
   <ItemGroup>
     <ClInclude Update="C:\Users\iammi\Documents\repos\AlmondShell\AlmondShell\src\almondshell">
+      <FileType>Document</FileType>
+    </ClInclude>
+    <ClInclude Update="C:\Users\iammi\OneDrive\Documents\repos\AlmondShell\AlmondShell\src\almondshell">
       <FileType>Document</FileType>
     </ClInclude>
   </ItemGroup>

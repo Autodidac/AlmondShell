@@ -1,5 +1,5 @@
 
-<img align="left" src="images/567.jpg" width="70px"/>
+<img align="left" src="AlmondShell/images/567.jpg" width="70px"/>
 
 # Almond Shell
 
@@ -9,5 +9,5 @@ What Seperates Almond Core From Almond Shell is plugin and 2D Graphical Support 
 
 Built with contemporary design principles and using C++20, it is designed for modularity, efficiency, and ease of use on current OS hardware for bleeding-edge software development and beyond. For 3D Graphics Rendering Capabilities or Game Engine see AlmondEngine. AlmondShell is a Modern Software Development Suite which aims to be as minimal as possible and also features a header only mostly functional programming design to reduce overhead.
 
-<img align="left" src="images/gpt.jpg" width="70px"/>GPT-4
+<img align="left" src="AlmondShell/images/gpt.jpg" width="70px"/>GPT-4
 

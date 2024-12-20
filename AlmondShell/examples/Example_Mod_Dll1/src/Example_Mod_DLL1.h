@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Exports_DLL.h"
-#include "PluginManager.h"
+#include "alsExports_DLL.h"
+#include "alsPluginManager.h"
 
 #include <string>
 

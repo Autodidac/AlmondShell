@@ -16,24 +16,29 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\almondversion.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\AsyncPluginManager.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\ContextFunctions.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EngineConfig.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Engine.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EventSystem.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\GLFWContext.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\ImageLoader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsGLFWSandSim.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsMesh.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsOpenGLShader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsOpenGLTextureAtlas.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsVersion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsAsyncPluginManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsContextFunctions.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEngineConfig.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEngine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEventSystem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsGLFWContext.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsImageLoader.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsIPlugin.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsLoadSave.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsPluginConcept.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsPluginManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsOpenGLRenderer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\IPlugin.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\LoadSave.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\PluginConcept.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\PluginManager.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\SDL3Context.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsSDL3Context.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -43,77 +48,63 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\SDLGameOfLife.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\SDLSandSim.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\SDLSnake.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\StringUtils.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Texture.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Types.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Types_Posix.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Types_Win32.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\ComponentManager.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Components.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Coroutine.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\SceneSnapshot.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Entity.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntityComponentSystem.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Android.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Headless.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Wasm.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_Win32.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Exports_DLL.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsSDLGameOfLife.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsSDLSandSim.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsSDLSnake.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsStringUtils.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsTexture.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsOpenGLTexture.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsTypes.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsTypes_Posix.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsTypes_Win32.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsComponentManager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsComponents.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsCoroutine.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsSceneSnapshot.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntity.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntityComponentSystem.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_Android.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntryPoint.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_Headless.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_Wasm.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_Win32.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_X11.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsExports_DLL.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\framework.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\InputSystem.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Logger.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\MovementEvent.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsInput.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsLogger.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsMovementEvent.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PhysicsSystem2D.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Scene.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\ThreadPool.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\TimeKeeper.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\UI_Button.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\UI_Manager.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\Utilities.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\WaitFreeQueue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsScene.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsThreadPool.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsTimeKeeper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsUIbutton.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsUImanager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsUtilities.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsWaitFreeQueue.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\ContextFunctions.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsContextFunctions.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\Engine.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EventSystem.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\GLFWContext.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\ImageLoader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\LoadSave.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Headless.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Wasm.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_Win32.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\EntryPoint_X11.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\SDL3Context.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\StringUtils.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\Texture_OpenGL.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Button.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\UI_Manager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsEngine.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsEventSystem.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsGLFWContext.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsImageLoader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsLoadSave.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsEntryPoint.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_Headless.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_Wasm.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_Win32.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsEntryPoint_X11.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsMesh.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsSDL3Context.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsStringUtils.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsUIbutton.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alsUImanager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="$(MSBuildThisFileDirectory)..\CMakeLists.txt">
@@ -124,13 +115,13 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)shaders\fragment_shader.glsl">
+    <None Include="$(MSBuildThisFileDirectory)shaders\frag.glsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)shaders\vertex_shader.glsl">
+    <None Include="$(MSBuildThisFileDirectory)shaders\vert.glsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
