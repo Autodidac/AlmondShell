@@ -39,7 +39,11 @@ AlmondShell/examples/Example_Android_StaticLibrary1/x64/
 AlmondShell/examples/Example_CMake_Project1/obj/x64/
 AlmondShell/examples/Example_Mod_Dll1/intermediate/
 AlmondShell/examples/bin/
+AlmondShell/src/glm/
+AlmondShell/src/SDL3/
+AlmondShell/src/glad.zip
 vcpkg_installed/
+build/
 .vs/
 *.dat
 *.log

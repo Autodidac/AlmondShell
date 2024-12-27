@@ -10,7 +10,10 @@
         "/t:Clean"
       ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Build DLL",
@@ -24,11 +27,16 @@
         "/p:Configuration=Debug",
         "/p:ConfigurationType=DynamicLibrary",
         "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\",
-        "/p:AdditionalLibraryDirectories=C:\\Users\\iammi\\Documents\\repos\\vcpkg\\installed\\x64-windows\\lib", // Path to zlib lib directory
-        "/p:AdditionalDependencies=zlib.lib" // Name of the zlib library to link
+        "/p:AdditionalLibraryDirectories=C:\\Users\\iammi\\Documents\\repos\\vcpkg\\installed\\x64-windows\\lib",
+        "/p:AdditionalDependencies=zlib.lib"
       ],
-      "problemMatcher": ["$msCompile"],
-      "group": { "kind": "build", "isDefault": false }
+      "problemMatcher": [
+        "$msCompile"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean Static Library",
@@ -39,7 +47,10 @@
         "/t:Clean"
       ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Build Static Library",
@@ -52,11 +63,16 @@
         "/p:Platform=x64",
         "/p:Configuration=Debug",
         "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\",
-        "/p:AdditionalLibraryDirectories=C:\\Users\\iammi\\Documents\\repos\\vcpkg\\installed\\x64-windows\\lib", // Path to zlib lib directory
-        "/p:AdditionalDependencies=zlib.lib" // Name of the zlib library to link
+        "/p:AdditionalLibraryDirectories=C:\\Users\\iammi\\Documents\\repos\\vcpkg\\installed\\x64-windows\\lib",
+        "/p:AdditionalDependencies=zlib.lib"
       ],
-      "problemMatcher": ["$msCompile"],
-      "group": { "kind": "build", "isDefault": false }
+      "problemMatcher": [
+        "$msCompile"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean Executable",
@@ -67,7 +83,10 @@
         "/t:Clean"
       ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Build Executable",
@@ -81,8 +100,13 @@
         "/p:Configuration=Debug",
         "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\"
       ],
-      "problemMatcher": ["$msCompile"],
-      "group": { "kind": "build", "isDefault": false }
+      "problemMatcher": [
+        "$msCompile"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean Windows App",
@@ -93,7 +117,10 @@
         "/t:Clean"
       ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Build Windows App",
@@ -107,36 +134,65 @@
         "/p:Configuration=Debug",
         "/p:OutDir=${workspaceFolder}\\AlmondShell\\examples\\bin\\x64\\Debug\\"
       ],
-      "problemMatcher": ["$msCompile"],
-      "group": { "kind": "build", "isDefault": false }
+      "problemMatcher": [
+        "$msCompile"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean & Build DLL",
       "dependsOrder": "sequence",
-      "dependsOn": ["Clean DLL", "Build DLL"],
+      "dependsOn": [
+        "Clean DLL",
+        "Build DLL"
+      ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean & Build Static Library",
       "dependsOrder": "sequence",
-      "dependsOn": ["Clean Static Library", "Build Static Library"],
+      "dependsOn": [
+        "Clean Static Library",
+        "Build Static Library"
+      ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean & Build Executable",
       "dependsOrder": "sequence",
-      "dependsOn": ["Clean Executable", "Build Executable"],
+      "dependsOn": [
+        "Clean Executable",
+        "Build Executable"
+      ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean & Build Windows App",
       "dependsOrder": "sequence",
-      "dependsOn": ["Clean Windows App", "Build Windows App"],
+      "dependsOn": [
+        "Clean Windows App",
+        "Build Windows App"
+      ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean & Build All",
@@ -148,7 +204,7 @@
         "Clean & Build Windows App"
       ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": true }
+      "group": "build"
     },
     {
       "label": "Build All",
@@ -160,7 +216,10 @@
         "Build Windows App"
       ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
     },
     {
       "label": "Clean All",
@@ -172,7 +231,163 @@
         "Clean Windows App"
       ],
       "problemMatcher": [],
-      "group": { "kind": "build", "isDefault": false }
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Configure (GCC)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/gladConfig.cmake",
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/glmConfig.cmake",
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/sdl3/SDL3/SDL3Config.cmake",
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/glfw3/glfw3Config.cmake",
+        "-DCMAKE_TOOLCHAIN_FILE=/home/dude/Documents/repos/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_C_COMPILER=gcc",
+        "-DCMAKE_CXX_COMPILER=g++",
+        "-B",
+        "build"
+      ],
+      "options": {
+        "env": {
+          "VCPKG_FEATURE_FLAGS": "manifests"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "detail": "Configure the project using GCC"
+    },
+    {
+      "label": "Configure (Clang)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/gladConfig.cmake",
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/glmConfig.cmake",
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/sdl3/SDL3/SDL3Config.cmake",
+        "-DCMAKE_PREFIX_PATH=/home/dude/Documents/repos/AlmondShell/build/vcpkg_installed/x64-linux/share/glfw3/glfw3Config.cmake",
+        "-DCMAKE_TOOLCHAIN_FILE=/home/dude/Documents/repos/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_C_COMPILER=clang",
+        "-DCMAKE_CXX_COMPILER=clang++",
+        "-B",
+        "build"
+      ],
+      "options": {
+        "env": {
+          "VCPKG_FEATURE_FLAGS": "manifests"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "detail": "Configure the project using Clang"
+    },
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build"
+      ],
+      "options": {
+        "env": {
+          "VCPKG_FEATURE_FLAGS": "manifests"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "detail": "Build the entire project"
+    },
+    {
+      "label": "Configure (Windows)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-DCMAKE_TOOLCHAIN_FILE=${workspaceFolder}/path_to_vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "-DCMAKE_PREFIX_PATH=${workspaceFolder}/path_to_vcpkg_installed/x64-windows/share/",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_C_COMPILER=cl",
+        "-DCMAKE_CXX_COMPILER=cl",
+        "-B",
+        "build"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": {
+        "owner": "cpp",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4,
+          "message": 5
+        }
+      },
+      "detail": "Configure the project for Windows build using vcpkg"
     }
+    
   ]
 }

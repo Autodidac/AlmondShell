@@ -77,7 +77,7 @@ namespace almond {
     }
     void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
         std::cout << "Window resized: " << width << "x" << height << "\n";
-        glViewport(0, 0, width, height); // Update OpenGL viewport
+        glad_glViewport(0, 0, width, height); // Update OpenGL viewport
     }
 
     // Create and initialize the sand simulation with a grid of 100x100

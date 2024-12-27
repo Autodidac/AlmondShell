@@ -4,6 +4,8 @@
 #include "alsUtilities.h"
 #include "alsExports_DLL.h"
 
+#ifndef __linux__
+
 namespace almond {
     class ALMONDSHELL_API HeadlessEntryPoint : public EntryPoint {
     public:
@@ -16,3 +18,5 @@ namespace almond {
         }
     };
 } // namespace almond
+
+#endif

@@ -267,14 +267,14 @@ namespace almond {
         auto now = std::chrono::steady_clock::now();
         auto lastFrame = now;
         auto lastSave = now;
-
+/*
         EventSystem eventSystem;
         UIManager uiManager;
 
         UIButton* button = new UIButton(50, 50, 200, 50, "Click Me!");
         button->SetOnClick([]() { std::cout << "Button clicked!\n"; });
         uiManager.AddButton(button);
-/*
+
         auto button = std::make_unique<UIButton>(50, 50, 200, 50, "Click Me!");
         button->SetOnClick([]() { std::cout << "Button clicked!\n"; });
         uiManager.AddButton(std::move(button));
@@ -300,7 +300,7 @@ namespace almond {
             auto currentTime = std::chrono::steady_clock::now();
 
             // Update events
-            uiManager.Update(eventSystem); // this should be inside the driver context code
+          //  uiManager.Update(eventSystem); // this should be inside the driver context code
 
            // RenderFrame(); // Render the frame
 
@@ -370,13 +370,13 @@ namespace almond {
     }
 
     // External entry points
-    AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize) {
+    extern "C" AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize) {
         return new AlmondShell(numThreads, running, scene, maxBufferSize);
     }
 
-    void Run(AlmondShell& core) { core.Run(); }
-    bool IsRunning(AlmondShell& core) { return core.IsItRunning(); }
-    void PrintFPS(AlmondShell& core) { core.PrintOutFPS(); }
+    extern "C" void Run(AlmondShell& core) { core.Run(); }
+    extern "C" bool IsRunning(AlmondShell& core) { return core.IsItRunning(); }
+    extern "C" void PrintFPS(AlmondShell& core) { core.PrintOutFPS(); }
     /*
     void PrintMessage(AlmondShell& core, const std::string& text)
     {
@@ -384,3 +384,5 @@ namespace almond {
     }*/
 
 } // namespace almond
+// in alsEntryPoint.cpp or a relevant .cpp file
+

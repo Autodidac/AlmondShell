@@ -78,7 +78,7 @@ namespace almond {
         // multithreading
         ThreadPool m_jobSystem;
         almond::SaveSystem m_saveSystem;
-        std::vector<Event> m_events;
+        std::vector<almond::Event> m_events;
 
         // time playback
         float m_targetTime = 0.0f;

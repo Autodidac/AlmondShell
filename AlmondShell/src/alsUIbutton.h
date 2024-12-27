@@ -9,7 +9,7 @@ public:
     UIButton(float x, float y, float width, float height, const std::string& label);
 
     void SetOnClick(void (*callback)());
-    void Update(const Event& event);
+   // void Update(const almond::Event& event);
     //void Render(BasicRenderer& renderer);
 
 private:

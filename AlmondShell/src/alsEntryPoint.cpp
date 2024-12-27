@@ -1,7 +1,7 @@
-
 #include "alsEntryPoint.h"
 #include "alsEntryPoint_Headless.h"
 #include "alsUtilities.h"
+#include "alsExports_DLL.h"
 
 #include <memory>
 #include <stdexcept>
@@ -12,6 +12,7 @@
 #endif
 #elif defined(__linux__)
     #include "alsEntryPoint_X11.h"
+
 #elif defined(__APPLE__)
     #if TARGET_OS_IOS
         #include "alsEntryPoint_iOS.mm"
@@ -31,38 +32,42 @@
 namespace almond {
    /// @brief  Crossplatform Factory Function
    /// @return Returns Contextual Entry Point
-   [[nodiscard]] std::unique_ptr<EntryPoint> create() {
+   [[nodiscard]] static std::unique_ptr<EntryPoint> create() {
         // Check for console application
+#ifdef _WIN32
         if (isConsoleApplication()) {
 #ifdef _CONSOLE
             return std::make_unique<HeadlessEntryPoint>();
 #endif
         }
         // Platform-specific instantiation
-#ifdef _WIN32
+
 #ifndef _CONSOLE
-        //return std::make_unique<Win32EntryPoint>();
+        return std::make_unique<Win32EntryPoint>();
 #endif
 #elif defined(__linux__)
         return std::make_unique<X11EntryPoint>();
+
 #elif defined(__APPLE__)
         #if TARGET_OS_IOS
                 return std::make_unique<IOSEntryPoint>();
         #else
                 return std::make_unique<CocoaEntryPoint>();
         #endif
+
 #elif defined(__ANDROID__)
         return std::make_unique<AndroidEntryPoint>();
+
 #elif defined(__EMSCRIPTEN__)
         return std::make_unique<WasmEntryPoint>();
+
 #elif defined(_XBOX)
         return std::make_unique<XboxEntryPoint>();
+
 #elif defined(_PS5)
         return std::make_unique<PS5EntryPoint>();
 #else
         throw std::runtime_error("Platform not supported");
 #endif
-        // Ideally, this return statement should never be reached
-        return nullptr; // Add a return statement to satisfy all paths.
     }
 } // namespace almond

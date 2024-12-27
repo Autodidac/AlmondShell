@@ -18,7 +18,7 @@ namespace almond
 #ifdef _WIN32
     return GetConsoleWindow() != nullptr;
 #else
-    return isatty(fileno(stdout))
+    return isatty(fileno(stdout));
 #endif
 
     }

@@ -1,20 +1,12 @@
-cmake_minimum_required(VERSION 3.20)
-project(AlmondShell\examples\Example_CMake_Project1)
+cmake_minimum_required(VERSION 3.21)
+project(AlmondEngine VERSION 1.0 LANGUAGES CXX)
 
-# Include shared items project
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Add Engine library
 add_subdirectory(AlmondShell)
-
-# Include static library project
-add_subdirectory(AlmondShell\examples\Example_StaticLib1)
-
-# Include DLL project
-add_subdirectory(AlmondShell\examples\Example_Dll1)
-
-# Include Windows/console example project
-add_subdirectory(AlmondShell\examples\Example_WindowsProject1)
-
-# Include plugin example project
-add_subdirectory(AlmondShell\examples\Example_Mod_Dll1)
-
-# Include Android example project
-add_subdirectory(AlmondShell\examples\Example_Android_StaticLibrary1)
+# Add all example projects in Examples directory
+add_subdirectory(AlmondShell/examples)

@@ -13,6 +13,9 @@
 #ifdef _MSC_VER
 //#pragma warning(disable : 26495) // suppress uninitialized event, it's intialized throughout the engine
 #endif
+#undef KeyPress
+namespace almond {
+
 
 enum class EventType {
     MouseButtonClick,
@@ -34,7 +37,7 @@ class EventSystem {
 public:
     void PollEvents();
     void RegisterCallback(const std::function<void(const Event&)>& callback);
-
+/*
     // Add a movement event as a unique pointer
     void addMovementEvent(std::unique_ptr<almond::MovementEvent> event) {
         std::lock_guard<std::mutex> lock(movementMutex);
@@ -54,14 +57,15 @@ public:
         std::lock_guard<std::mutex> lock(movementMutex);
         movementEvents.clear();
     }
-
+*/
 private:
-    std::vector<std::unique_ptr<almond::MovementEvent>> movementEvents; // Store movement events as unique pointers
+   // std::vector<std::unique_ptr<almond::MovementEvent>> movementEvents; // Store movement events as unique pointers
     std::vector<std::function<void(const Event&)>> callbacks;
     std::mutex callbackMutex; // Protect callback registrations
     std::mutex movementMutex; // Protect movement events
 };
 
 // Utility functions for EventType conversion
-std::string EventTypeToString(EventType type);
-EventType StringToEventType(const std::string& str);
+std::string EventTypeToString(almond::EventType type);
+almond::EventType StringToEventType(const std::string& str);
+}

@@ -6,7 +6,7 @@
 class UIManager {
 public:
     void AddButton(UIButton* button);
-    void Update(EventSystem& eventSystem);
+   // void Update(almond::EventSystem& eventSystem);
     //void Render(BasicRenderer& renderer);
 
 private:

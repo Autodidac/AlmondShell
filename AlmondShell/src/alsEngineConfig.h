@@ -11,7 +11,7 @@
 
 // Windowing backend (Uncomment ONLY ONE)
 #define ALMOND_USING_GLFW
-#define ALMOND_USING_SDL
+//#define ALMOND_USING_SDL
 
 // --------------------
 // Include Libraries
