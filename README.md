@@ -12,7 +12,7 @@ What Seperates Almond Core From Almond Shell is plugin and 2D Graphical Support 
 
 Built with contemporary design principles and using C++20, it is designed for modularity, efficiency, and ease of use on current OS hardware for bleeding-edge software development and beyond. For 3D Graphics Rendering Capabilities or Game Engine see AlmondEngine. AlmondShell is a Modern Software Development Suite which aims to be as minimal as possible and also features a header only mostly functional programming design to reduce overhead.
 
-<img align="left" src="images/gpt.jpg" width="40px"/>GPT-4
+<img align="left" src="AlmondShell/images/gpt.jpg" width="40px"/>GPT-4
 
 
 
@@ -35,9 +35,9 @@ In AlmondEngine, Ensure that these features are appropriately implemented in the
 
 - Tested in Windows 10/11, and Linux Kubuntu (Ubuntu Debian/KDE)
 
-<img align="left" src="images/1.png" width="200px"/>
+<img align="left" src="AlmondShell/images/1.png" width="200px"/>
 
-<img align="left" src="images/4.png" width="200px"/>
+<img align="left" src="AlmondShell/images/4.png" width="200px"/>
 
 ```cpp
 
@@ -197,8 +197,8 @@ I appreciate the power and capabilities of GPT-4 in aiding the creation of this 
 
 
 
-<img align="left" src="images/AlmondShell.jpg" width="80px"/>
-<img align="center" src="images/gpt4all.png" width="80px"/>
+<img align="left" src="AlmondShell/images/AlmondShell.jpg" width="80px"/>
+<img align="center" src="AlmondShell/images/gpt4all.png" width="80px"/>
 
 Almond Shell - A GPT-4 Cross-platform Library For All! Almost Entirely Built and Designed by AI - Even much of this readme and the CMakeLists.txt are written by GPT-4.. what a wonderful tool Thank You Again!
 
