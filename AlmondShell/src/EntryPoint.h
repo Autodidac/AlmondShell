@@ -1,7 +1,6 @@
 #pragma once
 
-#include "alsUtilities.h"
-#include "alsExports_DLL.h"
+#include "Exports_DLL.h"
 
 #include <memory>
 
@@ -15,13 +14,13 @@ namespace almond {
         //virtual void createEntryPoint(int width, int height, const wchar_t* title) = 0;
 
         // Displays the created entry point (window, etc.).
-       // virtual void show();
+        virtual void show() = 0;
 
         // Polls for events (like input, etc.) and returns whether any were processed.
-       // virtual bool pollEvents();
+        virtual bool pollEvents() = 0;
 
         // Factory method to create platform-specific entry points
-        [[nodiscard]] static std::unique_ptr<EntryPoint> create(); 
+        [[nodiscard]] std::unique_ptr<EntryPoint> create(); 
 /*
     private:
         // Class now handles all logic directly (no more Impl class)

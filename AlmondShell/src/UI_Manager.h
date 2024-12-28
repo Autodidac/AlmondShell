@@ -1,12 +1,12 @@
 // UIManager.h
 #pragma once
-#include "alsUIbutton.h"
+#include "UI_Button.h"
 #include <vector>
 
 class UIManager {
 public:
     void AddButton(UIButton* button);
-    void Update(almond::EventSystem& eventSystem);
+    void Update(EventSystem& eventSystem);
     //void Render(BasicRenderer& renderer);
 
 private:
