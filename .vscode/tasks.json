@@ -4,7 +4,7 @@
     {
       "label": "Clean DLL",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_Dll1\\Example_Dll1.vcxproj",
         "/t:Clean"
@@ -18,7 +18,7 @@
     {
       "label": "Build DLL",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_Dll1\\Example_Dll1.vcxproj",
         "/property:GenerateFullPaths=true",
@@ -41,7 +41,7 @@
     {
       "label": "Clean Static Library",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_StaticLib1\\Example_StaticLib1.vcxproj",
         "/t:Clean"
@@ -55,7 +55,7 @@
     {
       "label": "Build Static Library",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_StaticLib1\\Example_StaticLib1.vcxproj",
         "/property:GenerateFullPaths=true",
@@ -77,7 +77,7 @@
     {
       "label": "Clean Executable",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_ConsoleApplication\\Example_ConsoleApplication.vcxproj",
         "/t:Clean"
@@ -91,7 +91,7 @@
     {
       "label": "Build Executable",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_ConsoleApplication\\Example_ConsoleApplication.vcxproj",
         "/property:GenerateFullPaths=true",
@@ -111,7 +111,7 @@
     {
       "label": "Clean Windows App",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_WindowsProject1\\Example_WindowsProject1.vcxproj",
         "/t:Clean"
@@ -125,7 +125,7 @@
     {
       "label": "Build Windows App",
       "type": "shell",
-      "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe",
+      "command": "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe",
       "args": [
         "${workspaceFolder}\\AlmondShell\\examples\\Example_WindowsProject1\\Example_WindowsProject1.vcxproj",
         "/property:GenerateFullPaths=true",

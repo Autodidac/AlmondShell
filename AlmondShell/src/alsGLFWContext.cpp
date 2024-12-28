@@ -31,7 +31,9 @@
 #include<filesystem>
 namespace fs = std::filesystem;
 //------------------------------
+
 namespace almond {
+
     GLFWwindow* glfwWindow = nullptr;
 
     int width = 800;
@@ -54,6 +56,7 @@ namespace almond {
             //isSnakeGame = false;
         }
     }
+
     void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         if (action == GLFW_PRESS) isButtonHeld = true;
         if (action == GLFW_RELEASE) isButtonHeld = false;
@@ -64,6 +67,7 @@ namespace almond {
             // Sand brush logic here
         }
     }
+
     void CursorPositionCallback(GLFWwindow* window, double xpos, double ypos) {
 
         //GLFW_CURSOR
@@ -114,6 +118,7 @@ namespace almond {
 
         std::cout << "GLFW and OpenGL initialized successfully\n";
     }
+
     bool processGLFW() {
 
         if (glfwWindowShouldClose(glfwWindow)) {
@@ -127,7 +132,7 @@ namespace almond {
         const auto& grid = sandSim.getGrid();
 
         // Setup Texture Atlas
-        std::filesystem::path texturePath = std::filesystem::current_path().fs::path::parent_path().fs::path::parent_path() / "images" / "bmp3.bmp";
+        std::filesystem::path texturePath = std::filesystem::current_path().fs::path::parent_path().fs::path::parent_path().fs::path::parent_path().fs::path::parent_path() / "images" / "bmp3.bmp";
         OpenGLTextureAtlas atlas(width, height);
         Renderer renderer(atlas); // Create a renderer object for the texture atlas
 
@@ -196,7 +201,6 @@ namespace almond {
                 }
                 renderer.DrawBatch(commands);
             }
-
 
             if (isButtonHeld)
             {

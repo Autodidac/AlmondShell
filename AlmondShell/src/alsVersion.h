@@ -8,7 +8,7 @@ int GetRevision();
 // Version information
 const int major = 0;
 const int minor = 1;
-const int revision = 0;
+const int revision = 2;
 static char version_string[32] = "";
 
 int GetMajor() { return major; }
