@@ -118,7 +118,7 @@ struct NewScene : public almond::Scene {
 };
 
 int main() {
-    std::cout << "Running headless application...\n";
+    std::cout << "Running linux application...\n";
     /**/
     NewScene scene; 
     size_t threadCount = 1;

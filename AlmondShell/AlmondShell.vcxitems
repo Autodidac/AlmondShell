@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsGLFWSandSim.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsMesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsOpenGLShader.h" />
@@ -77,13 +78,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PhysicsSystem2D.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsScene.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsThreadPool.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsTimeKeeper.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsRobustTime.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsUIbutton.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsUImanager.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsUtilities.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsWaitFreeQueue.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\almondshell.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)src\alsContextFunctions.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>

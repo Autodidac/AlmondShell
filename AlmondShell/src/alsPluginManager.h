@@ -3,6 +3,7 @@
 #include "alsIPlugin.h"
 #include "alsLogger.h"
 #include "alsPluginConcept.h"
+#include "alsRobustTime.h"
 
 #include <filesystem>
 #include <functional>
@@ -14,13 +15,6 @@
 
 #ifdef _WIN32
 #include "framework.h"
-/*
-extern "C" {
-    HMODULE __stdcall LoadLibraryA(LPCSTR lpLibFileName);
-    void* __stdcall GetProcAddress(HMODULE hModule, LPCSTR lpProcName);
-    int __stdcall FreeLibrary(HMODULE hLibModule);
-}
-*/
 using PluginHandle = HMODULE;
 #define LoadSharedLibrary(path) LoadLibraryA(path.string().c_str())
 #define GetSymbol(handle, name) GetProcAddress(handle, name)
@@ -35,32 +29,31 @@ using PluginHandle = void*;
 
 namespace almond::plugin {
 
-    // PluginManager class, header-only
     class PluginManager {
     public:
         using PluginFactoryFunc = IPlugin * (*)();
 
-        // Default constructor with optional logFileName
-        explicit PluginManager(const std::string& logFileName = "default_log.txt")
-            : logger(logFileName) {
+        // Constructor with a robust time system
+        explicit PluginManager(const std::string& logFileName, almond::RobustTime& timeSystem)
+            : logger(almond::Logger::GetInstance(logFileName, timeSystem)), timeSystem(timeSystem) {
         }
 
         ~PluginManager() {
             UnloadAllPlugins();
         }
 
-        // C++20 use of std::filesystem::path and ranges for efficient operations
+        // Load a plugin
         bool LoadPlugin(const std::filesystem::path& path) {
             logger.log("Attempting to load plugin: " + path.string());
 
-            // Modern handling of the shared library loading
+            // Load the shared library
             PluginHandle handle = LoadSharedLibrary(path);
             if (!handle) {
                 logger.log("ERROR: Failed to load plugin: " + path.string());
                 return false;
             }
 
-            // Use reinterpret_cast to call the function from the plugin
+            // Get the plugin factory function
             auto factory = reinterpret_cast<PluginFactoryFunc>(GetSymbol(handle, "CreatePlugin"));
             if (!factory) {
                 logger.log("ERROR: Missing entry point in plugin: " + path.string());
@@ -68,7 +61,7 @@ namespace almond::plugin {
                 return false;
             }
 
-            // Using smart pointer to manage plugin instance
+            // Create the plugin instance
             std::unique_ptr<IPlugin> plugin(factory());
             if (plugin) {
                 plugin->Initialize();
@@ -82,20 +75,18 @@ namespace almond::plugin {
             return false;
         }
 
-        // Unloads all plugins
+        // Unload all plugins
         void UnloadAllPlugins() {
             logger.log("Unloading all plugins...");
 
-            // Reverse iteration with std::ranges for modern loop control
+            // Reverse iteration using std::ranges
             for (auto& [plugin, handle] : plugins | std::views::reverse) {
                 if (plugin) {
                     logger.log("Shutting down plugin...");
                     plugin->Shutdown();
                 }
 
-                logger.log("Destroying plugin instance...");
                 plugin.reset();
-
                 if (handle) {
                     logger.log("Closing library handle...");
                     CloseLibrary(handle);
@@ -108,7 +99,29 @@ namespace almond::plugin {
 
     private:
         std::vector<std::pair<std::unique_ptr<IPlugin>, PluginHandle>> plugins;
-        almond::Logger logger; // Logger instance
+        almond::Logger& logger;            // Shared Logger instance
+        almond::RobustTime& timeSystem;    // Reference to RobustTime
     };
 
 } // namespace almond::plugin
+
+/*
+#include "alsPluginManager.h"
+#include "alsRobustTime.h"
+
+int main() {
+    almond::RobustTimeSystem timeSystem;
+
+    // Create PluginManager with time system and optional log file name
+    almond::plugin::PluginManager pluginManager(timeSystem, "plugin_log.txt");
+
+    // Load a plugin
+    pluginManager.LoadPlugin("path/to/plugin.so");
+
+    // Unload all plugins
+    pluginManager.UnloadAllPlugins();
+
+    return 0;
+}
+
+*/

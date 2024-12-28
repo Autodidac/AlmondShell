@@ -24,13 +24,17 @@ namespace almond {
         m_updateCallback = callback;
     }
 
+    AlmondShell::AlmondShell(almond::RobustTime& m_timeSystem) : m_jobSystem(4), m_running(true), m_scene(nullptr), m_maxBufferSize(100), m_targetTime(0.0f),
+        m_targetFPS(120), m_frameLimitingEnabled(false), m_saveIntervalMinutes(1), m_frameCount(0), m_fps(0.0f),
+        m_pluginManager("./plugins.log", m_timeSystem), m_timeSystem(m_timeSystem)
+    {
+    }
+
     // Constructor and Destructor
-    AlmondShell::AlmondShell(size_t numThreads, bool running, almond::Scene* scene, size_t maxBufferSize)
-        : m_jobSystem(numThreads), m_running(running),
-        m_scene(scene ? std::make_unique<almond::Scene>(std::move(*scene)) : nullptr),
-        m_maxBufferSize(maxBufferSize), m_targetTime(0.0f), m_targetFPS(120),
-        m_frameLimitingEnabled(false), m_saveIntervalMinutes(1),
-        m_frameCount(0), m_fps(0.0f) {
+    AlmondShell::AlmondShell(size_t numThreads, bool running, almond::Scene* scene, size_t maxBufferSize, almond::RobustTime& m_timeSystem)
+            : m_jobSystem(numThreads), m_running(running), m_scene(scene ? std::make_unique<almond::Scene>(std::move(*scene)) : nullptr),
+        m_maxBufferSize(maxBufferSize), m_targetTime(0.0f), m_targetFPS(120), m_frameLimitingEnabled(false), m_saveIntervalMinutes(1),
+        m_frameCount(0), m_fps(0.0f), m_pluginManager("./plugins.log", m_timeSystem), m_timeSystem(m_timeSystem) {
         // Create renderer instance      
        // InitializeRenderer(L"Example Almond Window Title", 5.0f, 5.0f, 800, 600, 0xFFFFFFFF, nullptr);
     }
@@ -281,7 +285,8 @@ namespace almond {
 */
         //load plugins
         std::cout << "Loading any available plugins...\n";
-        almond::plugin::PluginManager manager("plugin_manager.log");
+        //almond::RobustTime* timeSystem;
+        almond::plugin::PluginManager manager("./plugins.log", m_timeSystem);
 
         const std::filesystem::path pluginDirectory = ".\\mods";
         if (std::filesystem::exists(pluginDirectory) && std::filesystem::is_directory(pluginDirectory)) {
@@ -370,11 +375,12 @@ namespace almond {
     }
 
     // External entry points
-    extern "C" AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize) {
-        return new AlmondShell(numThreads, running, scene, maxBufferSize);
+    extern "C" AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize, almond::RobustTime& m_timeSystem)
+    {
+        return new AlmondShell(numThreads, running, scene, maxBufferSize,m_timeSystem);
     }
 
-    extern "C" void Run(AlmondShell& core) { core.Run(); }
+    void Run(AlmondShell& core) { core.Run(); }
     extern "C" bool IsRunning(AlmondShell& core) { return core.IsItRunning(); }
     extern "C" void PrintFPS(AlmondShell& core) { core.PrintOutFPS(); }
     /*

@@ -15,6 +15,9 @@ extern "C" int main() {
     return 0;
 }
 */
+
+#ifdef __linux__
 void placeholder_function() {
     // Temporary function for compilation
 }
+#endif

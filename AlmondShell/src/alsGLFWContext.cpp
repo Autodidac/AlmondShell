@@ -1,3 +1,4 @@
+
 #include "alsGLFWContext.h"
 #include "alsEngineConfig.h"
 //#include "alsEngine.h"
@@ -13,10 +14,10 @@
 #ifdef ALMOND_USING_GLFW
 
 #ifdef ALMOND_USING_OPENGLTEXTURE
-#include "alsTexture.h"
-#include "alsOpenGLTexture.h" // OpenGL texture manager
-#include "alsOpenGLRenderer.h"
-#include "alsOpenGLTextureAtlas.h"
+    #include "alsTexture.h"
+    #include "alsOpenGLTexture.h" // OpenGL texture manager
+    #include "alsOpenGLRenderer.h"
+    #include "alsOpenGLTextureAtlas.h"
 #endif
 
 #include "alsGLFWSandSim.h"
@@ -29,6 +30,7 @@
 
 //------- Ignore this ----------
 #include<filesystem>
+
 namespace fs = std::filesystem;
 //------------------------------
 
@@ -81,7 +83,7 @@ namespace almond {
     }
     void FramebufferSizeCallback(GLFWwindow* window, int width, int height) {
         std::cout << "Window resized: " << width << "x" << height << "\n";
-        glad_glViewport(0, 0, width, height); // Update OpenGL viewport
+        glViewport(0, 0, width, height); // Update OpenGL viewport
     }
 
     // Create and initialize the sand simulation with a grid of 100x100
@@ -103,10 +105,10 @@ namespace almond {
 
         glfwMakeContextCurrent(glfwWindow);
         // important step
-        gladLoadGL();
-
+        //gladLoadGL();
+        gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
         // glfwSwapInterval(1); // Enable vsync
-        glViewport(0, 0, width, height); // Update OpenGL viewport
+       // glViewport(0, 0, width, height); // Update OpenGL viewport
 
         //        const char* version = (const char*)glGetString(GL_VERSION);
         //        std::cout << "OpenGL Version: " << version << std::endl;
@@ -132,13 +134,13 @@ namespace almond {
         const auto& grid = sandSim.getGrid();
 
         // Setup Texture Atlas
-        std::filesystem::path texturePath = std::filesystem::current_path().fs::path::parent_path().fs::path::parent_path().fs::path::parent_path().fs::path::parent_path() / "images" / "bmp3.bmp";
-        OpenGLTextureAtlas atlas(width, height);
+        std::filesystem::path texturePath = std::filesystem::current_path().parent_path().parent_path() / "images" / "bmp3.bmp";
+        OpenGLTextureAtlas atlas(2048, 2048);
         Renderer renderer(atlas); // Create a renderer object for the texture atlas
 
         renderer.AddTexture(texturePath.string().c_str(), 0, 0);
-        renderer.AddTexture(texturePath.string().c_str(), 512, 0);
-        renderer.AddTexture(texturePath.string().c_str(), 0, 512);
+        renderer.AddTexture(texturePath.string().c_str(), 256, 0);
+        renderer.AddTexture(texturePath.string().c_str(), 0, 256);
 
         std::vector<float> quadVertices = {
             -0.5f, -0.5f, 0.0f, 0.0f,  // Bottom-left
@@ -154,8 +156,7 @@ namespace almond {
         renderer.AddMesh("sand_quad", quadVertices, quadIndices); // Create a new mesh object in the renderer for our quad
 
         // Enable wireframe mode
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+       // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         while (!glfwWindowShouldClose(glfwWindow)) {
             auto currentTime = std::chrono::steady_clock::now();

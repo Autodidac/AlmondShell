@@ -30,18 +30,18 @@
 namespace almond {
    /// @brief  Crossplatform Factory Function
    /// @return Returns Contextual Entry Point
-   [[nodiscard]] static std::unique_ptr<EntryPoint> create() {
+   [[nodiscard]] std::unique_ptr<EntryPoint> EntryPoint::create() {
         // Check for console application
 #ifdef _WIN32
     #ifdef _CONSOLE
         if (isConsoleApplication()) {
             return std::make_unique<HeadlessEntryPoint>();
         }
-    #endif
+    
         
         // Platform-specific instantiation
 
-    #ifndef _CONSOLE
+    #else
             return std::make_unique<Win32EntryPoint>();
     #endif
 #elif defined(__linux__)
@@ -68,5 +68,7 @@ namespace almond {
 #else
         throw std::runtime_error("Platform not supported");
 #endif
+        return nullptr;  // Explicit return to handle all paths, it'll never reach here without throwing the error however.
     }
+
 } // namespace almond

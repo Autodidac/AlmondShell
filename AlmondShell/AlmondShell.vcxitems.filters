@@ -49,6 +49,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\alsMesh.cpp">
       <Filter>backends\rendering\OpenGL\Glad</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\almondshell.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsWaitFreeQueue.h">
@@ -91,7 +94,7 @@
       <Filter>core\events</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\PhysicsSystem2D.h">
-      <Filter>physics</Filter>
+      <Filter>core\physics</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsSceneSnapshot.h">
       <Filter>core\scene</Filter>
@@ -109,13 +112,13 @@
       <Filter>core\scene</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsPluginManager.h">
-      <Filter>plugins</Filter>
+      <Filter>core\plugins</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsAsyncPluginManager.h">
-      <Filter>plugins</Filter>
+      <Filter>core\plugins</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsPluginConcept.h">
-      <Filter>plugins</Filter>
+      <Filter>core\plugins</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEventSystem.h">
       <Filter>core\events</Filter>
@@ -127,7 +130,7 @@
       <Filter>core\rendering\ui</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsIPlugin.h">
-      <Filter>plugins</Filter>
+      <Filter>core\plugins</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\framework.h">
       <Filter>core\platform</Filter>
@@ -192,10 +195,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsGLFWSandSim.h">
       <Filter>backends\rendering\OpenGL\GLFW\minigames</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsTimeKeeper.h">
-      <Filter>core\support</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsVersion.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsRobustTime.h">
       <Filter>core\support</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsLogger.h">
@@ -209,6 +209,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsMesh.h">
       <Filter>backends\rendering\OpenGL\Glad</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\alsVersion.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell.h">
+      <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -242,20 +248,8 @@
     <Filter Include="backends\rendering\OpenGL\Glad\shaders">
       <UniqueIdentifier>{8a78979a-8cec-41c6-998a-107d70fec6c5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="physics">
-      <UniqueIdentifier>{3a760668-3ffc-4b16-8e38-7017dc70ff2e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="plugins">
-      <UniqueIdentifier>{7e32bc90-e2e3-4957-8209-e268579b2183}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\threading">
-      <UniqueIdentifier>{33b5f5e3-44f3-460a-8a51-bbfd86b7bd3d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core\platform">
       <UniqueIdentifier>{4f851def-2008-489f-bbd4-5757a7130558}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="core\scene">
-      <UniqueIdentifier>{d172e931-cada-4c75-a3a8-a55115caac52}</UniqueIdentifier>
     </Filter>
     <Filter Include="core\events">
       <UniqueIdentifier>{0a7b7474-0175-4439-9a91-cfb876973539}</UniqueIdentifier>
@@ -269,9 +263,6 @@
     <Filter Include="backends\rendering\OpenGL\GLFW\minigames">
       <UniqueIdentifier>{aaac557f-a5e6-46c8-82b2-8431feba1e39}</UniqueIdentifier>
     </Filter>
-    <Filter Include="core\support">
-      <UniqueIdentifier>{361c6dd1-79e9-456b-8c23-f32f4188e4eb}</UniqueIdentifier>
-    </Filter>
     <Filter Include="core\rendering">
       <UniqueIdentifier>{6a3486b9-0e20-4b21-8a5b-451391148ad3}</UniqueIdentifier>
     </Filter>
@@ -280,6 +271,21 @@
     </Filter>
     <Filter Include="core\rendering\ui">
       <UniqueIdentifier>{380cb480-3c8a-4316-a202-01c794910e9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\support">
+      <UniqueIdentifier>{361c6dd1-79e9-456b-8c23-f32f4188e4eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\physics">
+      <UniqueIdentifier>{3a760668-3ffc-4b16-8e38-7017dc70ff2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\scene">
+      <UniqueIdentifier>{d172e931-cada-4c75-a3a8-a55115caac52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\threading">
+      <UniqueIdentifier>{33b5f5e3-44f3-460a-8a51-bbfd86b7bd3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\plugins">
+      <UniqueIdentifier>{7e32bc90-e2e3-4957-8209-e268579b2183}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

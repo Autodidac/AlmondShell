@@ -13,10 +13,9 @@
 #ifdef _MSC_VER
 //#pragma warning(disable : 26495) // suppress uninitialized event, it's intialized throughout the engine
 #endif
-#undef KeyPress
 namespace almond {
 
-
+#undef KeyPress
 enum class EventType {
     MouseButtonClick,
     MouseMove,
@@ -26,7 +25,7 @@ enum class EventType {
 };
 
 struct Event {
-    EventType type{};
+    almond::EventType type{};
     std::map<std::string, std::string> data;
     float x = 0.0f, y = 0.0f;  // Mouse position
     int key = 0;               // Key press code
@@ -36,7 +35,7 @@ struct Event {
 class EventSystem {
 public:
     void PollEvents();
-    void RegisterCallback(const std::function<void(const Event&)>& callback);
+    void RegisterCallback(const std::function<void(const almond::Event&)>& callback);
 /*
     // Add a movement event as a unique pointer
     void addMovementEvent(std::unique_ptr<almond::MovementEvent> event) {

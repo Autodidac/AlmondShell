@@ -14,11 +14,11 @@ namespace almond {
 
     class OpenGLTexture : public almond::Texture {
     public:
+        OpenGLTexture() {}
         OpenGLTexture(const std::string filepath, Format format, bool generateMipmaps = true) : format(format), generateMipmaps(generateMipmaps) {
             LoadTexture(filepath);
         } 
 
-        OpenGLTexture() {}
 
         ~OpenGLTexture() override {
             if (id != 0) {
@@ -84,7 +84,7 @@ namespace almond {
 
         void LoadTexture(const std::string& filepath) {
             // Load the image using your custom image loader
-            image = ImageLoader::LoadImage(filepath);
+            image = ImageLoader::LoadAlmondImage(filepath);
 
             // Check if image is loaded correctly
             if (image.pixels.empty()) {

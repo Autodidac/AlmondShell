@@ -37,7 +37,7 @@ public:
         this->grid.resize(width * height);
     }
 
-    int getActiveParticles() const {
+    size_t getActiveParticles() const {
         return std::count_if(grid.begin(), grid.end(), [](uint8_t particle) { return particle > 0; });
     }
 

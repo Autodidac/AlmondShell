@@ -1,5 +1,7 @@
 #pragma once
 
+//#include "alsExports_DLL.h"
+
 #include <string>
 #include <vector>
 #include <cstdint>
@@ -16,7 +18,7 @@ namespace almond {
         };
 
         // Loads an image from file and returns its data
-        static ImageData LoadImage(const std::string& filepath);
+        static ImageData LoadAlmondImage(const std::string& filepath);
 
     private:
         // Helper methods for specific formats

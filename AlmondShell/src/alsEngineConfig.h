@@ -1,5 +1,10 @@
 #pragma once
 
+#ifdef _WIN32
+// include windows TODO: platform macros
+#include "framework.h"
+#endif
+
 // --------------------
 // Engine Context Config
 // --------------------
@@ -20,6 +25,7 @@
 #define ALMOND_USING_OPENGL
 #define ALMOND_USING_OPENGLTEXTURE
 #include <glad/glad.h>
+//#include <glu/glu.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #endif

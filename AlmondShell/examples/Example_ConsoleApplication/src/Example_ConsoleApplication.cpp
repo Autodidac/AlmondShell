@@ -151,9 +151,6 @@ struct myInitializer {
 
 */
 
-
-        //std::cout << "AlmondShell v" << almond::AlmondShell::GetEngineVersion() << std::endl;
-
         /*
         almond::RegisterAlmondCallback(MyCallback);
         almond::AlmondShell* engine = almond::CreateAlmondShell(4, true, nullptr, 10);

@@ -1,22 +1,26 @@
 #pragma once
 
 #include <iostream>
+#include <cstdio>
 
-int GetMajor();
-int GetMinor();
-int GetRevision();
-// Version information
-const int major = 0;
-const int minor = 1;
-const int revision = 2;
-static char version_string[32] = "";
+namespace almond {
 
-int GetMajor() { return major; }
-int GetMinor() { return minor; }
-int GetRevision() { return revision; }
+    // Version information as constexpr for compile-time evaluation
+    constexpr int major = 0;
+    constexpr int minor = 1;
+    constexpr int revision = 3;
 
-extern "C" const char* GetEngineVersion()
-{
-    std::snprintf(version_string, sizeof(version_string), "%d.%d.%d", major, minor, revision);
-    return version_string;
-}
+    static char version_string[32] = "";
+
+    // Use inline to ensure that each definition is treated uniquely in different translation units
+    inline int GetMajor() { return major; }
+    inline int GetMinor() { return minor; }
+    inline int GetRevision() { return revision; }
+
+    inline const char* GetEngineVersion()
+    {
+        std::snprintf(version_string, sizeof(version_string), "%d.%d.%d", major, minor, revision);
+        return version_string;
+    }
+
+} // namespace almond

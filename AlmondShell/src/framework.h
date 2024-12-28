@@ -5,6 +5,11 @@
 #include <windows.h>
 
 /*
+* this was for raylib, direct calls to winapi commands to avoid namespace pollution
+* it was abandoned because raylib directly conflicts with int main the heart of the library,
+  having it's own internal main and me wanting out of the box easy solutions
+*/
+/*
 //#define NOMINMAX
 //#define NOGDI
 

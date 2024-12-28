@@ -11,9 +11,6 @@
 #include "alsThreadPool.h"
 #include "alsTypes.h"
 
-// include windows TODO: platform macros
-#include "framework.h"
-
 #include <chrono>
 #include <deque>
 #include <functional>
@@ -33,7 +30,9 @@ namespace almond {
 
     class ALMONDSHELL_API AlmondShell {
     public:
-        AlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize);
+        AlmondShell(almond::RobustTime& m_timeSystem);
+        AlmondShell(size_t numThreads, bool running, almond::Scene* scene, size_t maxBufferSize, almond::RobustTime& m_timeSystem);
+
         ~AlmondShell();
 
         void Run();
@@ -63,8 +62,8 @@ namespace almond {
 
     private:
         bool m_running;
+        almond::RobustTime& m_timeSystem;
         almond::plugin::PluginManager m_pluginManager;
-
 
         // rendering
        // std::unique_ptr<RenderContext> m_renderer; // Renderer instance
@@ -100,7 +99,7 @@ namespace almond {
     };
 
     //external functions TODO: move to another file
-    extern "C" AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize);
+    extern "C" AlmondShell* CreateAlmondShell(size_t numThreads, bool running, Scene* scene, size_t maxBufferSize, almond::RobustTime& m_timeSystem);
     extern "C" void Run(AlmondShell& core);
     extern "C" bool IsRunning(AlmondShell& core);
     extern "C" void PrintFPS(AlmondShell& core);

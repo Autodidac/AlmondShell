@@ -21,7 +21,7 @@ namespace almond {
        // virtual bool pollEvents();
 
         // Factory method to create platform-specific entry points
-        [[nodiscard]] static std::unique_ptr<EntryPoint> create(); 
+        [[nodiscard]] std::unique_ptr<EntryPoint> create(); 
 /*
     private:
         // Class now handles all logic directly (no more Impl class)

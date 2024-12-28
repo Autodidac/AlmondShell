@@ -120,8 +120,9 @@ int main() {
     NewScene scene; 
     size_t threadCount = 1;
     size_t maxBuffer = 100;
+    almond::RobustTime timeSystem;
 
-    almond::AlmondShell* myAlmondShell = almond::CreateAlmondShell(threadCount, true, &scene, maxBuffer);
+    almond::AlmondShell* myAlmondShell = almond::CreateAlmondShell(threadCount, true, &scene, maxBuffer, timeSystem);
 
     // Optional: Register callbacks here if needed
 /*    almond::RegisterAlmondCallback([&scene]() {

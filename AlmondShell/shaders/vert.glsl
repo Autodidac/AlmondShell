@@ -1,10 +1,20 @@
-#version 460 core
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in vec2 aTexCoord;
-uniform vec2 position;
-uniform float size;
-out vec2 TexCoord;
+#version 330 core
+
+out vec4 FragColor;    // Final color output
+
+in vec2 TexCoords;     // Texture coordinates from the vertex shader
+
+uniform sampler2D textureSampler;  // The texture sampler (e.g., an atlas)
+uniform vec2 texOffset;           // Texture offset within the atlas
+uniform vec2 texSize;             // Size of the texture within the atlas
+
 void main() {
-    gl_Position = vec4(aPos * size + position, 0.0, 1.0);
-    TexCoord = aTexCoord;
+    // Adjust the texture coordinates based on the atlas's offset and size
+    vec2 adjustedTexCoords = TexCoords * texSize + texOffset;
+
+    // Ensure the texture coordinates are within valid bounds (0.0 to 1.0)
+    adjustedTexCoords = clamp(adjustedTexCoords, vec2(0.0), vec2(1.0));
+
+    // Sample the texture at the adjusted coordinates
+    FragColor = texture(textureSampler, adjustedTexCoords);
 }

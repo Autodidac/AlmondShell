@@ -67,20 +67,29 @@ namespace almond {
 
     class DrawCommand : public RenderCommand {
     public:
-
+        // For regular textures, you can use just the texture index and a render mode
         DrawCommand(std::shared_ptr<Mesh> mesh, int textureSlot, RenderMode renderMode, float x, float y)
-            : RenderCommand(CommandType::Draw), mesh(mesh), textureSlot(textureSlot), renderMode(renderMode), x(x), y(y)
-        {
+            : RenderCommand(CommandType::Draw), mesh(mesh), textureSlot(textureSlot), renderMode(renderMode), x(x), y(y) {
+        }
+
+        // For texture atlas, you also need offset and size for the texture in the atlas
+        DrawCommand(std::shared_ptr<Mesh> mesh, int textureSlot, RenderMode renderMode, float x, float y, glm::vec2 texOffset, glm::vec2 texSize)
+            : RenderCommand(CommandType::Draw), mesh(mesh), textureSlot(textureSlot), renderMode(renderMode), x(x), y(y), texOffset(texOffset), texSize(texSize) {
         }
 
         void Execute(ShaderProgram* shader) const override {
             if (renderMode == RenderMode::SingleTexture) {
+                // Render as a single texture
                 shader->SetUniform("position", glm::vec2(x, y));
+                shader->SetUniform("texOffset", glm::vec2(0.0f, 0.0f)); // No offset for regular texture
+                shader->SetUniform("texSize", glm::vec2(1.0f, 1.0f));  // Full texture size
                 glDrawElements(GL_TRIANGLES, mesh->GetIndexCount(), GL_UNSIGNED_INT, nullptr);
             }
-            else if (renderMode == RenderMode::TextureAtlas)
-            {
+            else if (renderMode == RenderMode::TextureAtlas) {
+                // Render from texture atlas
                 shader->SetUniform("position", glm::vec2(x, y));
+                shader->SetUniform("texOffset", texOffset); // Atlas offset
+                shader->SetUniform("texSize", texSize);     // Atlas size
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, mesh->GetVertexCount());
             }
         }
@@ -93,7 +102,10 @@ namespace almond {
         int textureSlot;
         float x, y;
         RenderMode renderMode;
+        glm::vec2 texOffset;  // Only used for texture atlas
+        glm::vec2 texSize;    // Only used for texture atlas
     };
+
 
     class Renderer {
     public:
@@ -150,7 +162,7 @@ namespace almond {
         void AddMesh(const std::string& name, const std::vector<float>& vertices, const std::vector<unsigned int>& indices)
         {
             if (meshes.find(name) == meshes.end()) {
-                meshes.emplace(name, std::make_shared<Mesh>(vertices, indices));
+                meshes.emplace(name, std::make_shared<almond::Mesh>(vertices, indices));
             }
             else
             {
@@ -158,7 +170,7 @@ namespace almond {
             }
         }
 
-        std::shared_ptr<Mesh> GetMesh(const std::string& name)
+        std::shared_ptr<almond::Mesh> GetMesh(const std::string& name)
         {
             if (meshes.find(name) == meshes.end()) {
                 return nullptr;
@@ -191,7 +203,7 @@ namespace almond {
             shader->SetUniform("textureSampler", 0);
             shader->SetUniform("scale", scaleValue);
 
-            if (renderMode == RenderMode::TextureAtlas) {
+            if (renderMode == almond::RenderMode::TextureAtlas) {
                 if (textureAtlas)
                     textureAtlas->Bind();
             }
@@ -199,18 +211,15 @@ namespace almond {
                 if (!textures.empty()) {
                     textures[0].Bind(0);
                 }
-                else
-                {
+                else {
                     std::cerr << "No single texture loaded to render!" << std::endl;
                     return;
                 }
             }
 
             // Apply uniform commands
-            for (const auto& cmd : commands)
-            {
-                if (cmd->GetType() == RenderCommand::CommandType::SetUniform)
-                {
+            for (const auto& cmd : commands) {
+                if (cmd->GetType() == almond::RenderCommand::CommandType::SetUniform) {
                     cmd->Execute(shader.get());
                 }
             }
@@ -224,7 +233,7 @@ namespace almond {
                 }
             }
 
-            if (renderMode == RenderMode::TextureAtlas) {
+            if (renderMode == almond::RenderMode::TextureAtlas) {
                 if (textureAtlas)
                     textureAtlas->Unbind();
             }
@@ -233,11 +242,10 @@ namespace almond {
                     textures[0].Unbind();
                 }
             }
-
         }
 
         void DrawSingleTexture() {
-            if (renderMode == RenderMode::SingleTexture) {
+            if (renderMode == almond::RenderMode::SingleTexture) {
                 shader->Use();  // Use the shader program
                 shader->SetUniform("textureSampler", 0);  // Set a texture uniform
                 shader->SetUniform("scale", scaleValue);  // Set a scale uniform
@@ -265,11 +273,11 @@ namespace almond {
         std::vector<OpenGLTexture> textures;  // Store loaded textures
         mutable std::shared_ptr<ShaderProgram> shader;
         float scaleValue = 1.0f; // Can be adjusted as needed
-        RenderMode renderMode = RenderMode::SingleTexture; // Current render mode (single texture or texture atlas)
-        std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes; // named mesh map
+        almond::RenderMode renderMode = almond::RenderMode::SingleTexture; // Current render mode (single texture or texture atlas)
+        std::unordered_map<std::string, std::shared_ptr<almond::Mesh>> meshes; // named mesh map
 
 
-        unsigned int SetupVAO(const std::shared_ptr<Mesh>& mesh)
+        unsigned int SetupVAO(const std::shared_ptr<almond::Mesh>& mesh)
         {
             unsigned int VAO;
             glGenVertexArrays(1, &VAO);
@@ -287,7 +295,6 @@ namespace almond {
 
             return VAO;
         }
-
 };
 } // namespace almond
 #endif

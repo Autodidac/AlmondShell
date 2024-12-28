@@ -8,9 +8,11 @@
 #include <ranges>
 #include <string>
 #include <vector>
+#include <ctime>
+#include <iomanip>  // For std::put_time
 
-namespace almond 
-{
+namespace almond {
+
     template<typename T>
     concept Clockable = requires(T a) {
         { T::now() } -> std::convertible_to<typename T::time_point>;
@@ -18,23 +20,25 @@ namespace almond
         typename T::time_point;
     };
 
-    class RobustTimeSystem {
+    class RobustTime {
     public:
         template<Clockable Clock = std::chrono::system_clock>
         struct TimePoint {
             typename Clock::time_point time;
-            
+
             TimePoint() : time(Clock::now()) {}
             explicit TimePoint(const typename Clock::time_point& t) : time(t) {}
+            // Define a comparison operator
+            auto operator<=>(const TimePoint&) const = default;
         };
 
         using SystemTimePoint = TimePoint<std::chrono::system_clock>;
         using SteadyTimePoint = TimePoint<std::chrono::steady_clock>;
 
-        RobustTimeSystem() : currentSystemTime(SystemTimePoint()), currentSteadyTime(SteadyTimePoint()), gameTimeScale(1.0) {}
+        RobustTime() : currentSystemTime(SystemTimePoint()), currentSteadyTime(SteadyTimePoint()), gameTimeScale(1.0) {}
 
-        void setCurrentTime(const SystemTimePoint& time) { 
-            currentSystemTime = time; 
+        void setCurrentTime(const SystemTimePoint& time) {
+            currentSystemTime = time;
             currentSteadyTime = SteadyTimePoint();
         }
 
@@ -56,15 +60,33 @@ namespace almond
         [[nodiscard]] SystemTimePoint getCurrentSystemTime() const { return currentSystemTime; }
         [[nodiscard]] SteadyTimePoint getCurrentSteadyTime() const { return currentSteadyTime; }
 
-        [[nodiscard]] std::string getCurrentTimeString(const std::string& format = "%Y-%m-%d %H:%M:%S") const {
-            auto timeT = std::chrono::system_clock::to_time_t(currentSystemTime.time);
-            std::tm tm_time = *std::localtime(&timeT);
-            return std::vformat(format, std::make_format_args(tm_time));
+
+        [[nodiscard]] std::string getCurrentTimeString(const std::string format = "%Y-%m-%d %H:%M:%S") const {
+            // Get the current system time
+            auto timeT = std::chrono::system_clock::to_time_t(static_cast<std::chrono::system_clock::time_point>(currentSystemTime.time));
+
+            // Convert to tm structure
+            std::tm tm_time;
+            // Thread-safe time handling
+#if defined(_WIN32) || defined(_WIN64)
+            localtime_s(&tm_time, &timeT);  // Windows-specific thread-safe localtime
+#else
+            // For non-Windows, ensure thread safety
+            static std::mutex mtx;
+            std::lock_guard<std::mutex> lock(mtx);
+            tm_time = *std::localtime(&timeT); // For other platforms, using standard localtime
+#endif
+
+            // Use std::ostringstream to format the time string
+            std::ostringstream oss;
+            oss << std::put_time(&tm_time, format.c_str());  // Format the time according to the specified format
+
+            return oss.str();  // Return the formatted string
         }
 
         class Timer {
         public:
-            explicit Timer(RobustTimeSystem& system) : timeSystem(system), running(false) {}
+            explicit Timer(RobustTime& system) : timeSystem(system), running(false) {}
 
             void start() {
                 startTime = timeSystem.getCurrentSteadyTime();
@@ -82,7 +104,7 @@ namespace almond
             }
 
         private:
-            RobustTimeSystem& timeSystem;
+            RobustTime& timeSystem;
             SteadyTimePoint startTime;
             SteadyTimePoint endTime;
             bool running;
@@ -90,13 +112,12 @@ namespace almond
 
         [[nodiscard]] Timer createTimer() { return Timer(*this); }
 
-        [[nodiscard]] std::string getTimeInTimeZone(const std::string& timeZone) const {
-            // Note: This is still a placeholder. Proper time zone handling would require additional libraries.
+/* [[nodiscard]] std::string getTimeInTimeZone(const std::string& timeZone) {
             auto timeT = std::chrono::system_clock::to_time_t(currentSystemTime.time);
             std::tm tm_time = *std::localtime(&timeT);
             return std::format("Time in {}: {:%Y-%m-%d %H:%M:%S}", timeZone, tm_time);
         }
-
+*/
         using AlarmCallback = std::function<void()>;
         void setAlarm(const SystemTimePoint& alarmTime, AlarmCallback callback) {
             alarms[alarmTime] = std::move(callback);
@@ -111,7 +132,7 @@ namespace almond
                     return true;
                 }
                 return false;
-            });
+                });
         }
 
     private:
@@ -120,35 +141,45 @@ namespace almond
         double gameTimeScale;
         std::map<SystemTimePoint, AlarmCallback> alarms;
     };
-} // namespace almond
-
-/* ------ Usage Example ---------
-#include "RobustTimeSystem.hpp"
+}
+// namespace almond
+/*
+// ------ Usage Example ---------
+#include "RobustTime.h"
 #include <iostream>
+#include <thread>
 
 int main() {
-    almond::RobustTimeSystem timeSystem;
+    almond::RobustTime timeSystem;
 
     // Create and use a timer
     auto timer = timeSystem.createTimer();
     timer.start();
-    // ... do some work ...
+    std::this_thread::sleep_for(std::chrono::seconds(2));
     timer.stop();
     std::cout << std::format("Elapsed time: {:.2f} seconds", timer.elapsed()) << std::endl;
 
-    // Advance time
-    timeSystem.advanceTime(std::chrono::hours(1));
+    // Set and manipulate game time scale
+    timeSystem.setGameTimeScale(2.0); // Double speed
+    timeSystem.advanceTime(std::chrono::seconds(5));
+    std::cout << "Current system time after advancing (scaled): " << timeSystem.getCurrentTimeString() << std::endl;
 
-    // Get current time
-    std::cout << std::format("Current time: {}", timeSystem.getCurrentTimeString()) << std::endl;
-
-    // Set an alarm
+    // Set an alarm to trigger in 3 seconds
     timeSystem.setAlarm(
-        almond::RobustTimeSystem::SystemTimePoint(std::chrono::system_clock::now() + std::chrono::minutes(5)),
+        almond::RobustTime::SystemTimePoint(std::chrono::system_clock::now() + std::chrono::seconds(3)),
         []() { std::cout << "Alarm triggered!" << std::endl; }
     );
 
-    // Check for alarms (you'd typically do this in your main loop)
-    timeSystem.checkAndTriggerAlarms();
+    // Run the alarm check loop (for simulation)
+    for (int i = 0; i < 10; ++i) {
+        timeSystem.checkAndTriggerAlarms();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 
-    return 0;}*/
+    // Get the current time in a specific time zone (still a placeholder)
+    std::cout << timeSystem.getTimeInTimeZone("UTC") << std::endl;
+
+    return 0;
+}
+
+*/
