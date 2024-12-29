@@ -49,9 +49,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)src\alsMesh.cpp">
       <Filter>backends\rendering\OpenGL\Glad</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)src\almondshell.cpp">
-      <Filter>core</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\almondshell.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsWaitFreeQueue.h">
@@ -93,9 +91,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsMovementEvent.h">
       <Filter>core\events</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\PhysicsSystem2D.h">
-      <Filter>core\physics</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsSceneSnapshot.h">
       <Filter>core\scene</Filter>
     </ClInclude>
@@ -103,9 +98,6 @@
       <Filter>core\scene</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsEntryPoint.h">
-      <Filter>core</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell">
       <Filter>core</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsLoadSave.h">
@@ -213,9 +205,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsVersion.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell.h">
-      <Filter>core</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\almondshell.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">

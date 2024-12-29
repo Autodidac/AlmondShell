@@ -7,7 +7,7 @@
 
 namespace almond {
 
-    class ALMONDSHELL_API EntryPoint {
+    class EntryPoint {
     public:
         virtual ~EntryPoint() = default;
 

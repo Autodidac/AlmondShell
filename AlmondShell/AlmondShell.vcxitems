@@ -4,7 +4,7 @@
     <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
     <HasSharedItems>true</HasSharedItems>
     <ItemsProjectGuid>{311ca3d3-081c-4e9a-99ee-60371c18b510}</ItemsProjectGuid>
-    <ItemsProjectName>AlmondShell</ItemsProjectName>
+    <ItemsProjectName>AlmondEngine</ItemsProjectName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -75,7 +75,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsInput.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsLogger.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsMovementEvent.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)src\PhysicsSystem2D.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsScene.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsThreadPool.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)src\alsRobustTime.h" />
