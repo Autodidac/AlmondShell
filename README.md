@@ -179,7 +179,8 @@ The platform-specific implementation files are organized into separate source fi
 
 
 ### License
-Almond Shell is licensed under the MIT License. See the LICENSE file for details.
+AlmondShell is licensed under the SPDX-License-Identifier: LicenseRef-MIT-NoSell license
+See the LICENSE file for details. - **[Download LICENSE](https://github.com/Autodidac/AlmondShell/raw/main/LICENSE)**
 
 
 
