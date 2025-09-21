@@ -111,6 +111,7 @@ Stop the session with `Ctrl+C` or by closing the console window.
 ## Contributing
 
 "We Are Not Accepting PRs At This Time" as Almond is a source available commercial product
+
 For substantial changes, open an issue first to discuss direction.
 
 ---
