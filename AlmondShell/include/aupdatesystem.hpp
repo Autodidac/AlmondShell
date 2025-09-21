@@ -186,11 +186,13 @@ namespace almondnamespace
         inline bool install_from_binary(const std::string& binary_url) {
             std::cout << "[INFO] Installing from precompiled binary...\n";
 
-            if (!download_file(binary_url, "updater_new.exe")) {
+            const std::string output_binary = OUTPUT_BINARY();
+
+            if (!download_file(binary_url, output_binary)) {
                 std::cerr << "[ERROR] Failed to download precompiled binary!\n";
                 return false;
             }
-            replace_binary("updater_new.exe");
+            replace_binary(output_binary);
 
             return true;
         }
@@ -261,7 +263,7 @@ namespace almondnamespace
             // you can reverse the redunant fallback order from "binary to source" to "source to binary" in download/usage order
             // by using this and altering the update_from_source() function differently, add binary_url to install_from_source(const std::string& binary_url) 
             //install_from_binary(binary_url);
-            replace_binary("updater_new.exe");
+            replace_binary(OUTPUT_BINARY());
         }
 
         // 🔄 **Update from Source (Minimal)**
