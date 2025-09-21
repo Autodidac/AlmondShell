@@ -5,7 +5,6 @@ AlmondShell combines a hot-reloadable C++ engine with a small self-updating laun
 The repository therefore serves two complementary use-cases:
 
 - **End users** can download the prebuilt updater binary, place it in an empty directory, and let it populate the latest AlmondShell files automatically.
-- **Contributors** can clone the repository, build the updater from source, and iterate on the engine, editor, and supporting tools contained in the `AlmondShell/` tree.
 
 ---
 
