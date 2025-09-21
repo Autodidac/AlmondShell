@@ -54,10 +54,12 @@ namespace almondnamespace
         {
             std::cout << "Attempting to open log file: " << filename << std::endl;
 
-            // Ensure the directory exists
+            // Ensure the directory exists when a directory component is provided
             std::filesystem::path logPath(filename);
-            if (!std::filesystem::exists(logPath.parent_path())) {
-                throw std::runtime_error("Directory for log file does not exist: " + logPath.parent_path().string());
+            const auto parentPath = logPath.parent_path();
+            if (!parentPath.empty() && !std::filesystem::exists(parentPath))
+            {
+                throw std::runtime_error("Directory for log file does not exist: " + parentPath.string());
             }
 
             if (!logFile.is_open()) {
