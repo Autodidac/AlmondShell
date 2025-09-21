@@ -50,16 +50,18 @@ namespace almondnamespace
     {
     public:
         Logger(const std::string& filename, LogLevel level = LogLevel::INFO)
-            : logFile(filename, std::ios::app), logFileName(filename), logLevel(level)
+            : logFileName(filename), logLevel(level)
         {
             std::cout << "Attempting to open log file: " << filename << std::endl;
 
             // Ensure the directory exists
             std::filesystem::path logPath(filename);
-            if (!std::filesystem::exists(logPath.parent_path())) {
-                throw std::runtime_error("Directory for log file does not exist: " + logPath.parent_path().string());
+            const auto parentDirectory = logPath.parent_path();
+            if (!parentDirectory.empty() && !std::filesystem::exists(parentDirectory)) {
+                std::filesystem::create_directories(parentDirectory);
             }
 
+            logFile.open(logPath, std::ios::app);
             if (!logFile.is_open()) {
                 std::cerr << "Failed to open log file: " << filename << std::endl;
                 throw std::runtime_error("Could not open log file: " + filename);
