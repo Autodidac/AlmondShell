@@ -1,0 +1,58 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+Debug/
+Release/
+x64/*
+out/
+build_clang/
+built/
+build/
+build_gcc/
+vcpkg_installed/
+bin/*
+.vs/
+backup/
+app1/
+/updater/Cpp20_Ultimate_Project_Updater/
+Cpp20_Ultimate_Project_Updater.exe
+update.exe
+
+
+*.ninja_log
+ninja.zip
+
+*.pdb
+*.idb
+*.log
+*.tlog
