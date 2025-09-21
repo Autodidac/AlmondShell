@@ -1,7 +1,10 @@
 
 <img align="left" src="AlmondShell/images/567.jpg" width="70px"/>
 
+
 # AlmondShell
+
+
 
 AlmondShell combines a hot-reloadable C++ engine with a self-updating launcher. the engine runtime drives editor scripts from `src/scripts/`.
 
