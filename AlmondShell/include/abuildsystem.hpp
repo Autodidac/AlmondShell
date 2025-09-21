@@ -325,9 +325,9 @@ namespace almondnamespace
 #endif
 #else
 #ifdef LEAVE_NO_FILES_ALWAYS_REDOWNLOAD
-            system("rm -rf build.ninja llvm.zip llvm_installer source_code.zip updater_new 7z_installer Cpp_Ultimate_Project_Updater-main ninja");
+            system("rm -rf build.ninja llvm.zip llvm_installer source_code.zip 7z_installer Cpp_Ultimate_Project_Updater-main ninja");
 #else
-            system("rm -rf build.ninja llvm.zip llvm_installer source_code.zip updater_new 7z_installer Cpp_Ultimate_Project_Updater-main");
+            system("rm -rf build.ninja llvm.zip llvm_installer source_code.zip 7z_installer Cpp_Ultimate_Project_Updater-main");
 #endif
 #endif
         }
