@@ -1,4 +1,4 @@
-# AlmondShell Updater
+# AlmondShell
 
 AlmondShell combines a hot-reloadable C++ engine with a small self-updating launcher. The launcher keeps your working copy in sync with the latest project release and starts the engine runtime that drives editor scripts from `src/scripts/`.
 
