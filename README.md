@@ -1,119 +1,131 @@
-# Cpp_Ultimate_Project_Updater
+# AlmondShell Updater
 
-# ⚠️ IMPORTANT WARNING AND NOTICE!
+AlmondShell combines a hot-reloadable C++ engine with a small self-updating launcher. The launcher keeps your working copy in sync with the latest project release and starts the engine runtime that drives editor scripts from `src/scripts/`.
 
-🚨 **Always run the updater in its own directory!** 🚨  
-The updater **creates and modifies files in the directory where it runs**.  
-Running it inside an existing project folder **may overwrite files**.  
-**Recommended:** **Create a new directory where you want the updater to manage files.**
+The repository therefore serves two complementary use-cases:
 
-```cpp
-/**************************************************************
- *   █████╗ ██╗     ███╗   ███╗   ███╗   ██╗    ██╗██████╗    *
- *  ██╔══██╗██║     ████╗ ████║ ██╔═══██╗████╗  ██║██╔══██╗   *
- *  ███████║██║     ██╔████╔██║ ██║   ██║██╔██╗ ██║██║  ██║   *
- *  ██╔══██║██║     ██║╚██╔╝██║ ██║   ██║██║╚██╗██║██║  ██║   *
- *  ██║  ██║███████╗██║ ╚═╝ ██║ ╚██████╔╝██║ ╚████║██████╔╝   *
- *  ╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝  ╚═════╝ ╚═╝  ╚═══╝╚═════╝    *
- *                                                            *
- *   This file is part of the Almond Project.                 *
- *   AlmondShell - Modular C++ Framework                      *
- *                                                            *
- *   SPDX-License-Identifier: LicenseRef-MIT-NoSell           *
- *                                                            *
- *   Provided "AS IS", without warranty of any kind.          *
- *   Use permitted for non-commercial purposes only.          *
- *   Redistribution allowed with this notice.                 *
- *   No obligation to disclose modifications.                 *
- *   See LICENSE file for full terms.                         *
- **************************************************************/
+- **End users** can download the prebuilt updater binary, place it in an empty directory, and let it populate the latest AlmondShell files automatically.
+- **Contributors** can clone the repository, build the updater from source, and iterate on the engine, editor, and supporting tools contained in the `AlmondShell/` tree.
+
+---
+
+## Key Features
+
+- 🔄 **Self-updating launcher** that fetches the newest release when run.
+- ⚙️ **Modular C++20 engine** with systems for rendering, scripting, tasks, and asset management.
+- 🧪 **Live script reloading** – changes to `*.ascript.cpp` files are detected at runtime and recompiled automatically.
+- 🗂️ **Well-organised codebase** with headers in `include/`, implementation in `src/`, and helper scripts under `unix/` and project-level `.sh` helpers.
+
+---
+
+## Repository Layout
+
+```
+.
+├── README.md                # Project overview (this file)
+├── AlmondShell/
+│   ├── include/             # Core engine headers
+│   ├── src/                 # Engine, updater entry point, and scripts
+│   ├── docs/                # Supplementary documentation and setup notes
+│   ├── examples/            # Sample projects and templates
+│   └── CMakeLists.txt       # Build script for the updater target
+└── AlmondShell.sln          # Visual Studio solution for Windows developers
 ```
 
----
-
-# C++ Ultimate Project Updater
-
-A **fully automated, centralized, self-updating entry point** for projects.  
-This updater **requires no manual cloning or forking**—it will **automatically download, update, and manage project files** while keeping itself updated.  
-
-🚀 **No need to manage repositories manually**—just run the updater and let it handle everything!
-
-## 🛠️ How to Use
-
-### **🔹 Quick Start (Recommended)**
-1. **Create a new directory where you want the updater to manage files.**  
-   - ⚠️ **DO NOT run the updater in an existing project directory.** It will manage its own files!
-2. **Download** `updater.exe` (Windows) or `updater` (Linux/macOS) from the **Releases** section ➜ _(On the right side of the GitHub page)_.
-3. **Run the updater**:
-   - **Windows**: Double-click `updater.exe` or run it from the command line.
-   - **Linux/macOS**: Open a terminal in the directory and run:
-     ```sh
-     chmod +x updater && ./updater
-     ```
-4. The updater will **automatically fetch and manage all required project files** in the directory.
-5. **Run the updater again** in the same directory whenever you want to check for updates.
+Refer to `AlmondShell/docs/file_structure.txt` for a more exhaustive tour of the available modules.
 
 ---
 
-## 📦 Normal Repository Instructions
+## Prerequisites
 
-For developers who want to manually build and modify the project:
+To build AlmondShell from source you will need the following tools:
 
-### **🔹 Clone the Repository**
-```sh
+| Requirement            | Notes |
+| ---------------------- | ----- |
+| A C++20 toolchain      | Visual Studio 2022, clang, or GCC 11+ are recommended. |
+| CMake ≥ 3.10           | Used to generate build files. |
+| Ninja _or_ MSBuild     | Pick the generator that matches your platform. |
+| Git                    | Required for cloning the repository and fetching dependencies. |
+| [vcpkg](https://vcpkg.io/) | Simplifies acquiring third-party libraries such as `asio`. |
+| Optional: Vulkan SDK   | Needed when working on Vulkan backends listed in `include/avulkan*`. |
+
+> **Note:** The project expects the header-only [`asio`](https://think-async.com/) library. When using vcpkg run `vcpkg install asio` (or add it to your manifest) before configuring the build.
+
+---
+
+## Building from Source
+
+Clone the repository and configure the build with your preferred toolchain:
+
+```bash
 git clone https://github.com/Autodidac/Cpp_Ultimate_Project_Updater.git
-cd Cpp_Ultimate_Project_Updater
+cd Cpp_Ultimate_Project_Updater/AlmondShell
 ```
 
-### **🔹 Building from Source**
-**Windows (MSVC + CMake)**
-```sh
-mkdir build
-cd build
-cmake .. -G "Visual Studio 17 2022"
-cmake --build . --config Release
+### Windows (MSVC)
+
+```powershell
+cmake -B build -S . -G "Visual Studio 17 2022"
+cmake --build build --config Release
 ```
 
-**Linux/macOS (Clang/GCC + Ninja)**
-```sh
-mkdir build
-cd build
-cmake .. -G Ninja
-ninja
+### Linux & macOS (Clang/GCC + Ninja)
+
+```bash
+cmake -B build -S . -G Ninja
+cmake --build build
 ```
 
-### **🔹 Running the Updater from Source**
-After building, run:
-```sh
-./updater
-```
-or on Windows:
-```sh
-updater.exe
-```
+Both configurations produce the `updater` executable inside the `build` directory. Adjust `--config` or the generator settings to create Debug builds when needed.
 
 ---
 
-## 🔗 **Releases & Downloads**
-Get the latest version of `updater.exe` or `updater` from the **[Releases](https://github.com/Autodidac/Cpp_Ultimate_Project_Updater/releases)** section.
+## Running the Updater & Engine
 
-For support or bug reports, open an **[issue](https://github.com/Autodidac/Cpp_Ultimate_Project_Updater/issues)**.
+### Using a Release Binary
+1. Create an empty working directory.
+2. Download the appropriate `updater` binary from the [Releases](https://github.com/Autodidac/Cpp_Ultimate_Project_Updater/releases) page.
+3. Run the binary inside the empty directory. The updater downloads the latest project snapshot and will keep it synchronised on subsequent runs.
+
+### Running From Source
+
+After compiling, execute the updater directly from your build tree:
+
+```bash
+./build/updater        # or .\build\Release\updater.exe on Windows
+```
+
+On launch the updater:
+1. Reads the remote configuration targets defined in `include/aupdateconfig.hpp` (for example the `include/config.hpp` manifest in the release repository).
+2. Downloads and applies updates when available.
+3. Starts the engine runtime, which in turn loads `src/scripts/editor_launcher.ascript.cpp` and watches for changes. Editing the script triggers automatic recompilation within the running session.
+
+Stop the session with `Ctrl+C` or by closing the console window.
 
 ---
 
-## ⚖️ Legal Information
-📄 License
-This project is licensed under the "SPDX-License-Identifier: LicenseRef-MIT-NoSell" License.
-See LICENSE.md for full terms.
+## Development Tips
 
-🛡️ Disclaimer of Warranty
-This software is provided “AS IS”, without warranty of any kind, express or implied (including merchantability, fitness for a particular purpose, or non-infringement). Use at your own risk.
+- The hot-reload loop in `src/main.cpp` monitors script timestamps roughly every 200 ms. Keep editor builds incremental to benefit from the fast feedback.
+- Utility shell scripts (`build.sh`, `run.sh`, `unix/*.sh`) can streamline development on POSIX systems.
+- Check the `docs/` folder for platform-specific setup guides, tool recommendations, and dependency notes.
 
-📌 Limitation of Liability
-In no event shall the authors or copyright holders be liable for any claim, damages, or other liability—contract, tort, or otherwise—arising from, out of, or in connection with the software or its use.
+---
 
-🔗 Third-Party Components
-Where applicable, this project may include third-party libraries. Each component remains under its own license—refer to its documentation or source headers.
+## Contributing
 
-🤝 Commercial Licensing
-For a warranty, indemnification, or proprietary commercial license, contact legal@yourdomain.com.
+Issues and pull requests are welcome! Please:
+
+1. Ensure your changes build on all supported platforms.
+2. Run the provided CMake configure step before submitting.
+3. Document new features in this README or within `docs/`.
+
+For substantial changes, open an issue first to discuss direction.
+
+---
+
+## License
+
+The project uses the `LicenseRef-MIT-NoSell` license variant. See [`LICENSE`](LICENSE) for the full terms, including restrictions on commercial use and warranty disclaimers.
+
+
