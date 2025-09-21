@@ -19,11 +19,16 @@ namespace almondnamespace::core {
         }
 
         bool drain() {
-            std::scoped_lock lock(mutex);
-            if (commands.empty()) return false;
-            while (!commands.empty()) {
-                auto cmd = std::move(commands.front());
-                commands.pop();
+            std::queue<RenderCommand> localCommands;
+            {
+                std::scoped_lock lock(mutex);
+                if (commands.empty()) return false;
+                localCommands.swap(commands);
+            }
+
+            while (!localCommands.empty()) {
+                auto cmd = std::move(localCommands.front());
+                localCommands.pop();
                 if (cmd) cmd();
             }
             return true;
