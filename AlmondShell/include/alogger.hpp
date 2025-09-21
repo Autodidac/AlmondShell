@@ -36,6 +36,7 @@
 #include <format>
 #include <chrono>
 #include <filesystem>
+#include <system_error>
 
 namespace almondnamespace
 {
@@ -57,8 +58,42 @@ namespace almondnamespace
             // Ensure the directory exists
             std::filesystem::path logPath(filename);
             const auto parentDirectory = logPath.parent_path();
-            if (!parentDirectory.empty() && !std::filesystem::exists(parentDirectory)) {
-                std::filesystem::create_directories(parentDirectory);
+            if (!parentDirectory.empty()) {
+                std::error_code fsError;
+                const bool parentExists = std::filesystem::exists(parentDirectory, fsError);
+                if (fsError)
+                {
+                    throw std::runtime_error(
+                        std::string("Could not verify log directory: ") + parentDirectory.string() +
+                        ": " + fsError.message());
+                }
+
+                if (parentExists)
+                {
+                    const bool isDirectory = std::filesystem::is_directory(parentDirectory, fsError);
+                    if (fsError)
+                    {
+                        throw std::runtime_error(
+                            std::string("Could not verify log directory type: ") + parentDirectory.string() +
+                            ": " + fsError.message());
+                    }
+
+                    if (!isDirectory)
+                    {
+                        throw std::runtime_error(
+                            std::string("Log path parent is not a directory: ") + parentDirectory.string());
+                    }
+                }
+                else
+                {
+                    std::filesystem::create_directories(parentDirectory, fsError);
+                    if (fsError)
+                    {
+                        throw std::runtime_error(
+                            std::string("Could not create log directory: ") + parentDirectory.string() +
+                            ": " + fsError.message());
+                    }
+                }
             }
 
             logFile.open(logPath, std::ios::app);
