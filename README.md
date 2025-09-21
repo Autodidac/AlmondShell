@@ -1,10 +1,8 @@
 # AlmondShell
 
-AlmondShell combines a hot-reloadable C++ engine with a small self-updating launcher. The launcher keeps your working copy in sync with the latest project release and starts the engine runtime that drives editor scripts from `src/scripts/`.
+AlmondShell combines a hot-reloadable C++ engine with a self-updating launcher. the engine runtime drives editor scripts from `src/scripts/`.
 
-The repository therefore serves two complementary use-cases:
-
-- **End users** can download the prebuilt updater binary, place it in an empty directory, and let it populate the latest AlmondShell files automatically.
+- **End users** can download the prebuilt binary, place it in an empty directory, and let it populate the latest AlmondShell files automatically.
 
 ---
 
@@ -57,8 +55,8 @@ To build AlmondShell from source you will need the following tools:
 Clone the repository and configure the build with your preferred toolchain:
 
 ```bash
-git clone https://github.com/Autodidac/Cpp_Ultimate_Project_Updater.git
-cd Cpp_Ultimate_Project_Updater/AlmondShell
+git clone https://github.com/Autodidac/AlmondShell.git
+cd AlmondShell
 ```
 
 ### Windows (MSVC)
@@ -83,16 +81,9 @@ Both configurations produce the `updater` executable inside the `build` director
 
 ### Using a Release Binary
 1. Create an empty working directory.
-2. Download the appropriate `updater` binary from the [Releases](https://github.com/Autodidac/Cpp_Ultimate_Project_Updater/releases) page.
-3. Run the binary inside the empty directory. The updater downloads the latest project snapshot and will keep it synchronised on subsequent runs.
+2. Download the appropriate `almondshell` binary from the [Releases](https://github.com/Autodidac/AlmondShell/releases) page.
 
 ### Running From Source
-
-After compiling, execute the updater directly from your build tree:
-
-```bash
-./build/updater        # or .\build\Release\updater.exe on Windows
-```
 
 On launch the updater:
 1. Reads the remote configuration targets defined in `include/aupdateconfig.hpp` (for example the `include/config.hpp` manifest in the release repository).
@@ -113,12 +104,7 @@ Stop the session with `Ctrl+C` or by closing the console window.
 
 ## Contributing
 
-Issues and pull requests are welcome! Please:
-
-1. Ensure your changes build on all supported platforms.
-2. Run the provided CMake configure step before submitting.
-3. Document new features in this README or within `docs/`.
-
+"We Are Not Accepting PRs At This Time" as Almond is a source available commercial product
 For substantial changes, open an issue first to discuss direction.
 
 ---
