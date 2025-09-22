@@ -29,6 +29,8 @@
 
 #if defined(ALMOND_USING_RAYLIB)
 
+#include "araylibcontext.hpp"
+#include "araylibstate.hpp"
 #include "aatlasmanager.hpp"
 #include "aatlastexture.hpp"
 #include "aimageloader.hpp"
@@ -44,7 +46,7 @@
 
 #include <raylib.h>
 
-namespace almondnamespace::raylibcontext
+namespace almondnamespace::raylibtextures
 {
     using Handle = uint32_t;
 
@@ -69,6 +71,25 @@ namespace almondnamespace::raylibcontext
     };
 
     inline std::unordered_map<const TextureAtlas*, AtlasGPU, TextureAtlasPtrHash, TextureAtlasPtrEqual> raylib_gpu_atlases;
+
+    // forward declare OpenGL4State to avoid pulling in aopenglcontext here
+    namespace raylibcontext { struct RaylibState; }
+    struct BackendData {
+        std::unordered_map<const TextureAtlas*, AtlasGPU,
+            TextureAtlasPtrHash, TextureAtlasPtrEqual> gpu_atlases;
+        almondnamespace::raylibcontext::RaylibState rlState{};
+    };
+
+    inline BackendData& get_raylib_backend() {
+        auto& backend = almondnamespace::core::g_backends[almondnamespace::core::ContextType::RayLib];
+        if (!backend.data) {
+            backend.data = {
+                new BackendData(),
+                [](void* p) { delete static_cast<BackendData*>(p); }
+            };
+        }
+        return *static_cast<BackendData*>(backend.data.get());
+    }
 
     inline std::atomic_uint8_t s_generation{ 0 };
     inline std::atomic_uint32_t s_dumpSerial{ 0 };

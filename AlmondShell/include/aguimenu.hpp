@@ -52,13 +52,15 @@ namespace almondnamespace::menu
     using almondnamespace::spritepool::is_alive;
     using almondnamespace::atlasmanager::registry;
 
-    enum class Choice {
+    enum class Choice 
+    {
         Snake, Tetris, Pacman, Sokoban,
         Minesweep, Puzzle, Bejeweled, Fourty,
         Sandsim, Cellular, Settings, Exit
     };
 
-    struct SliceEntry {
+    struct SliceEntry 
+    {
         std::string name;
         int x, y, width, height;
         SpriteHandle handle{};
@@ -66,7 +68,8 @@ namespace almondnamespace::menu
 
     struct SlicePair { SliceEntry normal; SliceEntry hover; };
 
-    struct MenuOverlay {
+    struct MenuOverlay 
+    {
         std::vector<SlicePair> slicePairs;
         size_t selection = 0;
         bool prevUp = false, prevDown = false, prevLeft = false, prevRight = false, prevEnter = false;
@@ -152,7 +155,8 @@ namespace almondnamespace::menu
             }
         }
 
-        void initialize(std::shared_ptr<core::Context> ctx) {
+        void initialize(std::shared_ptr<core::Context> ctx) 
+        {
             if (initialized) return;
 
             spritepool::initialize(128);
@@ -207,7 +211,6 @@ namespace almondnamespace::menu
                     opengltextures::ensure_uploaded(*atlas);
                     });
             }
-
 
             // Define menu slices based on the new layout
             constexpr int expectedColumns = 4;

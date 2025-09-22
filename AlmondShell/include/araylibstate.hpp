@@ -30,19 +30,28 @@
 
 #include <array>
 #include <bitset>
+#include <functional>
 
 #if defined(ALMOND_USING_RAYLIB)
 
-namespace almondnamespace::raylibcontext::state
+namespace almondnamespace::raylibcontext
 {
-    struct RayLibState
+    struct RaylibState
     {
 #ifdef ALMOND_USING_WINMAIN
         HWND hwnd = nullptr;
         HDC hdc = nullptr;
         HGLRC hglrc = nullptr;
+
+        HGLRC glContext{}; // Store GL context created
       //  WNDPROC oldWndProc = nullptr;
        // WNDPROC getOldWndProc() const noexcept { return oldWndProc; }
+        HWND parent = nullptr;
+        std::function<void(int, int)> onResize;
+        unsigned int width{ 400 };
+        unsigned int height{ 300 };
+
+        bool running{ false };
 #endif
 
         
@@ -82,7 +91,7 @@ namespace almondnamespace::raylibcontext::state
     };
 
     // Inline global instance — same pattern.
-    inline RayLibState s_raylibstate{};
+    inline RaylibState s_raylibstate{};
 }
 
 #endif // ALMON

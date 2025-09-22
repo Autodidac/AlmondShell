@@ -150,7 +150,7 @@ namespace almondnamespace::core {
         case ContextType::SFML:  return sfmlcontext::atlas_add_texture(atlas, name, img);
 #endif
 #ifdef ALMOND_USING_RAYLIB
-        case ContextType::RayLib: return raylibcontext::atlas_add_texture(atlas, name, img);
+        case ContextType::RayLib: return raylibtextures::atlas_add_texture(atlas, name, img);
 #endif
 #ifdef ALMOND_USING_VULKAN
         case ContextType::Vulkan: return vulkancontext::atlas_add_texture(atlas, name, img);
@@ -174,7 +174,7 @@ namespace almondnamespace::core {
         case ContextType::SFML: return sfmlcontext::load_atlas(atlas, 0);
 #endif
 #ifdef ALMOND_USING_RAYLIB
-        case ContextType::RayLib: return raylibcontext::load_atlas(atlas, 0);
+        case ContextType::RayLib: return raylibtextures::load_atlas(atlas, 0);
 #endif
 #ifdef ALMOND_USING_VULKAN
         case ContextType::Vulkan: return vulkancontext::load_atlas(atlas, 0);

@@ -559,7 +559,7 @@ using almondnamespace::sdlcontext::state::s_sdlstate;
 using almondnamespace::sfmlcontext::state::s_sfmlstate;
 #endif
 #ifdef ALMOND_USING_RAYLIB
-using almondnamespace::raylibcontext::state::s_raylibstate;
+using almondnamespace::raylibcontext::s_raylibstate;
 #endif
 #ifdef ALMOND_USING_OPENGL
 using almondnamespace::openglcontext::s_openglstate;

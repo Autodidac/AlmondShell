@@ -46,7 +46,6 @@
 #include "asoftrenderer_state.hpp"
 #endif
 
-
 #include <memory>  
 #include <atomic>  
 #include <cstdint>  
@@ -74,7 +73,7 @@ namespace almondnamespace::state
 #endif
 #ifdef ALMOND_USING_RAYLIB
 
-    inline raylibcontext::state::RayLibState s_raylibstate{};
+    inline raylibcontext::RaylibState s_raylibstate{};
 
 #endif
 #ifdef ALMOND_USING_OPENGL

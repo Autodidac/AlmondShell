@@ -46,26 +46,29 @@
 
 #include <stdexcept>
 #include <iostream>
+
+// FOR EXAMPLE
 //#include <windows.h>
 // Raylib includes 
 #include <raylib.h> // Ensure this is included after platform-specific headers
+
 namespace almondnamespace::raylibcontext
 {
     // Usually at the start of your program, before window creation:
     static almondnamespace::contextwindow::WindowData* g_raylibwindowContext;
 
    // HWND hwnd;
-    struct RaylibState {
-        HWND parent{};
-        HWND hwnd{};
-        HDC  hdc{};       // Store device context
-        HGLRC glContext{}; // Store GL context created by Raylib
-        bool running{ false };
-        unsigned int width{ 800 };
-        unsigned int height{ 600 };
-        std::function<void(int, int)> onResize;
-    };
-    inline RaylibState raylibcontext;
+    //struct RaylibState {
+    //    HWND parent{};
+    //    HWND hwnd{};
+    //    HDC  hdc{};       // Store device context
+    //    HGLRC glContext{}; // Store GL context created by Raylib
+    //    bool running{ false };
+    //    unsigned int width{ 800 };
+    //    unsigned int height{ 600 };
+    //    std::function<void(int, int)> onResize;
+    //};
+    //inline RaylibState raylibcontext;
     
     // ──────────────────────────────────────────────
     // Initialize Raylib window and context
@@ -74,42 +77,88 @@ namespace almondnamespace::raylibcontext
     {
        // if (ctx) ctx->windowData = core::WindowData::get_global_instance();
 
-        raylibcontext.onResize = std::move(onResize);
-        raylibcontext.width = w;
-        raylibcontext.height = h;
-        raylibcontext.parent = parentWnd;
+        s_raylibstate.onResize = std::move(onResize);
+        s_raylibstate.width = w;
+        s_raylibstate.height = h;
+        s_raylibstate.parent = parentWnd;
 
-        InitWindow(raylibcontext.width, raylibcontext.height, "Raylib Window");
+
+        static bool initialized = false;
+        if (initialized) return true;
+        initialized = true;
+
+
+        auto& backend = almondnamespace::raylibtextures::get_raylib_backend();
+        auto& rlState = backend.rlState;
+
+        // -----------------------------------------------------------------
+        // Step 1: Resolve window/context handles
+        // -----------------------------------------------------------------
+        HWND   resolvedHwnd = nullptr;
+        HDC    resolvedHdc = nullptr;
+        HGLRC  resolvedHglrc = nullptr;
+
+        if (ctx && ctx->windowData) {
+            resolvedHwnd = ctx->windowData->hwnd;
+            resolvedHdc = ctx->windowData->hdc;
+            resolvedHglrc = ctx->windowData->glContext;
+            std::cerr << "[Raylib Init] Using ctx->windowData handles\n";
+        }
+
+        // Fallbacks: pull directly from current thread
+        if (!resolvedHdc)   resolvedHdc = wglGetCurrentDC();
+        if (!resolvedHglrc) resolvedHglrc = wglGetCurrentContext();
+
+        // Parent HWND priority
+        HWND resolvedParent = parentWnd ? parentWnd : resolvedHwnd;
+
+        // Assign hwnd only if we actually resolved one
+        if (resolvedHwnd) {
+            rlState.hwnd = resolvedHwnd;
+            std::cerr << "[Raylib Init] Using resolved hwnd=" << resolvedHwnd << "\n";
+        }
+        else if (parentWnd) {
+            rlState.hwnd = parentWnd;
+            std::cerr << "[Raylib Init] Using parent hwnd=" << parentWnd << "\n";
+        }
+        else {
+            // Leave glState.hwnd unchanged if it was already set earlier
+            std::cerr << "[Raylib Init] WARNING: No hwnd resolved; keeping existing rlState.hwnd="
+                << rlState.hwnd << "\n";
+        }
+
+
+        InitWindow(s_raylibstate.width, s_raylibstate.height, "Raylib Window");
         // SetTargetFPS(60);  // Cap FPS to something sane
 
-        raylibcontext.hwnd = (HWND)GetWindowHandle();
-        raylibcontext.hdc = GetDC(raylibcontext.hwnd);
-        raylibcontext.glContext = wglGetCurrentContext();  // Get Raylib's GL context _immediately_ after InitWindow
+        s_raylibstate.hwnd = (HWND)GetWindowHandle();
+        s_raylibstate.hdc = GetDC(s_raylibstate.hwnd);
+        s_raylibstate.glContext = wglGetCurrentContext();  // Get Raylib's GL context _immediately_ after InitWindow
 
-        std::cout << "[Raylib] Context: " << raylibcontext.glContext << "\n";
+        std::cout << "[Raylib] Context: " << s_raylibstate.glContext << "\n";
 
-        if (raylibcontext.parent) {
+        if (s_raylibstate.parent) {
             RECT parentRect;
-            GetWindowRect(raylibcontext.parent, &parentRect);
-            SetParent(raylibcontext.hwnd, raylibcontext.parent);
-            ShowWindow(raylibcontext.hwnd, SW_SHOW);
+            GetWindowRect(s_raylibstate.parent, &parentRect);
+            SetParent(s_raylibstate.hwnd, s_raylibstate.parent);
+            ShowWindow(s_raylibstate.hwnd, SW_SHOW);
 
-            LONG_PTR style = GetWindowLongPtr(raylibcontext.hwnd, GWL_STYLE);
+            LONG_PTR style = GetWindowLongPtr(s_raylibstate.hwnd, GWL_STYLE);
             style &= ~WS_OVERLAPPEDWINDOW;
             style |= WS_CHILD | WS_VISIBLE;
-            SetWindowLongPtr(raylibcontext.hwnd, GWL_STYLE, style);
+            SetWindowLongPtr(s_raylibstate.hwnd, GWL_STYLE, style);
 
-            SetWindowPos(raylibcontext.hwnd, nullptr, raylibcontext.width, 0,
-                raylibcontext.width,
-                raylibcontext.height,
+            SetWindowPos(s_raylibstate.hwnd, nullptr, s_raylibstate.width, 0,
+                s_raylibstate.width,
+                s_raylibstate.height,
                 SWP_NOZORDER | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
             RECT rc;
-            GetClientRect(raylibcontext.parent, &rc);
-            PostMessage(raylibcontext.parent, WM_SIZE, 0, MAKELPARAM(rc.right - rc.left, rc.bottom - rc.top));
+            GetClientRect(s_raylibstate.parent, &rc);
+            PostMessage(s_raylibstate.parent, WM_SIZE, 0, MAKELPARAM(rc.right - rc.left, rc.bottom - rc.top));
         }
 
-        raylibcontext.running = true;
+        s_raylibstate.running = true;
         return true;
 
 //        //InitRaylibWindow();
@@ -186,13 +235,13 @@ namespace almondnamespace::raylibcontext
     // Per-frame event processing
     // ──────────────────────────────────────────────
     inline bool raylib_process(core::Context& ctx, core::CommandQueue& queue) {
-        if (!raylibcontext.running || WindowShouldClose()) {
-            raylibcontext.running = false;
+        if (!s_raylibstate.running || WindowShouldClose()) {
+            s_raylibstate.running = false;
             return true;
         }
 
-        if (!wglMakeCurrent(raylibcontext.hdc, raylibcontext.glContext)) {
-            raylibcontext.running = false;
+        if (!wglMakeCurrent(s_raylibstate.hdc, s_raylibstate.glContext)) {
+            s_raylibstate.running = false;
             std::cerr << "[Raylib] Failed to make Raylib GL context current\n";
             return true;
         }
@@ -219,7 +268,7 @@ namespace almondnamespace::raylibcontext
 
         // Optional: unbind context if you want to be neat
         // wglMakeCurrent(nullptr, nullptr);
-        //almondnamespace::raylibcontext::poll_input();
+        //almondnamespace::s_raylibstate::poll_input();
         //s_raylibstate.shouldClose = WindowShouldClose();
         //return !s_raylibstate.shouldClose;
 		return true; // Continue running
@@ -246,9 +295,9 @@ namespace almondnamespace::raylibcontext
     // Cleanup and shutdown
     // ──────────────────────────────────────────────
     inline void raylib_cleanup(std::shared_ptr<almondnamespace::core::Context>& ctx) {
-        if (!raylibcontext.running) return;
-        CloseWindow(raylibcontext.hwnd);  // Raylib manages its window internally
-        raylibcontext.running = false;
+        if (!s_raylibstate.running) return;
+        CloseWindow(s_raylibstate.hwnd);  // Raylib manages its window internally
+        s_raylibstate.running = false;
        // Raylib_CloseWindow();
     }
 
@@ -263,7 +312,7 @@ namespace almondnamespace::raylibcontext
     }
 
     inline bool RaylibIsRunning(std::shared_ptr<core::Context> ctx) {
-        return raylibcontext.running;
+        return s_raylibstate.running;
     }
 } // namespace almondnamespace::raylibcontext
 

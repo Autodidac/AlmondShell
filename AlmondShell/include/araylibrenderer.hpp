@@ -98,10 +98,10 @@ namespace almondnamespace::raylibcontext
             return;
         }
 
-        ensure_uploaded(*atlas);
+       almondnamespace::raylibtextures::ensure_uploaded(*atlas);
 
-        auto texIt = raylib_gpu_atlases.find(atlas);
-        if (texIt == raylib_gpu_atlases.end() || texIt->second.texture.id == 0) {
+        auto texIt = almondnamespace::raylibtextures::raylib_gpu_atlases.find(atlas);
+        if (texIt == almondnamespace::raylibtextures::raylib_gpu_atlases.end() || texIt->second.texture.id == 0) {
             std::cerr << "[Raylib_DrawSprite] Atlas not uploaded or invalid texture ID: " << atlas->name << "\n";
             return;
         }
