@@ -41,6 +41,7 @@
 #include <optional>
 #include <tuple>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <iostream>
 
@@ -156,10 +157,16 @@ namespace almondnamespace::menu {
             spritepool::initialize(128);
             spritepool::reset();
 
-            // Load the atlas image
-            auto image = a_loadImage("assets/menu/menubuttonatlas.tga");
+            // Load the menu buttons image
+            auto image = a_loadImage("assets/menu/menubuttons.tga");
             if (image.pixels.empty())
-                throw std::runtime_error("Failed to load menu button atlas image");
+                throw std::runtime_error("Failed to load menu button image");
+
+            if (image.width <= 0 || image.height <= 0)
+                throw std::runtime_error("Menu button image has invalid dimensions");
+
+            if (image.height % 2 != 0)
+                throw std::runtime_error("Menu button image height must be divisible by 2 for normal/hover halves");
 
             // Create atlas in manager
             if (!atlasmanager::create_atlas({
@@ -201,23 +208,62 @@ namespace almondnamespace::menu {
             }
 
 
-            // Define menu slices
-            constexpr int spriteW = 319, spriteH = 119;
-            constexpr int stepX = spriteW + 1, stepY = spriteH + 1;
-            slicePairs = {
-                { {"snake_normal",0,0,spriteW,spriteH}, {"snake_hover",0,360,spriteW,spriteH} },
-                { {"tetris_normal",stepX,0,spriteW,spriteH}, {"tetris_hover",stepX,360,spriteW,spriteH} },
-                { {"pacman_normal",2 * stepX,0,spriteW,spriteH}, {"pacman_hover",2 * stepX,360,spriteW,spriteH} },
-                { {"sokoban_normal",3 * stepX,0,spriteW,spriteH}, {"sokoban_hover",3 * stepX,360,spriteW,spriteH} },
-                { {"minesweep_normal",0,stepY,spriteW,spriteH}, {"minesweep_hover",0,stepY + 360,spriteW,spriteH} },
-                { {"puzzle_normal",stepX,stepY,spriteW,spriteH}, {"puzzle_hover",stepX,stepY + 360,spriteW,spriteH} },
-                { {"match3_normal",2 * stepX,stepY,spriteW,spriteH}, {"match3_hover",2 * stepX,stepY + 360,spriteW,spriteH} },
-                { {"2048_normal",3 * stepX,stepY,spriteW,spriteH}, {"2048_hover",3 * stepX,stepY + 360,spriteW,spriteH} },
-                { {"sandsim_normal",0,2 * stepY,spriteW,spriteH}, {"sandsim_hover",0,2 * stepY + 360,spriteW,spriteH} },
-                { {"automata_normal",stepX,2 * stepY,spriteW,spriteH}, {"automata_hover",stepX,2 * stepY + 360,spriteW,spriteH} },
-                { {"settings_normal",2 * stepX,2 * stepY,spriteW,spriteH}, {"settings_hover",2 * stepX,2 * stepY + 360,spriteW,spriteH} },
-                { {"quit_normal",3 * stepX,2 * stepY,spriteW,spriteH}, {"quit_hover",3 * stepX,2 * stepY + 360,spriteW,spriteH} },
+            // Define menu slices based on the new layout
+            constexpr int expectedColumns = 4;
+            constexpr int expectedRowsPerHalf = 3;
+            const int totalButtons = expectedColumns * expectedRowsPerHalf;
+
+            const int halfHeight = image.height / 2;
+            if (image.width % expectedColumns != 0)
+                throw std::runtime_error("Menu button image width must be divisible by column count");
+            if (halfHeight % expectedRowsPerHalf != 0)
+                throw std::runtime_error("Menu button image half-height must be divisible by row count");
+
+            const int spriteW = image.width / expectedColumns;
+            const int spriteH = halfHeight / expectedRowsPerHalf;
+
+            if (spriteW <= 0 || spriteH <= 0)
+                throw std::runtime_error("Derived menu button size is invalid");
+
+            const std::array<std::string_view, totalButtons> buttonNames = {
+                "snake", "tetris", "pacman", "sokoban",
+                "minesweep", "puzzle", "match3", "2048",
+                "sandsim", "automata", "settings", "quit"
             };
+
+            slicePairs.clear();
+            slicePairs.reserve(buttonNames.size());
+
+            for (size_t idx = 0; idx < buttonNames.size(); ++idx) {
+                const int row = static_cast<int>(idx) / expectedColumns;
+                const int col = static_cast<int>(idx) % expectedColumns;
+
+                const int normalX = col * spriteW;
+                const int normalY = row * spriteH;
+                const int hoverX = normalX;
+                const int hoverY = halfHeight + normalY;
+
+                SlicePair pair{
+                    .normal = SliceEntry{
+                        .name = std::string(buttonNames[idx]) + "_normal",
+                        .x = normalX,
+                        .y = normalY,
+                        .width = spriteW,
+                        .height = spriteH,
+                        .handle = {}
+                    },
+                    .hover = SliceEntry{
+                        .name = std::string(buttonNames[idx]) + "_hover",
+                        .x = hoverX,
+                        .y = hoverY,
+                        .width = spriteW,
+                        .height = spriteH,
+                        .handle = {}
+                    }
+                };
+
+                slicePairs.emplace_back(std::move(pair));
+            }
 
             // Register slices
             std::vector<std::tuple<std::string, int, int, int, int>> sliceRects;
