@@ -59,7 +59,6 @@
 #include <functional>
 #include <mutex>
 #include <queue>
-#include <algorithm>
 
 namespace almondnamespace::openglcontext
 {
@@ -106,7 +105,136 @@ namespace almondnamespace::openglcontext
         return program;
     }
 
-    constexpr const char kSpriteVS[] = R"(
+    // — Engine hooks
+    inline bool opengl_initialize(std::shared_ptr<core::Context> ctx,
+        HWND parentWnd = nullptr,
+        unsigned int w = 800,
+        unsigned int h = 600,
+        std::function<void(int, int)> onResize = nullptr)
+    {
+        static bool initialized = false;
+        if (initialized) return true;
+        initialized = true;
+
+
+        auto& backend = almondnamespace::opengltextures::get_opengl_backend();
+        auto& glState = backend.glState;
+
+        std::cerr << "[OpenGL Init] Starting initialization\n";
+
+        // -----------------------------------------------------------------
+        // Step 1: Resolve window/context handles
+        // -----------------------------------------------------------------
+        HWND   resolvedHwnd = nullptr;
+        HDC    resolvedHdc = nullptr;
+        HGLRC  resolvedHglrc = nullptr;
+
+        if (ctx && ctx->windowData) {
+            resolvedHwnd = ctx->windowData->hwnd;
+            resolvedHdc = ctx->windowData->hdc;
+            resolvedHglrc = ctx->windowData->glContext;
+            std::cerr << "[OpenGL Init] Using ctx->windowData handles\n";
+        }
+
+        // Fallbacks: pull directly from current thread
+        if (!resolvedHdc)   resolvedHdc = wglGetCurrentDC();
+        if (!resolvedHglrc) resolvedHglrc = wglGetCurrentContext();
+
+        // Parent HWND priority
+        HWND resolvedParent = parentWnd ? parentWnd : resolvedHwnd;
+
+        // Assign hwnd only if we actually resolved one
+        if (resolvedHwnd) {
+            glState.hwnd = resolvedHwnd;
+            std::cerr << "[OpenGL Init] Using resolved hwnd=" << resolvedHwnd << "\n";
+        }
+        else if (parentWnd) {
+            glState.hwnd = parentWnd;
+            std::cerr << "[OpenGL Init] Using parent hwnd=" << parentWnd << "\n";
+        }
+        else {
+            // Leave glState.hwnd unchanged if it was already set earlier
+            std::cerr << "[OpenGL Init] WARNING: No hwnd resolved; keeping existing glState.hwnd="
+                << glState.hwnd << "\n";
+        }
+
+        // Always update HDC / HGLRC from current thread
+        glState.hdc = resolvedHdc;
+        glState.hglrc = resolvedHglrc;
+        glState.parent = resolvedParent;
+
+        std::cerr << "[OpenGL Init] Final handles: hwnd=" << glState.hwnd
+            << " hdc=" << glState.hdc
+            << " hglrc=" << glState.hglrc << "\n";
+
+        // -----------------------------------------------------------------
+        // Step 2: Cache size and callback into Context
+        // -----------------------------------------------------------------
+        ctx->width = static_cast<int>(w);
+        ctx->height = static_cast<int>(h);
+        ctx->onResize = std::move(onResize);
+
+
+        if (!glState.hwnd) {
+            glState.hwnd = CreateWindowEx(
+                0, L"AlmondChild", L"working",
+                WS_CHILD | WS_VISIBLE | WS_BORDER,
+                CW_USEDEFAULT, CW_USEDEFAULT, w, h,
+                glState.parent, nullptr, nullptr, nullptr);
+        }
+
+        if (!glState.hwnd)
+            throw std::runtime_error("[OpenGLContext] Failed to create child window");
+
+        ShowWindow(glState.hwnd, SW_SHOW);
+
+        // Device context
+        glState.hdc = GetDC(glState.hwnd);
+        if (!glState.hdc)
+            throw std::runtime_error("GetDC failed");
+
+        PIXELFORMATDESCRIPTOR pfd = { sizeof(pfd), 1,
+            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+            PFD_TYPE_RGBA, 32, 0,0,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0 };
+
+        int pf = ChoosePixelFormat(glState.hdc, &pfd);
+        if (!pf) throw std::runtime_error("ChoosePixelFormat failed");
+        if (!SetPixelFormat(glState.hdc, pf, &pfd))
+            throw std::runtime_error("SetPixelFormat failed");
+
+        // Temporary context to load extensions
+        HGLRC tmpContext = wglCreateContext(glState.hdc);
+        if (!tmpContext) throw std::runtime_error("wglCreateContext failed");
+        if (!wglMakeCurrent(glState.hdc, tmpContext))
+            throw std::runtime_error("wglMakeCurrent failed");
+
+        auto wglCreateContextAttribsARB =
+            (PFNWGLCREATECONTEXTATTRIBSARBPROC)LoadGLFunc("wglCreateContextAttribsARB");
+        if (!wglCreateContextAttribsARB)
+            throw std::runtime_error("Failed to load wglCreateContextAttribsARB");
+
+        int attribs[] = {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+            WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+            WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+            0
+        };
+
+        glState.hglrc = wglCreateContextAttribsARB(glState.hdc, nullptr, attribs);
+        if (!glState.hglrc)
+            throw std::runtime_error("Failed to create OpenGL 4.6 context");
+
+        wglMakeCurrent(nullptr, nullptr);
+        wglDeleteContext(tmpContext);
+
+        if (!wglMakeCurrent(glState.hdc, glState.hglrc))
+            throw std::runtime_error("Failed to make OpenGL context current");
+
+        if (!gladLoadGL())
+            throw std::runtime_error("Failed to initialize GLAD");
+
+        // Compile & link shaders (vertex and fragment)
+        constexpr auto vs_source = R"(
         #version 460 core
 
         layout(location = 0) in vec2 aPos;       // [-0.5..0.5] quad coords
@@ -124,7 +252,7 @@ namespace almondnamespace::openglcontext
         }
     )";
 
-    constexpr const char kSpriteFS[] = R"(
+        constexpr auto fs_source = R"(
         #version 460 core
         in vec2 vUV;
         out vec4 outColor;
@@ -136,42 +264,26 @@ namespace almondnamespace::openglcontext
         }
     )";
 
-    inline void ensure_shared_resources(opengltextures::BackendData& backend)
-    {
-        auto& glState = backend.glState;
 
-        if (!GLAD_GL_VERSION_1_0) {
-            if (!gladLoadGL()) {
-                throw std::runtime_error("Failed to initialize GLAD");
-            }
-        }
+        // Compile shader program
+        glState.shader = linkProgram(vs_source, fs_source);
+        glState.uUVRegionLoc = glGetUniformLocation(glState.shader, "uUVRegion");
+        glState.uTransformLoc = glGetUniformLocation(glState.shader, "uTransform");
+        glState.uSamplerLoc = glGetUniformLocation(glState.shader, "uTexture");
 
-        if (glState.shader == 0) {
-            glState.shader = linkProgram(kSpriteVS, kSpriteFS);
-            glState.uUVRegionLoc = glGetUniformLocation(glState.shader, "uUVRegion");
-            glState.uTransformLoc = glGetUniformLocation(glState.shader, "uTransform");
-            glState.uSamplerLoc = glGetUniformLocation(glState.shader, "uTexture");
+        glUseProgram(glState.shader);
+        if (glState.uSamplerLoc >= 0)
+            glUniform1i(glState.uSamplerLoc, 0);
+        glUseProgram(0);
 
-            glUseProgram(glState.shader);
-            if (glState.uSamplerLoc >= 0) {
-                glUniform1i(glState.uSamplerLoc, 0);
-            }
-            glUseProgram(0);
+        std::cerr << "[OpenGL Init] Shader program compiled/linked\n";
 
-            atlasmanager::ensure_uploaded_backend = [](const TextureAtlas& atlas) {
-                opengltextures::ensure_uploaded(atlas);
-            };
-        }
-
-        if (glState.vao == 0) {
-            glGenVertexArrays(1, &glState.vao);
-        }
-        if (glState.vbo == 0) {
-            glGenBuffers(1, &glState.vbo);
-        }
-        if (glState.ebo == 0) {
-            glGenBuffers(1, &glState.ebo);
-        }
+        // -----------------------------------------------------------------
+        // Step 8: Quad VAO/VBO/EBO
+        // -----------------------------------------------------------------
+        glGenVertexArrays(1, &glState.vao);
+        glGenBuffers(1, &glState.vbo);
+        glGenBuffers(1, &glState.ebo);
 
         glBindVertexArray(glState.vao);
 
@@ -189,209 +301,51 @@ namespace almondnamespace::openglcontext
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
         glEnableVertexAttribArray(1);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-        constexpr unsigned int quadIndices[] = {
+        constexpr unsigned int quadIndices[] = { 
             0, 1, 2,
-            2, 3, 0
+            2, 3, 0 
         };
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glState.ebo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
 
         glBindVertexArray(0);
-    }
 
-    // — Engine hooks
-    inline bool opengl_initialize(std::shared_ptr<core::Context> ctx,
-        HWND parentWnd = nullptr,
-        unsigned int w = 800,
-        unsigned int h = 600,
-        std::function<void(int, int)> onResize = nullptr)
-    {
-        auto& backend = almondnamespace::opengltextures::get_opengl_backend();
-        auto& glState = backend.glState;
+        std::cerr << "[OpenGL Init] Quad VAO/VBO/EBO created\n";
 
-        HWND resolvedHwnd = nullptr;
-        HDC  resolvedHdc = nullptr;
-        HGLRC resolvedHglrc = nullptr;
-
-        if (ctx) {
-            if (ctx->windowData) {
-                resolvedHwnd = ctx->windowData->hwnd;
-                resolvedHdc = ctx->windowData->hdc;
-                resolvedHglrc = ctx->windowData->glContext;
-            }
-            if (!resolvedHwnd) resolvedHwnd = ctx->hwnd;
-            if (!resolvedHdc) resolvedHdc = ctx->hdc;
-            if (!resolvedHglrc) resolvedHglrc = ctx->hglrc;
-        }
-
-        if (!resolvedHdc)   resolvedHdc = wglGetCurrentDC();
-        if (!resolvedHglrc) resolvedHglrc = wglGetCurrentContext();
-        if (!resolvedHwnd && resolvedHdc) resolvedHwnd = WindowFromDC(resolvedHdc);
-
-        auto syncContext = [&](HWND hwnd, HDC hdc, HGLRC hglrc) {
-            if (parentWnd) {
-                glState.parent = parentWnd;
-            }
-            glState.hwnd = hwnd;
-            glState.hdc = hdc;
-            glState.hglrc = hglrc;
-            glState.width = w;
-            glState.height = h;
-            glState.onResize = onResize;
-            if (ctx) {
-                ctx->hwnd = hwnd;
-                ctx->hdc = hdc;
-                ctx->hglrc = hglrc;
-                ctx->width = static_cast<int>(w);
-                ctx->height = static_cast<int>(h);
-                ctx->onResize = onResize;
-                ctx->draw_sprite = opengltextures::draw_sprite;
-            }
-        };
-
-        if (resolvedHdc && resolvedHglrc) {
-            syncContext(resolvedHwnd, resolvedHdc, resolvedHglrc);
-
-            HGLRC prevCtx = wglGetCurrentContext();
-            HDC prevDC = wglGetCurrentDC();
-            bool switched = false;
-            if (resolvedHglrc && resolvedHdc && prevCtx != resolvedHglrc) {
-                if (wglMakeCurrent(resolvedHdc, resolvedHglrc)) {
-                    switched = true;
-                }
-            }
-
-            ensure_shared_resources(backend);
-
-            if (switched) {
-                if (prevCtx && prevDC) {
-                    wglMakeCurrent(prevDC, prevCtx);
-                }
-                else {
-                    wglMakeCurrent(nullptr, nullptr);
-                }
-            }
-            return true;
-        }
-
-        if (!parentWnd && !glState.parent) {
-            glState.parent = nullptr;
-        }
-
-        if (!glState.hwnd) {
-            glState.hwnd = CreateWindowEx(
-                0, L"AlmondChild", L"working",
-                WS_CHILD | WS_VISIBLE | WS_BORDER,
-                CW_USEDEFAULT, CW_USEDEFAULT, w, h,
-                glState.parent, nullptr, nullptr, nullptr);
-        }
-
-        if (!glState.hwnd) {
-            throw std::runtime_error("[OpenGLContext] Failed to create window");
-        }
-
-        ShowWindow(glState.hwnd, SW_SHOW);
-
-        if (!glState.hdc) {
-            glState.hdc = GetDC(glState.hwnd);
-        }
-        if (!glState.hdc) {
-            throw std::runtime_error("GetDC failed");
-        }
-
-        PIXELFORMATDESCRIPTOR pfd = { sizeof(pfd), 1,
-            PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-            PFD_TYPE_RGBA, 32, 0,0,0,0,0,0,0,0,0,24,0,0,0,0,0,0,0 };
-
-        int pf = ChoosePixelFormat(glState.hdc, &pfd);
-        if (!pf || !SetPixelFormat(glState.hdc, pf, &pfd)) {
-            throw std::runtime_error("Failed to set pixel format");
-        }
-
-        if (!glState.hglrc) {
-            HGLRC tmpContext = wglCreateContext(glState.hdc);
-            if (!tmpContext) {
-                throw std::runtime_error("wglCreateContext failed");
-            }
-            if (!wglMakeCurrent(glState.hdc, tmpContext)) {
-                wglDeleteContext(tmpContext);
-                throw std::runtime_error("wglMakeCurrent failed");
-            }
-
-            auto wglCreateContextAttribsARB =
-                (PFNWGLCREATECONTEXTATTRIBSARBPROC)LoadGLFunc("wglCreateContextAttribsARB");
-            if (!wglCreateContextAttribsARB) {
-                wglMakeCurrent(nullptr, nullptr);
-                wglDeleteContext(tmpContext);
-                throw std::runtime_error("Failed to load wglCreateContextAttribsARB");
-            }
-
-            int attribs[] = {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 6,
-                WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-                0
+        // -----------------------------------------------------------------
+        // Step 9: Hook texture uploads
+        // -----------------------------------------------------------------
+        atlasmanager::ensure_uploaded_backend = [](const TextureAtlas& atlas) {
+            opengltextures::ensure_uploaded(atlas);
             };
 
-            glState.hglrc = wglCreateContextAttribsARB(glState.hdc, nullptr, attribs);
-            wglMakeCurrent(nullptr, nullptr);
-            wglDeleteContext(tmpContext);
+        // -----------------------------------------------------------------
+        // Step 10: Sync context with GL state
+        // -----------------------------------------------------------------
+        ctx->hwnd = glState.hwnd;
+        ctx->hdc = glState.hdc;
+        ctx->hglrc = glState.hglrc;
 
-            if (!glState.hglrc) {
-                throw std::runtime_error("Failed to create OpenGL 4.6 context");
-            }
-        }
-
-        if (!wglMakeCurrent(glState.hdc, glState.hglrc)) {
-            throw std::runtime_error("Failed to make OpenGL context current");
-        }
-
-        syncContext(glState.hwnd, glState.hdc, glState.hglrc);
-        ensure_shared_resources(backend);
-        wglMakeCurrent(nullptr, nullptr);
-
+        std::cerr << "[OpenGL Init] Context sync complete\n";
         return true;
 }
 
     inline void opengl_present() {
-        if (HDC current = wglGetCurrentDC()) {
-            SwapBuffers(current);
-            return;
-        }
-
         auto& backend = opengltextures::get_opengl_backend();
-        auto& glState = backend.glState;
-        if (glState.hdc) {
-            SwapBuffers(glState.hdc);
-        }
+        auto& glState = backend.glState;        // IMPORTANT: attach our static state
+        SwapBuffers(glState.hdc);
     }
 
     //   inline void opengl_pump() { almondnamespace::platform::pump_events(); }
-    inline int  opengl_get_width() {
-        if (HDC current = wglGetCurrentDC()) {
-            if (HWND hwnd = WindowFromDC(current)) {
-                RECT r{};
-                if (GetClientRect(hwnd, &r)) {
-                    return r.right - r.left;
-                }
-            }
-        }
-        auto& backend = opengltextures::get_opengl_backend();
-        return static_cast<int>(backend.glState.width);
+    inline int  opengl_get_width() { 
+        RECT r; GetClientRect(s_openglstate.hwnd, &r); return r.right - r.left; 
     }
-    inline int  opengl_get_height() {
-        if (HDC current = wglGetCurrentDC()) {
-            if (HWND hwnd = WindowFromDC(current)) {
-                RECT r{};
-                if (GetClientRect(hwnd, &r)) {
-                    return r.bottom - r.top;
-                }
-            }
-        }
-        auto& backend = opengltextures::get_opengl_backend();
-        return static_cast<int>(backend.glState.height);
+    inline int  opengl_get_height() { 
+        RECT r; GetClientRect(s_openglstate.hwnd, &r); return r.bottom - r.top;
     }
     inline void opengl_clear(core::Context& ctx) {
         glViewport(0, 0, ctx.width, ctx.height);
@@ -414,9 +368,6 @@ namespace almondnamespace::openglcontext
         }
 
         if (!wglMakeCurrent(ctx.hdc, ctx.hglrc)) return true;
-
-        glState.width = static_cast<unsigned int>(std::max(0, ctx.width));
-        glState.height = static_cast<unsigned int>(std::max(0, ctx.height));
 
         // ─── Time & events ──────────────────────────────────────────────────────
         //static auto lastReal = std::chrono::steady_clock::now();
@@ -447,6 +398,50 @@ namespace almondnamespace::openglcontext
             SwapBuffers(ctx.hdc);
             wglMakeCurrent(nullptr, nullptr);
             return true;
+        }
+
+        if (!atlasmanager::atlas_vector.empty()) {
+            const auto* atlas = atlasmanager::atlas_vector[0];
+            auto it = backend.gpu_atlases.find(atlas);
+            if (it != backend.gpu_atlases.end()) {
+                GLuint tex = it->second.textureHandle;
+
+                if (tex == 0) {
+                    std::cerr << "[OpenGL] Warning: texture handle is 0\n";
+                }
+                else {
+                    glUseProgram(glState.shader);
+                    glBindVertexArray(glState.vao);
+
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, tex);
+
+                    if (glState.uTransformLoc >= 0)
+                        glUniform4f(glState.uTransformLoc,
+                            0.0f, 0.0f,   // center
+                            2.0f, 2.0f);  // span whole screen
+
+                    if (glState.uUVRegionLoc >= 0)
+                        glUniform4f(glState.uUVRegionLoc,
+                            0.0f, 0.0f,
+                            1.0f, 1.0f);
+
+                    // Double-check bound EBO before drawing
+                    GLint boundEbo = 0;
+                    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &boundEbo);
+                    if (boundEbo == 0) {
+                        std::cerr << "[OpenGL] No element buffer bound!\n";
+                    }
+                    else {
+                        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+                    }
+
+                    // Unbind for hygiene
+                    glBindVertexArray(0);
+                    glBindTexture(GL_TEXTURE_2D, 0);
+                    glUseProgram(0);
+                }
+            }
         }
 
         // --- Update input each frame ---

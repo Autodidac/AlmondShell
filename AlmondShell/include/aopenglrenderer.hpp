@@ -165,9 +165,8 @@ namespace almondnamespace::openglrenderer
 
         //ensure_uploaded(*atlas);
 
-        auto& backend = opengltextures::get_opengl_backend();
-        auto it = backend.gpu_atlases.find(atlas);
-        if (it == backend.gpu_atlases.end()) {
+        auto it = opengltextures::opengl_gpu_atlases.find(atlas);
+        if (it == opengltextures::opengl_gpu_atlases.end()) {
             std::cerr << "[DrawSprite] GPU texture not found for atlas '" << atlas->name << "'\n";
             return;
         }
