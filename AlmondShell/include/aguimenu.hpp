@@ -292,7 +292,6 @@ namespace almondnamespace::menu {
 
             prevUp = upPressed; prevDown = downPressed;
             prevLeft = leftPressed; prevRight = rightPressed;
-            prevEnter = enterPressed;
 
             // --- Queue rendering commands ---
             win->commandQueue.enqueue([ctx]() { ctx->clear_safe(ctx); });
@@ -300,8 +299,11 @@ namespace almondnamespace::menu {
             auto& atlasVec = atlasmanager::get_atlas_vector();
             std::span<const TextureAtlas* const> atlasSpan(atlasVec.data(), atlasVec.size());
 
+            const int hoveredIndex = hover;
+
             for (int i = 0; i < totalItems; ++i) {
-                const auto& slice = (i == selection) ? slicePairs[i].hover : slicePairs[i].normal;
+                const bool isHighlighted = (i == selection) || (i == hoveredIndex);
+                const auto& slice = isHighlighted ? slicePairs[i].hover : slicePairs[i].normal;
                 if (!is_alive(slice.handle)) continue;
                 const auto& pos = cachedPositions[i];
 
@@ -315,12 +317,20 @@ namespace almondnamespace::menu {
             win->commandQueue.enqueue([ctx]() { ctx->present_safe(); });
 
             // --- Input selection ---
+            const bool triggeredByEnter = enterPressed && !prevEnter;
+
             if (hover >= 0 && mouseLeftDown && !wasMousePressed) {
                 wasMousePressed = true;
+                prevEnter = enterPressed;
                 return static_cast<Choice>(hover);
             }
             wasMousePressed = mouseLeftDown;
-            if (enterPressed && !prevEnter) return static_cast<Choice>(selection);
+            if (triggeredByEnter) {
+                prevEnter = enterPressed;
+                return static_cast<Choice>(selection);
+            }
+
+            prevEnter = enterPressed;
 
             return std::nullopt;
         }
