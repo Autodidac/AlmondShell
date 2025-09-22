@@ -41,6 +41,7 @@
 #include <optional>
 #include <tuple>
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 namespace almondnamespace::menu {
@@ -72,6 +73,82 @@ namespace almondnamespace::menu {
 
         std::vector<std::pair<int, int>> cachedPositions; // x,y per item
         std::vector<float> colWidths, rowHeights;
+        int cachedWidth = -1;
+        int cachedHeight = -1;
+        int columns = 1;
+        int rows = 0;
+
+        static constexpr float LayoutSpacing = 32.f;
+
+        void recompute_layout(std::shared_ptr<core::Context> ctx) {
+            const int totalItems = static_cast<int>(slicePairs.size());
+            if (totalItems == 0) {
+                cachedPositions.clear();
+                colWidths.clear();
+                rowHeights.clear();
+                columns = 1;
+                rows = 0;
+                return;
+            }
+
+            cachedWidth = ctx->get_width_safe();
+            cachedHeight = ctx->get_height_safe();
+
+            float maxItemWidth = 0.f;
+            float maxItemHeight = 0.f;
+            for (const auto& pair : slicePairs) {
+                maxItemWidth = std::max(maxItemWidth, float(pair.normal.width));
+                maxItemHeight = std::max(maxItemHeight, float(pair.normal.height));
+            }
+
+            const float spacing = LayoutSpacing;
+            int computedCols = totalItems;
+            if (maxItemWidth > 0.f) {
+                const float availableWidth = static_cast<float>(std::max(1, cachedWidth));
+                const float denom = maxItemWidth + spacing;
+                if (denom > 0.f) {
+                    computedCols = static_cast<int>(std::floor((availableWidth + spacing) / denom));
+                    computedCols = std::clamp(computedCols, 1, totalItems);
+                }
+            }
+            columns = std::max(1, computedCols);
+            rows = (totalItems + columns - 1) / columns;
+
+            colWidths.assign(columns, 0.f);
+            rowHeights.assign(rows, 0.f);
+            for (int idx = 0; idx < totalItems; ++idx) {
+                const int row = idx / columns;
+                const int col = idx % columns;
+                const auto& slice = slicePairs[idx].normal;
+                colWidths[col] = std::max(colWidths[col], float(slice.width));
+                rowHeights[row] = std::max(rowHeights[row], float(slice.height));
+            }
+
+            float totalWidth = spacing * std::max(0, columns - 1);
+            for (float w : colWidths) totalWidth += w;
+            float totalHeight = spacing * std::max(0, rows - 1);
+            for (float h : rowHeights) totalHeight += h;
+
+            const float baseX = std::max(0.f, (static_cast<float>(cachedWidth) - totalWidth) * 0.5f);
+            const float baseY = std::max(0.f, (static_cast<float>(cachedHeight) - totalHeight) * 0.5f);
+
+            cachedPositions.resize(totalItems);
+            float yPos = baseY;
+            for (int r = 0; r < rows; ++r) {
+                float xPos = baseX;
+                for (int c = 0; c < columns; ++c) {
+                    const int idx = r * columns + c;
+                    if (idx < totalItems) {
+                        cachedPositions[idx] = {
+                            static_cast<int>(std::round(xPos)),
+                            static_cast<int>(std::round(yPos))
+                        };
+                    }
+                    xPos += colWidths[c] + spacing;
+                }
+                yPos += rowHeights[r] + spacing;
+            }
+        }
 
         void initialize(std::shared_ptr<core::Context> ctx) {
             if (initialized) return;
@@ -163,43 +240,7 @@ namespace almondnamespace::menu {
                 }
             }
 
-            // Layout positions
-            const int cols = 4;
-            const int totalItems = static_cast<int>(slicePairs.size());
-            const int rows = (totalItems + cols - 1) / cols;
-
-            colWidths.resize(cols, 0.f);
-            rowHeights.resize(rows, 0.f);
-
-            for (int r = 0; r < rows; ++r) {
-                for (int c = 0; c < cols; ++c) {
-                    int idx = r * cols + c;
-                    if (idx < totalItems) {
-                        colWidths[c] = std::max(colWidths[c], float(slicePairs[idx].normal.width));
-                        rowHeights[r] = std::max(rowHeights[r], float(slicePairs[idx].normal.height));
-                    }
-                }
-            }
-
-            constexpr float SP = 10.f;
-            float totalWidth = SP * (cols - 1), totalHeight = SP * (rows - 1);
-            for (float w : colWidths) totalWidth += w;
-            for (float h : rowHeights) totalHeight += h;
-
-            float baseX = std::max(0.f, (ctx->get_width_safe() - totalWidth) * 0.5f);
-            float baseY = std::max(0.f, (ctx->get_height_safe() - totalHeight) * 0.5f);
-
-            cachedPositions.resize(totalItems);
-            float yPos = baseY;
-            for (int r = 0; r < rows; ++r) {
-                float xPos = baseX;
-                for (int c = 0; c < cols; ++c) {
-                    int idx = r * cols + c;
-                    if (idx < totalItems) cachedPositions[idx] = { int(xPos), int(yPos) };
-                    xPos += colWidths[c] + SP;
-                }
-                yPos += rowHeights[r] + SP;
-            }
+            recompute_layout(ctx);
 
             initialized = true;
             std::cout << "[Menu] Initialized " << slicePairs.size() << " entries\n";
@@ -208,6 +249,9 @@ namespace almondnamespace::menu {
         std::optional<Choice> update_and_draw(std::shared_ptr<core::Context> ctx, core::WindowData* win) {
 
             if (!initialized) return std::nullopt;
+
+            if (ctx->get_width_safe() != cachedWidth || ctx->get_height_safe() != cachedHeight)
+                recompute_layout(ctx);
 
             input::poll_input();
 
@@ -221,6 +265,8 @@ namespace almondnamespace::menu {
             bool enterPressed = input::keyPressed.test(input::Key::Enter);
 
             const int totalItems = int(slicePairs.size());
+            if (totalItems == 0 || cachedPositions.size() != static_cast<size_t>(totalItems))
+                return std::nullopt;
 
             // Hover
             int hover = -1;
@@ -235,12 +281,12 @@ namespace almondnamespace::menu {
             }
 
             // Keyboard navigation
-            const int cols = 4;
-            const int rows = (totalItems + cols - 1) / cols;
+            const int cols = std::max(1, columns);
+            const int rowsLocal = std::max(1, rows);
 
             if (leftPressed && !prevLeft) selection = (selection == 0) ? totalItems - 1 : selection - 1;
             if (rightPressed && !prevRight) selection = (selection + 1) % totalItems;
-            if (upPressed && !prevUp) selection = (selection < cols) ? selection + (rows - 1) * cols : selection - cols;
+            if (upPressed && !prevUp) selection = (selection < cols) ? selection + (rowsLocal - 1) * cols : selection - cols;
             if (downPressed && !prevDown) selection = (selection + cols >= totalItems) ? selection % cols : selection + cols;
             if (!upPressed && !downPressed && !leftPressed && !rightPressed && hover >= 0) selection = hover;
 
@@ -288,6 +334,10 @@ namespace almondnamespace::menu {
             cachedPositions.clear();
             colWidths.clear();
             rowHeights.clear();
+            cachedWidth = -1;
+            cachedHeight = -1;
+            columns = 1;
+            rows = 0;
             initialized = false;
         }
     };
