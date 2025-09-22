@@ -21,8 +21,9 @@
  *   See LICENSE file for full terms.                         *
  *                                                            *
  **************************************************************/
- // aguimenu.hpp
+// aguimenu.hpp
 #pragma once
+
 #include "aplatform.hpp"          // must be first
 #include "aengineconfig.hpp"
 #include "atypes.hpp"
@@ -45,8 +46,8 @@
 #include <cmath>
 #include <iostream>
 
-namespace almondnamespace::menu {
-
+namespace almondnamespace::menu 
+{
     using almondnamespace::SpriteHandle;
     using almondnamespace::spritepool::is_alive;
     using almondnamespace::atlasmanager::registry;
@@ -292,8 +293,8 @@ namespace almondnamespace::menu {
             std::cout << "[Menu] Initialized " << slicePairs.size() << " entries\n";
         }
 
-        std::optional<Choice> update_and_draw(std::shared_ptr<core::Context> ctx, core::WindowData* win) {
-
+        std::optional<Choice> update_and_draw(std::shared_ptr<core::Context> ctx, core::WindowData* win) 
+        {
             if (!initialized) return std::nullopt;
 
             if (ctx->get_width_safe() != cachedWidth || ctx->get_height_safe() != cachedHeight)

@@ -673,7 +673,7 @@ namespace almondnamespace::core
             win.context->windowData = &win;
         }
 
-        // 🔑 Ensure per-thread initialization flags are outside switch
+        // Ensure per-thread initialization flags are outside switch
         static thread_local bool glInit = false;
         static thread_local bool swInit = false;
         static thread_local bool sdlInit = false;
@@ -704,7 +704,7 @@ namespace almondnamespace::core
                         std::cerr << "[OpenGL] process returned false\n";
                         break;
                     }
-                    std::cout << "[OpenGL] Processed context for hwnd=" << win.hwnd << "\n";
+                  //  std::cout << "[OpenGL] Processed context for hwnd=" << win.hwnd << "\n";
                 }
                 else {
                     glClearColor(1.f, 0.f, 1.f, 1.f); // magenta fallback
@@ -732,7 +732,7 @@ namespace almondnamespace::core
                         std::cerr << "[Software] process returned false\n";
                         break;
                     }
-                    std::cout << "[Software] Processed context for hwnd=" << win.hwnd << "\n";
+                   // std::cout << "[Software] Processed context for hwnd=" << win.hwnd << "\n";
                 }
                 else {
                     std::this_thread::sleep_for(std::chrono::milliseconds(16));
@@ -756,7 +756,7 @@ namespace almondnamespace::core
                         std::cerr << "[SDL] process returned false\n";
                         break;
                     }
-                    std::cout << "[SDL] Processed context for hwnd=" << win.hwnd << "\n";
+                  //  std::cout << "[SDL] Processed context for hwnd=" << win.hwnd << "\n";
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
             }
@@ -778,7 +778,7 @@ namespace almondnamespace::core
                         std::cerr << "[SFML] process returned false\n";
                         break;
                     }
-                    std::cout << "[SFML] Processed context for hwnd=" << win.hwnd << "\n";
+                //    std::cout << "[SFML] Processed context for hwnd=" << win.hwnd << "\n";
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
             }
@@ -800,7 +800,7 @@ namespace almondnamespace::core
                         std::cerr << "[RayLib] process returned false\n";
                         break;
                     }
-                    std::cout << "[RayLib] Processed context for hwnd=" << win.hwnd << "\n";
+                 //   std::cout << "[RayLib] Processed context for hwnd=" << win.hwnd << "\n";
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(16));
             }
