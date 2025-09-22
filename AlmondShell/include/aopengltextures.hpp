@@ -70,8 +70,6 @@ namespace almondnamespace::opengltextures
         }
     };
 
-    inline std::unordered_map<const TextureAtlas*, AtlasGPU, TextureAtlasPtrHash, TextureAtlasPtrEqual> opengl_gpu_atlases;
-
     // forward declare OpenGL4State to avoid pulling in aopenglcontext here
     namespace openglcontext { struct OpenGL4State; }
     struct BackendData {
@@ -252,12 +250,13 @@ namespace almondnamespace::opengltextures
 
 
     inline void clear_gpu_atlases() noexcept {
-        for (auto& [_, gpu] : opengl_gpu_atlases) {
+        auto& backend = get_opengl_backend();
+        for (auto& [_, gpu] : backend.gpu_atlases) {
             if (gpu.textureHandle) {
                 glDeleteTextures(1, &gpu.textureHandle);
             }
         }
-        opengl_gpu_atlases.clear();
+        backend.gpu_atlases.clear();
         s_generation.fetch_add(1, std::memory_order_relaxed);
     }
 
@@ -314,9 +313,11 @@ namespace almondnamespace::opengltextures
             return;
         }
 
-        const int w = core::cli::window_width;
-        const int h = core::cli::window_height;
-        if (w == 0 || h == 0) {
+        GLint viewport[4] = { 0, 0, 0, 0 };
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        const int w = viewport[2];
+        const int h = viewport[3];
+        if (w <= 0 || h <= 0) {
             std::cerr << "[DrawSprite] ERROR: Window dimensions are zero.\n";
             return;
         }
