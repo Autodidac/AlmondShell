@@ -25,6 +25,7 @@
 
 #include "afilewatch.hpp"
 
+#include <array>
 #include <filesystem>
 #include <fstream>
 
@@ -32,8 +33,28 @@ namespace fs = std::filesystem;
 
 namespace almondnamespace 
 {
-    static std::uint64_t fake_hash(const std::string& path) {
-        return std::hash<std::string>{}(path);
+    static std::uint64_t compute_file_hash(const std::string& path) {
+        std::ifstream file(path, std::ios::binary);
+        if (!file) {
+            return 0;
+        }
+
+        constexpr std::uint64_t kOffsetBasis = 1469598103934665603ull;
+        constexpr std::uint64_t kPrime = 1099511628211ull;
+
+        std::uint64_t hash = kOffsetBasis;
+        std::array<char, 4096> buffer{};
+
+        while (file) {
+            file.read(buffer.data(), static_cast<std::streamsize>(buffer.size()));
+            const std::streamsize readCount = file.gcount();
+            for (std::streamsize i = 0; i < readCount; ++i) {
+                hash ^= static_cast<unsigned char>(buffer[static_cast<std::size_t>(i)]);
+                hash *= kPrime;
+            }
+        }
+
+        return hash;
     }
 
     std::vector<file_state> get_file_states(const std::string& folder) {
@@ -60,7 +81,7 @@ namespace almondnamespace
                 }
 
                 fs.last_write_time = last_write.time_since_epoch().count();
-                fs.hash = fake_hash(fs.path);
+                fs.hash = compute_file_hash(fs.path);
                 fs.dirty = false;
                 result.push_back(std::move(fs));
             }
@@ -82,7 +103,24 @@ namespace almondnamespace
             auto new_time = write_time.time_since_epoch().count();
             if (new_time != f.last_write_time) {
                 f.last_write_time = new_time;
-                f.dirty = true;
+
+                const auto new_hash = compute_file_hash(f.path);
+                if (new_hash == 0) {
+                    f.hash = 0;
+                    f.dirty = true;
+                    continue;
+                }
+
+                if (new_hash != f.hash) {
+                    f.hash = new_hash;
+                    f.dirty = true;
+                }
+                else {
+                    f.dirty = false;
+                }
+            }
+            else {
+                f.dirty = false;
             }
         }
     }
