@@ -400,50 +400,6 @@ namespace almondnamespace::openglcontext
             return true;
         }
 
-        if (!atlasmanager::atlas_vector.empty()) {
-            const auto* atlas = atlasmanager::atlas_vector[0];
-            auto it = backend.gpu_atlases.find(atlas);
-            if (it != backend.gpu_atlases.end()) {
-                GLuint tex = it->second.textureHandle;
-
-                if (tex == 0) {
-                    std::cerr << "[OpenGL] Warning: texture handle is 0\n";
-                }
-                else {
-                    glUseProgram(glState.shader);
-                    glBindVertexArray(glState.vao);
-
-                    glActiveTexture(GL_TEXTURE0);
-                    glBindTexture(GL_TEXTURE_2D, tex);
-
-                    if (glState.uTransformLoc >= 0)
-                        glUniform4f(glState.uTransformLoc,
-                            0.0f, 0.0f,   // center
-                            2.0f, 2.0f);  // span whole screen
-
-                    if (glState.uUVRegionLoc >= 0)
-                        glUniform4f(glState.uUVRegionLoc,
-                            0.0f, 0.0f,
-                            1.0f, 1.0f);
-
-                    // Double-check bound EBO before drawing
-                    GLint boundEbo = 0;
-                    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &boundEbo);
-                    if (boundEbo == 0) {
-                        std::cerr << "[OpenGL] No element buffer bound!\n";
-                    }
-                    else {
-                        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-                    }
-
-                    // Unbind for hygiene
-                    glBindVertexArray(0);
-                    glBindTexture(GL_TEXTURE_2D, 0);
-                    glUseProgram(0);
-                }
-            }
-        }
-
         // --- Update input each frame ---
         almondnamespace::input::poll_input();
 
