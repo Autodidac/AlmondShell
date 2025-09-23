@@ -288,7 +288,7 @@ namespace almondnamespace::core {
         openglContext->is_mouse_button_down = [](input::MouseButton b) { return input::is_mouse_button_down(b); };
 
         openglContext->registry_get = [](const char*) { return 0; };
-        openglContext->draw_sprite = openglrenderer::draw_sprite;
+        openglContext->draw_sprite = [](SpriteHandle, std::span<const TextureAtlas* const>, float, float, float, float) {};
 
         openglContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::OpenGL);

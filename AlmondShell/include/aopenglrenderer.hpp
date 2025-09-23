@@ -118,75 +118,67 @@ namespace almondnamespace::openglrenderer
         glLineWidth(1.0f);
     }
 
+//    // Diagnostic draw_sprite version
     inline void draw_sprite(SpriteHandle handle, std::span<const TextureAtlas* const> atlases,
-        float x, float y, float width, float height) noexcept
+        float x, float y, int width, int height) noexcept
     {
         if (!is_handle_live(handle)) {
             std::cerr << "[DrawSprite] Invalid sprite handle.\n";
             return;
         }
 
-        if (width <= 0.f || height <= 0.f) {
-            std::cerr << "[DrawSprite] Non-positive draw size requested.\n";
+        const int w = width;
+        const int h = height;
+        if (w == 0 || h == 0) {
+            std::cerr << "[DrawSprite] ERROR: Window dimensions are zero.\n";
             return;
         }
 
-        const int atlasIdx = static_cast<int>(handle.atlasIndex);
-        const int localIdx = static_cast<int>(handle.localIndex);
+#if defined(DEBUG_TEXTURE_RENDERING)
+        std::cerr << "[DrawSprite] Inputs: x=" << x << ", y=" << y << ", w=" << width << ", h=" << height << '\n';
+#endif
 
-        if (atlasIdx < 0 || atlasIdx >= static_cast<int>(atlases.size())) {
+        const int atlasIdx = int(handle.atlasIndex);
+        const int localIdx = int(handle.localIndex);
+
+        if (atlasIdx < 0 || atlasIdx >= int(atlases.size())) {
             std::cerr << "[DrawSprite] Atlas index out of bounds: " << atlasIdx << '\n';
             return;
         }
-
-        const TextureAtlas* atlas = atlases[static_cast<size_t>(atlasIdx)];
+        const TextureAtlas* atlas = atlases[atlasIdx];
         if (!atlas) {
             std::cerr << "[DrawSprite] Null atlas pointer at index: " << atlasIdx << '\n';
             return;
         }
-
-        if (localIdx < 0 || localIdx >= static_cast<int>(atlas->entries.size())) {
+        if (localIdx < 0 || localIdx >= int(atlas->entries.size())) {
             std::cerr << "[DrawSprite] Sprite index out of bounds: " << localIdx << '\n';
             return;
         }
 
-        auto& backend = opengltextures::get_opengl_backend();
-        auto& glState = backend.glState;
+        std::cerr << "[DrawSprite] Using atlas index = " << atlasIdx
+            << ", atlas name = '" << atlas->name << "'"
+            << ", local sprite index = " << localIdx
+            << ", sprite name = '" << atlas->entries[localIdx].name << "'\n";
 
-        if (glState.shader == 0 || glState.vao == 0) {
-            std::cerr << "[DrawSprite] OpenGL state not initialized.\n";
+        std::cerr << "[DrawSprite] Pointer key: " << atlas
+            << ", Atlas name: " << atlas->name << "\n";
+
+        //ensure_uploaded(*atlas);
+
+        auto it = opengltextures::opengl_gpu_atlases.find(atlas);
+        if (it == opengltextures::opengl_gpu_atlases.end()) {
+            std::cerr << "[DrawSprite] GPU texture not found for atlas '" << atlas->name << "'\n";
+            return;
+        }
+        GLuint tex = it->second.textureHandle;
+        if (!tex) {
+            std::cerr << "[DrawSprite] GPU texture handle is 0 for atlas '" << atlas->name << "'\n";
             return;
         }
 
-        opengltextures::ensure_uploaded(*atlas);
-        auto gpuIt = backend.gpu_atlases.find(atlas);
-        if (gpuIt == backend.gpu_atlases.end() || gpuIt->second.textureHandle == 0) {
-            std::cerr << "[DrawSprite] GPU texture not available for atlas '" << atlas->name << "'\n";
-            return;
-        }
 
-        const GLuint tex = gpuIt->second.textureHandle;
-
-        GLint viewport[4] = { 0, 0, 1, 1 };
-        glGetIntegerv(GL_VIEWPORT, viewport);
-        const float viewportWidth = viewport[2] > 0 ? static_cast<float>(viewport[2]) : 1.f;
-        const float viewportHeight = viewport[3] > 0 ? static_cast<float>(viewport[3]) : 1.f;
-
-        const auto& entry = atlas->entries[static_cast<size_t>(localIdx)];
-        const float u0 = entry.region.u1;
-        const float v0 = entry.region.v1;
-        const float du = entry.region.u2 - entry.region.u1;
-        const float dv = entry.region.v2 - entry.region.v1;
-
-        const float centerX = x + width * 0.5f;
-        const float centerY = y + height * 0.5f;
-        const float ndcX = (centerX / viewportWidth) * 2.f - 1.f;
-        const float ndcY = 1.f - (centerY / viewportHeight) * 2.f;
-        const float ndcW = (width / viewportWidth) * 2.f;
-        const float ndcH = (height / viewportHeight) * 2.f;
-
-        glUseProgram(glState.shader);
-        glBindVertexArray(glState.vao);
+        glUseProgram(openglcontext::s_openglstate.shader);
+        glBindVertexArray(openglcontext::s_openglstate.vao);
 
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
@@ -196,19 +188,65 @@ namespace almondnamespace::openglrenderer
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex);
 
-        if (glState.uUVRegionLoc >= 0)
-            glUniform4f(glState.uUVRegionLoc, u0, v0, du, dv);
+        const auto& entry = atlas->entries[localIdx];
 
-        if (glState.uTransformLoc >= 0)
-            glUniform4f(glState.uTransformLoc, ndcX, ndcY, ndcW, ndcH);
+        // Flip V coords for OpenGL (bottom-left origin)
+        float u0 = entry.region.u1;
+        float u1 = entry.region.u2;
+        float v0 = 1.0f - entry.region.v1; 
+        float v1 = 1.0f - entry.region.v2; 
+
+        float du = u1 - u0;
+        float dv = v1 - v0;
+        std::cerr << "[DrawSprite] UVs: u0=" << u0 << ", u1=" << u1 << ", du=" << du << "\n";
+        std::cerr << "[DrawSprite] UVs: v0=" << v0 << ", v1=" << v1 << ", dv=" << dv << "\n";
+        if (openglcontext::s_openglstate.uUVRegionLoc >= 0)
+            glUniform4f(openglcontext::s_openglstate.uUVRegionLoc, u0, v0, du, dv);
+
+        // Flip Y pixel coordinate *before* normalization
+        float flippedY = h - (y + height * 0.5f);
+
+        // Convert to NDC [-1, 1], center coords
+        float ndc_x = ((x + width * 0.5f) / float(w)) * 2.f - 1.f;
+        float ndc_y = (flippedY / float(h)) * 2.f - 1.f;
+        float ndc_w = (width / float(w)) * 2.f;
+        float ndc_h = (height / float(h)) * 2.f;
+
+#if defined(DEBUG_TEXTURE_RENDERING_VERY_VERBOSE)
+        std::cerr << "[DrawSprite] Atlas entries count: " << atlas->entries.size() << "\n";
+        std::cerr << "[DrawSprite] Requested sprite index: " << localIdx << "\n";
+
+        if (y < 0) {
+            std::cerr << "[Warning] Negative y coordinate: " << y << '\n';
+        }
+
+        std::cerr << "[DrawSprite] Using region for '" << entry.name << "': "
+            << "u1=" << entry.region.u1 << ", v1=" << entry.region.v1
+            << ", u2=" << entry.region.u2 << ", v2=" << entry.region.v2
+            << ", x=" << entry.region.x << ", y=" << entry.region.y
+            << ", w=" << entry.region.width << ", h=" << entry.region.height << '\n';
+#endif
+        if (openglcontext::s_openglstate.uTransformLoc >= 0)
+            glUniform4f(openglcontext::s_openglstate.uTransformLoc, ndc_x, ndc_y, ndc_w, ndc_h);
+
+        //debug_gl_state(s_state.shader, s_state.vao, tex, s_state.uUVRegionLoc, s_state.uTransformLoc);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-        glDisable(GL_BLEND);
+        //draw_debug_outline();
+
+        // unbind VAO
         glBindVertexArray(0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        glUseProgram(0);
+        glDisable(GL_BLEND);
+
+#if defined(DEBUG_TEXTURE_RENDERING_VERY_VERBOSE)
+        std::cerr << "[DrawSprite] Atlas '" << atlas->name << "' Sprite '" << entry.name
+            << "' AtlasIdx=" << atlasIdx << " SpriteIdx=" << localIdx << '\n';
+#endif
     }
+
+
     inline void draw_quad(const openglcontext::Quad& quad, GLuint texture) {
         glUseProgram(s_openglstate.shader);
 
