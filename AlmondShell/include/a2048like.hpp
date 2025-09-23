@@ -32,6 +32,8 @@
 #include "aatlasmanager.hpp"
 #include "aimageloader.hpp"
 
+#include <algorithm>
+#include <array>
 #include <string>
 #include <random>
 #include <iostream>
@@ -117,7 +119,169 @@ namespace almondnamespace::game2048
         if (almondnamespace::input::is_key_down(almondnamespace::input::Key::Escape))
             return false;
 
-        // TODO: add swipe/merge logic here (left/right/up/down)
+        enum class Direction { Left, Right, Up, Down };
+
+        auto process_line = [](std::array<int, GRID_W> line) {
+            std::array<int, GRID_W> result{};
+            int write = 0;
+
+            // Gather non-zero tiles preserving order
+            std::array<int, GRID_W> compact{};
+            int compactCount = 0;
+            for (int v : line)
+                if (v != 0)
+                    compact[compactCount++] = v;
+
+            // Merge neighbouring tiles once per move
+            for (int i = 0; i < compactCount; ++i)
+            {
+                int val = compact[i];
+                if (i + 1 < compactCount && compact[i + 1] == val)
+                {
+                    val *= 2;
+                    ++i;
+                }
+                result[write++] = val;
+            }
+
+            return result;
+        };
+
+        auto apply_move = [&](Direction dir)
+        {
+            bool moved = false;
+
+            auto update_cell = [&](int x, int y, int value)
+            {
+                int& cell = state.grid[gamecore::idx(GRID_W, x, y)];
+                if (cell != value)
+                {
+                    cell = value;
+                    moved = true;
+                }
+            };
+
+            auto handle_row = [&](int y, bool reverse)
+            {
+                std::array<int, GRID_W> line{};
+                for (int x = 0; x < GRID_W; ++x)
+                    line[x] = state.grid[gamecore::idx(GRID_W, x, y)];
+
+                if (reverse)
+                    std::reverse(line.begin(), line.end());
+
+                auto merged = process_line(line);
+
+                if (reverse)
+                    std::reverse(merged.begin(), merged.end());
+
+                for (int x = 0; x < GRID_W; ++x)
+                    update_cell(x, y, merged[x]);
+            };
+
+            auto handle_column = [&](int x, bool reverse)
+            {
+                std::array<int, GRID_H> line{};
+                for (int y = 0; y < GRID_H; ++y)
+                    line[y] = state.grid[gamecore::idx(GRID_W, x, y)];
+
+                if (reverse)
+                    std::reverse(line.begin(), line.end());
+
+                // Reuse row processor by padding to GRID_W length
+                std::array<int, GRID_W> padded{};
+                for (int i = 0; i < GRID_H; ++i)
+                    padded[i] = line[i];
+
+                auto merged = process_line(padded);
+
+                if (reverse)
+                    std::reverse(merged.begin(), merged.begin() + GRID_H);
+
+                for (int y = 0; y < GRID_H; ++y)
+                    update_cell(x, y, merged[y]);
+            };
+
+            switch (dir)
+            {
+            case Direction::Left:
+                for (int y = 0; y < GRID_H; ++y)
+                    handle_row(y, false);
+                break;
+            case Direction::Right:
+                for (int y = 0; y < GRID_H; ++y)
+                    handle_row(y, true);
+                break;
+            case Direction::Up:
+                for (int x = 0; x < GRID_W; ++x)
+                    handle_column(x, false);
+                break;
+            case Direction::Down:
+                for (int x = 0; x < GRID_W; ++x)
+                    handle_column(x, true);
+                break;
+            }
+
+            return moved;
+        };
+
+        auto any_moves_available = [&]()
+        {
+            for (int y = 0; y < GRID_H; ++y)
+            {
+                for (int x = 0; x < GRID_W; ++x)
+                {
+                    int val = state.grid[gamecore::idx(GRID_W, x, y)];
+                    if (val == 0)
+                        return true;
+
+                    if (x + 1 < GRID_W && state.grid[gamecore::idx(GRID_W, x + 1, y)] == val)
+                        return true;
+                    if (y + 1 < GRID_H && state.grid[gamecore::idx(GRID_W, x, y + 1)] == val)
+                        return true;
+                }
+            }
+            return false;
+        };
+
+        static bool input_consumed = false;
+
+        auto try_move = [&](Direction dir)
+        {
+            if (game_over)
+                return;
+
+            if (apply_move(dir))
+            {
+                state.add_tile();
+                if (!any_moves_available())
+                    game_over = true;
+            }
+        };
+
+        const bool left = almondnamespace::input::is_key_down(almondnamespace::input::Key::Left);
+        const bool right = almondnamespace::input::is_key_down(almondnamespace::input::Key::Right);
+        const bool up = almondnamespace::input::is_key_down(almondnamespace::input::Key::Up);
+        const bool down = almondnamespace::input::is_key_down(almondnamespace::input::Key::Down);
+
+        const bool any = left || right || up || down;
+
+        if (any && !input_consumed)
+        {
+            if (left)       try_move(Direction::Left);
+            else if (right) try_move(Direction::Right);
+            else if (up)    try_move(Direction::Up);
+            else if (down)  try_move(Direction::Down);
+
+            input_consumed = true;
+        }
+        else if (!any)
+        {
+            input_consumed = false;
+        }
+
+        if (!game_over && !any_moves_available())
+            game_over = true;
 
         // Render
         ctx->clear_safe(ctx);
