@@ -107,8 +107,20 @@ namespace almondnamespace::sandsim
 
             int mx, my;
             ctx->get_mouse_position(mx, my);
-            int gx = mx * W / ctx->get_width();
-            int gy = my * H / ctx->get_height();
+            const int w = std::max(1, ctx->get_width_safe());
+            const int h = std::max(1, ctx->get_height_safe());   // was width again
+
+            // scale mouse pixels -> grid coords (W x H)
+            const float sx = W / float(w);
+            const float sy = H / float(h);
+
+            int gx = int(mx * sx);
+            int gy = int(my * sy);
+
+            // clamp just in case
+            gx = std::clamp(gx, 0, W - 1);
+            gy = std::clamp(gy, 0, H - 1);
+
 
             if (ctx->is_mouse_button_down_safe(input::MouseButton::MouseLeft) && gamecore::in_bounds(W, H, gx, gy)) {
                 gamecore::at(grid, W, H, gx, gy) = true;

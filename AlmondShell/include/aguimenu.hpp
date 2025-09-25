@@ -21,7 +21,7 @@
  *   See LICENSE file for full terms.                         *
  *                                                            *
  **************************************************************/
-// aguimenu.hpp
+ // aguimenu.hpp
 #pragma once
 
 #include "aplatform.hpp"          // must be first
@@ -35,6 +35,7 @@
 #include "aimageloader.hpp"
 #include "aspriteregistry.hpp"
 #include "aspritepool.hpp"
+#include "aopengltextures.hpp"    // use draw_sprite directly
 
 #include <vector>
 #include <string>
@@ -46,21 +47,19 @@
 #include <cmath>
 #include <iostream>
 
-namespace almondnamespace::menu 
+namespace almondnamespace::menu
 {
     using almondnamespace::SpriteHandle;
     using almondnamespace::spritepool::is_alive;
     using almondnamespace::atlasmanager::registry;
 
-    enum class Choice 
-    {
+    enum class Choice {
         Snake, Tetris, Pacman, Sokoban,
         Minesweep, Puzzle, Bejeweled, Fourty,
         Sandsim, Cellular, Settings, Exit
     };
 
-    struct SliceEntry 
-    {
+    struct SliceEntry {
         std::string name;
         int x, y, width, height;
         SpriteHandle handle{};
@@ -68,8 +67,7 @@ namespace almondnamespace::menu
 
     struct SlicePair { SliceEntry normal; SliceEntry hover; };
 
-    struct MenuOverlay 
-    {
+    struct MenuOverlay {
         std::vector<SlicePair> slicePairs;
         size_t selection = 0;
         bool prevUp = false, prevDown = false, prevLeft = false, prevRight = false, prevEnter = false;
@@ -82,6 +80,9 @@ namespace almondnamespace::menu
         int cachedHeight = -1;
         int columns = 1;
         int rows = 0;
+
+        static constexpr int ExpectedColumns = 4;
+        static constexpr int ExpectedRowsPerHalf = 3;
 
         static constexpr float LayoutSpacing = 32.f;
 
@@ -116,6 +117,9 @@ namespace almondnamespace::menu
                     computedCols = std::clamp(computedCols, 1, totalItems);
                 }
             }
+            const int targetColumns = std::min(ExpectedColumns, totalItems);
+            if (targetColumns > 0)
+                computedCols = std::clamp(computedCols, targetColumns, totalItems);
             columns = std::max(1, computedCols);
             rows = (totalItems + columns - 1) / columns;
 
@@ -155,14 +159,12 @@ namespace almondnamespace::menu
             }
         }
 
-        void initialize(std::shared_ptr<core::Context> ctx) 
-        {
+        void initialize(std::shared_ptr<core::Context> ctx) {
             if (initialized) return;
 
             spritepool::initialize(128);
             spritepool::reset();
 
-            // Load the menu buttons image
             auto image = a_loadImage("assets/menu/menubuttons.tga");
             if (image.pixels.empty())
                 throw std::runtime_error("Failed to load menu button image");
@@ -171,9 +173,8 @@ namespace almondnamespace::menu
                 throw std::runtime_error("Menu button image has invalid dimensions");
 
             if (image.height % 2 != 0)
-                throw std::runtime_error("Menu button image height must be divisible by 2 for normal/hover halves");
+                throw std::runtime_error("Menu button image height must be divisible by 2");
 
-            // Create atlas in manager
             if (!atlasmanager::create_atlas({
                 .name = "menubuttons",
                 .width = static_cast<u32>(image.width),
@@ -181,53 +182,27 @@ namespace almondnamespace::menu
                 .generate_mipmaps = false
                 })) throw std::runtime_error("Failed to create atlas in manager");
 
-            // Get registrar for sprite registration
             auto registrar = atlasmanager::get_registrar("menubuttons");
             if (!registrar) throw std::runtime_error("Failed to get registrar");
 
-            // Move pixels into manager atlas
             registrar->atlas.pixel_data = std::move(image.pixels);
             registrar->atlas.width = image.width;
             registrar->atlas.height = image.height;
 
-            // Add atlas to rendering context
             if (ctx->add_atlas_safe(registrar->atlas) == -1)
                 throw std::runtime_error("Failed to add atlas to context");
 
-            // Upload to GPU once so it’s ready
-            //openglcontext::ensure_uploaded(registrar->atlas);
-            //if (ctx->type == core::ContextType::OpenGL && ctx->hdc && ctx->hglrc) {
-            //    if (wglMakeCurrent(ctx->hdc, ctx->hglrc)) {
-            //        opengltextures::ensure_uploaded(registrar->atlas);
-            //        wglMakeCurrent(nullptr, nullptr);
-            //    }
-            //    else {
-            //        std::cerr << "[Menu] Failed to make GL context current\n";
-            //    }
-            //}
-
             if (auto* win = ctx->windowData) {
                 win->commandQueue.enqueue([atlas = &registrar->atlas]() {
-                    opengltextures::ensure_uploaded(*atlas);
-                    });
+                    atlasmanager::ensure_uploaded(*atlas);
+                });
             }
 
-            // Define menu slices based on the new layout
-            constexpr int expectedColumns = 4;
-            constexpr int expectedRowsPerHalf = 3;
-            const int totalButtons = expectedColumns * expectedRowsPerHalf;
+            constexpr int totalButtons = ExpectedColumns * ExpectedRowsPerHalf;
 
             const int halfHeight = image.height / 2;
-            if (image.width % expectedColumns != 0)
-                throw std::runtime_error("Menu button image width must be divisible by column count");
-            if (halfHeight % expectedRowsPerHalf != 0)
-                throw std::runtime_error("Menu button image half-height must be divisible by row count");
-
-            const int spriteW = image.width / expectedColumns;
-            const int spriteH = halfHeight / expectedRowsPerHalf;
-
-            if (spriteW <= 0 || spriteH <= 0)
-                throw std::runtime_error("Derived menu button size is invalid");
+            const int spriteW = image.width / ExpectedColumns;
+            const int spriteH = halfHeight / ExpectedRowsPerHalf;
 
             const std::array<std::string_view, totalButtons> buttonNames = {
                 "snake", "tetris", "pacman", "sokoban",
@@ -239,8 +214,15 @@ namespace almondnamespace::menu
             slicePairs.reserve(buttonNames.size());
 
             for (size_t idx = 0; idx < buttonNames.size(); ++idx) {
-                const int row = static_cast<int>(idx) / expectedColumns;
-                const int col = static_cast<int>(idx) % expectedColumns;
+                const int rowFromTop = static_cast<int>(idx) / ExpectedColumns;
+                const int colFromLeft = static_cast<int>(idx) % ExpectedColumns;
+
+                // The sprite sheet is authored starting at the bottom edge, so we
+                // flip the row index to keep logical index 0 at the top-left of the
+                // menu grid while preserving the original left-to-right ordering of
+                // columns.
+                const int row = ExpectedRowsPerHalf - 1 - rowFromTop;
+                const int col = colFromLeft;
 
                 const int normalX = col * spriteW;
                 const int normalY = row * spriteH;
@@ -248,28 +230,12 @@ namespace almondnamespace::menu
                 const int hoverY = halfHeight + normalY;
 
                 SlicePair pair{
-                    .normal = SliceEntry{
-                        .name = std::string(buttonNames[idx]) + "_normal",
-                        .x = normalX,
-                        .y = normalY,
-                        .width = spriteW,
-                        .height = spriteH,
-                        .handle = {}
-                    },
-                    .hover = SliceEntry{
-                        .name = std::string(buttonNames[idx]) + "_hover",
-                        .x = hoverX,
-                        .y = hoverY,
-                        .width = spriteW,
-                        .height = spriteH,
-                        .handle = {}
-                    }
+                    .normal = { std::string(buttonNames[idx]) + "_normal", normalX, normalY, spriteW, spriteH },
+                    .hover = { std::string(buttonNames[idx]) + "_hover",  hoverX,  hoverY,  spriteW, spriteH }
                 };
-
                 slicePairs.emplace_back(std::move(pair));
             }
 
-            // Register slices
             std::vector<std::tuple<std::string, int, int, int, int>> sliceRects;
             for (auto& pair : slicePairs) {
                 sliceRects.emplace_back(pair.normal.name, pair.normal.x, pair.normal.y, pair.normal.width, pair.normal.height);
@@ -279,7 +245,6 @@ namespace almondnamespace::menu
             if (!registrar->register_atlas_sprites_by_custom_sizes(sliceRects))
                 throw std::runtime_error("Failed to register menu sprite slices");
 
-            // Assign handles from registry
             for (auto& pair : slicePairs) {
                 for (auto* slice : { &pair.normal, &pair.hover }) {
                     auto spriteOpt = registry.get(slice->name);
@@ -296,8 +261,7 @@ namespace almondnamespace::menu
             std::cout << "[Menu] Initialized " << slicePairs.size() << " entries\n";
         }
 
-        std::optional<Choice> update_and_draw(std::shared_ptr<core::Context> ctx, core::WindowData* win) 
-        {
+        std::optional<Choice> update_and_draw(std::shared_ptr<core::Context> ctx, core::WindowData* win) {
             if (!initialized) return std::nullopt;
 
             if (ctx->get_width_safe() != cachedWidth || ctx->get_height_safe() != cachedHeight)
@@ -318,7 +282,6 @@ namespace almondnamespace::menu
             if (totalItems == 0 || cachedPositions.size() != static_cast<size_t>(totalItems))
                 return std::nullopt;
 
-            // Hover
             int hover = -1;
             for (int i = 0; i < totalItems; ++i) {
                 const auto& slice = slicePairs[i].normal;
@@ -330,7 +293,6 @@ namespace almondnamespace::menu
                 }
             }
 
-            // Keyboard navigation
             const int cols = std::max(1, columns);
             const int rowsLocal = std::max(1, rows);
 
@@ -343,9 +305,6 @@ namespace almondnamespace::menu
             prevUp = upPressed; prevDown = downPressed;
             prevLeft = leftPressed; prevRight = rightPressed;
 
-            // --- Queue rendering commands ---
-            win->commandQueue.enqueue([ctx]() { ctx->clear_safe(ctx); });
-
             auto& atlasVec = atlasmanager::get_atlas_vector();
             std::span<const TextureAtlas* const> atlasSpan(atlasVec.data(), atlasVec.size());
 
@@ -357,16 +316,21 @@ namespace almondnamespace::menu
                 if (!is_alive(slice.handle)) continue;
                 const auto& pos = cachedPositions[i];
 
-                win->commandQueue.enqueue([=]() {
-                    ctx->draw_sprite_safe(slice.handle, atlasSpan,
-                        float(pos.first), float(pos.second),
-                        float(slice.width), float(slice.height));
+                win->commandQueue.enqueue([handle = slice.handle,
+                    x = pos.first, y = pos.second,
+                    w = slice.width, h = slice.height]() {
+                        // build span fresh on render thread
+                        auto& atlasVecRT = atlasmanager::get_atlas_vector();
+                        std::span<const TextureAtlas* const> atlasSpanRT(atlasVecRT.data(), atlasVecRT.size());
+
+                        almondnamespace::opengltextures::draw_sprite(
+                            handle, atlasSpanRT,
+                            float(x), float(y),
+                            float(w), float(h)
+                        );
                     });
             }
 
-            win->commandQueue.enqueue([ctx]() { ctx->present_safe(); });
-
-            // --- Input selection ---
             const bool triggeredByEnter = enterPressed && !prevEnter;
 
             if (hover >= 0 && mouseLeftDown && !wasMousePressed) {
@@ -381,7 +345,6 @@ namespace almondnamespace::menu
             }
 
             prevEnter = enterPressed;
-
             return std::nullopt;
         }
 

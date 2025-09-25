@@ -93,12 +93,13 @@ namespace almondnamespace::raylibcontext
             return;
         }
 
-        if (localIdx < 0 || localIdx >= static_cast<int>(atlas->entries.size())) {
+        AtlasRegion region{};
+        if (!atlas->try_get_entry_info(localIdx, region)) {
             std::cerr << "[Raylib_DrawSprite] Sprite index out of bounds: " << localIdx << '\n';
             return;
         }
 
-       almondnamespace::raylibtextures::ensure_uploaded(*atlas);
+        almondnamespace::raylibtextures::ensure_uploaded(*atlas);
 
         auto texIt = almondnamespace::raylibtextures::raylib_gpu_atlases.find(atlas);
         if (texIt == almondnamespace::raylibtextures::raylib_gpu_atlases.end() || texIt->second.texture.id == 0) {
@@ -107,18 +108,16 @@ namespace almondnamespace::raylibcontext
         }
 
         const Texture2D& texture = texIt->second.texture;
-        const auto& entry = atlas->entries[localIdx];
-
         Rect srcRect{
-            static_cast<float>(entry.region.x),
-            static_cast<float>(entry.region.y),
-            static_cast<float>(entry.region.width),
-            static_cast<float>(entry.region.height)
+            static_cast<float>(region.x),
+            static_cast<float>(region.y),
+            static_cast<float>(region.width),
+            static_cast<float>(region.height)
         };
 
         // If width/height <= 0, use native sprite size
-        float drawWidth = (width > 0.f) ? width : static_cast<float>(entry.region.width);
-        float drawHeight = (height > 0.f) ? height : static_cast<float>(entry.region.height);
+        float drawWidth = (width > 0.f) ? width : static_cast<float>(region.width);
+        float drawHeight = (height > 0.f) ? height : static_cast<float>(region.height);
 
         Rect destRect{
             x,

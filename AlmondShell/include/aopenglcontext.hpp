@@ -59,6 +59,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <vector>
 
 namespace almondnamespace::openglcontext
 {
@@ -103,6 +104,141 @@ namespace almondnamespace::openglcontext
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         return program;
+    }
+
+    inline void destroy_quad_pipeline(OpenGL4State& glState) noexcept
+    {
+        if (glState.shader && glIsProgram(glState.shader)) {
+            glDeleteProgram(glState.shader);
+        }
+        glState.shader = 0;
+        glState.uUVRegionLoc = -1;
+        glState.uTransformLoc = -1;
+        glState.uSamplerLoc = -1;
+
+        if (glState.vao && glIsVertexArray(glState.vao)) {
+            glDeleteVertexArrays(1, &glState.vao);
+        }
+        if (glState.vbo && glIsBuffer(glState.vbo)) {
+            glDeleteBuffers(1, &glState.vbo);
+        }
+        if (glState.ebo && glIsBuffer(glState.ebo)) {
+            glDeleteBuffers(1, &glState.ebo);
+        }
+
+        glState.vao = 0;
+        glState.vbo = 0;
+        glState.ebo = 0;
+    }
+
+    inline bool build_quad_pipeline(OpenGL4State& glState)
+    {
+        destroy_quad_pipeline(glState);
+
+        try {
+            constexpr auto vs_source = R"(
+        #version 460 core
+
+        layout(location = 0) in vec2 aPos;       // [-0.5..0.5] quad coords
+        layout(location = 1) in vec2 aTexCoord;  // [0..1] UV coords
+
+        uniform vec4 uTransform; // xy = center in NDC, zw = size in NDC
+        uniform vec4 uUVRegion;  // xy = UV offset, zw = UV size
+
+        out vec2 vUV;
+
+        void main() {
+            vec2 pos = aPos * uTransform.zw + uTransform.xy;
+            gl_Position = vec4(pos, 0.0, 1.0);
+            vUV = uUVRegion.xy + aTexCoord * uUVRegion.zw;
+        }
+    )";
+
+            constexpr auto fs_source = R"(
+        #version 460 core
+        in vec2 vUV;
+        out vec4 outColor;
+
+        uniform sampler2D uTexture;
+
+        void main() {
+            outColor = texture(uTexture, vUV);
+        }
+    )";
+
+            glState.shader = linkProgram(vs_source, fs_source);
+        }
+        catch (const std::exception& ex) {
+            std::cerr << "[OpenGL] Failed to build quad pipeline: " << ex.what() << "\n";
+            destroy_quad_pipeline(glState);
+            return false;
+        }
+
+        glState.uUVRegionLoc = glGetUniformLocation(glState.shader, "uUVRegion");
+        glState.uTransformLoc = glGetUniformLocation(glState.shader, "uTransform");
+        glState.uSamplerLoc = glGetUniformLocation(glState.shader, "uTexture");
+
+        if (glState.uSamplerLoc >= 0) {
+            glUseProgram(glState.shader);
+            glUniform1i(glState.uSamplerLoc, 0);
+            glUseProgram(0);
+        }
+
+        glGenVertexArrays(1, &glState.vao);
+        glGenBuffers(1, &glState.vbo);
+        glGenBuffers(1, &glState.ebo);
+
+        if (!glState.vao || !glState.vbo || !glState.ebo) {
+            std::cerr << "[OpenGL] Failed to allocate quad geometry buffers\n";
+            destroy_quad_pipeline(glState);
+            return false;
+        }
+
+        glBindVertexArray(glState.vao);
+        glBindBuffer(GL_ARRAY_BUFFER, glState.vbo);
+
+        constexpr float quadVerts[] = {
+            -0.5f, -0.5f,    0.0f, 0.0f,
+             0.5f, -0.5f,    1.0f, 0.0f,
+             0.5f,  0.5f,    1.0f, 1.0f,
+            -0.5f,  0.5f,    0.0f, 1.0f
+        };
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerts), quadVerts, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glState.ebo);
+
+        constexpr unsigned int quadIndices[] = {
+            0, 1, 2,
+            2, 3, 0
+        };
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        std::cerr << "[OpenGL] Quad pipeline (shader/VAO/VBO/EBO) rebuilt\n";
+        return true;
+    }
+
+    inline bool ensure_quad_pipeline(OpenGL4State& glState)
+    {
+        const bool shaderValid = glState.shader != 0 && glIsProgram(glState.shader) == GL_TRUE;
+        const bool vaoValid = glState.vao != 0 && glIsVertexArray(glState.vao) == GL_TRUE;
+        const bool vboValid = glState.vbo != 0 && glIsBuffer(glState.vbo) == GL_TRUE;
+        const bool eboValid = glState.ebo != 0 && glIsBuffer(glState.ebo) == GL_TRUE;
+
+        if (shaderValid && vaoValid && vboValid && eboValid)
+            return true;
+
+        return build_quad_pipeline(glState);
     }
 
     // — Engine hooks
@@ -233,95 +369,16 @@ namespace almondnamespace::openglcontext
         if (!gladLoadGL())
             throw std::runtime_error("Failed to initialize GLAD");
 
-        // Compile & link shaders (vertex and fragment)
-        constexpr auto vs_source = R"(
-        #version 460 core
-
-        layout(location = 0) in vec2 aPos;       // [-0.5..0.5] quad coords
-        layout(location = 1) in vec2 aTexCoord;  // [0..1] UV coords
-
-        uniform vec4 uTransform; // xy = center in NDC, zw = size in NDC
-        uniform vec4 uUVRegion;  // xy = UV offset, zw = UV size
-
-        out vec2 vUV;
-
-        void main() {
-            vec2 pos = aPos * uTransform.zw + uTransform.xy;
-            gl_Position = vec4(pos, 0.0, 1.0);
-            vUV = uUVRegion.xy + vec2(aTexCoord.x, 1.0 - aTexCoord.y) * uUVRegion.zw;
-        }
-    )";
-
-        constexpr auto fs_source = R"(
-        #version 460 core
-        in vec2 vUV;
-        out vec4 outColor;
-
-        uniform sampler2D uTexture;
-
-        void main() {
-            outColor = texture(uTexture, vUV);
-        }
-    )";
-
-
-        // Compile shader program
-        glState.shader = linkProgram(vs_source, fs_source);
-        glState.uUVRegionLoc = glGetUniformLocation(glState.shader, "uUVRegion");
-        glState.uTransformLoc = glGetUniformLocation(glState.shader, "uTransform");
-        glState.uSamplerLoc = glGetUniformLocation(glState.shader, "uTexture");
-
-        glUseProgram(glState.shader);
-        if (glState.uSamplerLoc >= 0)
-            glUniform1i(glState.uSamplerLoc, 0);
-        glUseProgram(0);
-
-        std::cerr << "[OpenGL Init] Shader program compiled/linked\n";
-
-        // -----------------------------------------------------------------
-        // Step 8: Quad VAO/VBO/EBO
-        // -----------------------------------------------------------------
-        glGenVertexArrays(1, &glState.vao);
-        glGenBuffers(1, &glState.vbo);
-        glGenBuffers(1, &glState.ebo);
-
-        glBindVertexArray(glState.vao);
-
-        constexpr float quadVerts[] = {
-            -0.5f, -0.5f,    0.0f, 0.0f,
-             0.5f, -0.5f,    1.0f, 0.0f,
-             0.5f,  0.5f,    1.0f, 1.0f,
-            -0.5f,  0.5f,    0.0f, 1.0f
-        };
-
-        glBindBuffer(GL_ARRAY_BUFFER, glState.vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVerts), quadVerts, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-
-        glEnableVertexAttribArray(1);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-
-        constexpr unsigned int quadIndices[] = { 
-            0, 1, 2,
-            2, 3, 0 
-        };
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, glState.ebo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), quadIndices, GL_STATIC_DRAW);
-
-        glBindVertexArray(0);
-
-        std::cerr << "[OpenGL Init] Quad VAO/VBO/EBO created\n";
+        if (!build_quad_pipeline(glState))
+            throw std::runtime_error("Failed to build OpenGL quad pipeline");
 
         // -----------------------------------------------------------------
         // Step 9: Hook texture uploads
         // -----------------------------------------------------------------
-        atlasmanager::ensure_uploaded_backend = [](const TextureAtlas& atlas) {
-            opengltextures::ensure_uploaded(atlas);
-            };
+        atlasmanager::register_backend_uploader(core::ContextType::OpenGL,
+            [](const TextureAtlas& atlas) {
+                opengltextures::ensure_uploaded(atlas);
+            });
 
         // -----------------------------------------------------------------
         // Step 10: Sync context with GL state
@@ -347,8 +404,8 @@ namespace almondnamespace::openglcontext
     inline int  opengl_get_height() { 
         RECT r; GetClientRect(s_openglstate.hwnd, &r); return r.bottom - r.top;
     }
-    inline void opengl_clear(core::Context& ctx) {
-        glViewport(0, 0, ctx.width, ctx.height);
+    inline void opengl_clear(std::shared_ptr<core::Context> ctx) {
+        glViewport(0, 0, ctx->width, ctx->height);
         glClearColor(0.f, 0.f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
     }
@@ -356,18 +413,60 @@ namespace almondnamespace::openglcontext
     // ------------------------------------------------------
     // Per-frame process: clear, run commands, swap
     // ------------------------------------------------------
-    inline bool opengl_process(core::Context& ctx, core::CommandQueue& queue)
+    inline bool opengl_process(std::shared_ptr<core::Context> ctx, core::CommandQueue& queue)
     {
         auto& backend = opengltextures::get_opengl_backend();
         auto& glState = backend.glState;
 
-        if (!ctx.hdc || !ctx.hglrc) {
-            std::cerr << "[OpenGL] Context not ready (hdc=" << ctx.hdc
-                << ", hglrc=" << ctx.hglrc << ")\n";
+        atlasmanager::process_pending_uploads(core::ContextType::OpenGL);
+
+        if (!ctx->hdc || !ctx->hglrc) {
+            std::cerr << "[OpenGL] Context not ready (hdc=" << ctx->hdc
+                << ", hglrc=" << ctx->hglrc << ")\n";
             return false;
         }
 
-        if (!wglMakeCurrent(ctx.hdc, ctx.hglrc)) return true;
+        if (!wglMakeCurrent(ctx->hdc, ctx->hglrc)) {
+            DWORD err = GetLastError();
+            std::cerr << "[OpenGL] wglMakeCurrent failed (error " << err
+                << ") — attempting recovery\n";
+
+            if (backend.glState.hdc && backend.glState.hglrc) {
+                ctx->hdc = backend.glState.hdc;
+                ctx->hglrc = backend.glState.hglrc;
+            }
+
+            if (!ctx->hdc || !ctx->hglrc || !wglMakeCurrent(ctx->hdc, ctx->hglrc)) {
+                std::cerr << "[OpenGL] Unable to recover current context — skipping frame\n";
+                return true;
+            }
+        }
+
+        if (!ensure_quad_pipeline(glState)) {
+            std::cerr << "[OpenGL] Failed to ensure quad pipeline\n";
+            queue.drain();
+            wglMakeCurrent(nullptr, nullptr);
+            return true;
+        }
+
+        std::vector<const TextureAtlas*> atlasesToReload;
+        for (auto& [atlas, gpu] : backend.gpu_atlases) {
+            const bool handleMissing = gpu.textureHandle == 0;
+            const bool handleValid = !handleMissing && glIsTexture(gpu.textureHandle) == GL_TRUE;
+            if (handleMissing || !handleValid) {
+                if (handleValid) {
+                    glDeleteTextures(1, &gpu.textureHandle);
+                }
+                gpu.textureHandle = 0;
+                gpu.version = 0;
+                atlasesToReload.push_back(atlas);
+            }
+        }
+
+        for (const TextureAtlas* atlas : atlasesToReload) {
+            if (atlas)
+                opengltextures::upload_atlas_to_gpu(*atlas);
+        }
 
         // ─── Time & events ──────────────────────────────────────────────────────
         //static auto lastReal = std::chrono::steady_clock::now();
@@ -395,81 +494,37 @@ namespace almondnamespace::openglcontext
         if (glState.vao == 0 || glState.vbo == 0 || glState.ebo == 0) {
             std::cerr << "[OpenGL] VAO/VBO/EBO not initialized!\n";
             queue.drain();
-            SwapBuffers(ctx.hdc);
+            SwapBuffers(ctx->hdc);
             wglMakeCurrent(nullptr, nullptr);
             return true;
-        }
-
-        if (!atlasmanager::atlas_vector.empty()) {
-            const auto* atlas = atlasmanager::atlas_vector[0];
-            auto it = backend.gpu_atlases.find(atlas);
-            if (it != backend.gpu_atlases.end()) {
-                GLuint tex = it->second.textureHandle;
-
-                if (tex == 0) {
-                    std::cerr << "[OpenGL] Warning: texture handle is 0\n";
-                }
-                else {
-                    glUseProgram(glState.shader);
-                    glBindVertexArray(glState.vao);
-
-                    glActiveTexture(GL_TEXTURE0);
-                    glBindTexture(GL_TEXTURE_2D, tex);
-
-                    if (glState.uTransformLoc >= 0)
-                        glUniform4f(glState.uTransformLoc,
-                            0.0f, 0.0f,   // center
-                            2.0f, 2.0f);  // span whole screen
-
-                    if (glState.uUVRegionLoc >= 0)
-                        glUniform4f(glState.uUVRegionLoc,
-                            0.0f, 0.0f,
-                            1.0f, 1.0f);
-
-                    // Double-check bound EBO before drawing
-                    GLint boundEbo = 0;
-                    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &boundEbo);
-                    if (boundEbo == 0) {
-                        std::cerr << "[OpenGL] No element buffer bound!\n";
-                    }
-                    else {
-                        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-                    }
-
-                    // Unbind for hygiene
-                    glBindVertexArray(0);
-                    glBindTexture(GL_TEXTURE_2D, 0);
-                    glUseProgram(0);
-                }
-            }
         }
 
         // --- Update input each frame ---
         almondnamespace::input::poll_input();
 
         // Pipe global input into context functions
-        ctx.is_key_held = [](almondnamespace::input::Key key) -> bool {
+        ctx->is_key_held = [](almondnamespace::input::Key key) -> bool {
             return almondnamespace::input::is_key_held(key);
             };
-        ctx.is_key_down = [](almondnamespace::input::Key key) -> bool {
+        ctx->is_key_down = [](almondnamespace::input::Key key) -> bool {
             return almondnamespace::input::is_key_down(key);
             };
-        ctx.is_mouse_button_held = [](almondnamespace::input::MouseButton btn) -> bool {
+        ctx->is_mouse_button_held = [](almondnamespace::input::MouseButton btn) -> bool {
             return almondnamespace::input::is_mouse_button_held(btn);
             };
-        ctx.is_mouse_button_down = [](almondnamespace::input::MouseButton btn) -> bool {
+        ctx->is_mouse_button_down = [](almondnamespace::input::MouseButton btn) -> bool {
             return almondnamespace::input::is_mouse_button_down(btn);
             };
 
         queue.drain();
-        SwapBuffers(ctx.hdc);
+        SwapBuffers(ctx->hdc);
 
         wglMakeCurrent(nullptr, nullptr);
         return true;
     }
 
 
-    inline void opengl_cleanup(std::shared_ptr<core::Context>& ctx) {
+    inline void opengl_cleanup(std::shared_ptr<core::Context> ctx) {
         if (ctx->hglrc) {
             wglMakeCurrent(nullptr, nullptr);
             wglDeleteContext(ctx->hglrc);
@@ -481,122 +536,6 @@ namespace almondnamespace::openglcontext
         }
     }
 
-    // main context thread
-    //inline bool opengl_process(core::Context& ctx) {
-    //    MSG msg{};
-    //    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-    //        if (msg.message == WM_QUIT) return false;
-    //        TranslateMessage(&msg);
-    //        DispatchMessage(&msg);
-    //    }
-
-    //    HDC hdc = s_openglstate.hdc;
-    //    HGLRC hglrc = s_openglstate.hglrc;
-
-    //    if (!hdc || !hglrc) return false;
-
-    //    // Make context current on THIS thread only
-    //    if (!wglMakeCurrent(hdc, hglrc)) {
-    //        DWORD err = GetLastError();
-    //        std::cerr << "[OPENGL] Failed to make context current, GetLastError = " << err << "\n";
-    //        s_openglstate.running = false;
-    //        return false;
-    //    }
-
-    //    glViewport(0, 0, s_openglstate.width, s_openglstate.height);
-    //    glClearColor(0.f, 0.f, 1.f, 1.f);
-    //    glClear(GL_COLOR_BUFFER_BIT);
-
-    //    // Execute queued render commands safely
-    //    {
-    //        std::scoped_lock lock(s_commandMutex);
-    //        while (!s_renderCommands.empty()) {
-    //            auto& cmd = s_renderCommands.front();
-    //            cmd();
-    //            s_renderCommands.pop();
-    //        }
-    //    }
-
-    //    // Swap buffers for this window
-    //    SwapBuffers(hdc);
-
-    //    // Exit condition
-    //    if (!s_openglstate.running || almondnamespace::input::is_key_down(almondnamespace::input::Key::Escape)) {
-    //        s_openglstate.running = false;
-    //        wglMakeCurrent(nullptr, nullptr);
-    //        return false;
-    //    }
-
-    //    wglMakeCurrent(nullptr, nullptr); // always unbind
-    //    return true;
-    
-    
-    //    // ─── Time & events ──────────────────────────────────────────────────────
-    //    static auto lastReal = std::chrono::steady_clock::now();
-    //    auto nowReal = std::chrono::steady_clock::now();
-    //    s_clockSystem.advanceTime(nowReal - lastReal);
-    //    lastReal = nowReal;
-
-    //    platform::pump_events();
-
-    //    // ─── FPS logging ────────────────────────────────────────────────────────
-    //    ++s_frameCount;
-    //    if (s_pollTimer.elapsed() >= 0.3) {
-    //        s_pollTimer.restart();
-    //    }
-    //    if (s_fpsTimer.elapsed() >= 1.0) {
-    //        std::cout << "FPS: " << s_frameCount << "\n";
-    //        s_frameCount = 0;
-    //        s_fpsTimer.restart();
-    //    }
-
-    //    // ─── Clear & viewport ───────────────────────────────────────────────────
-    //    RECT r;
-    //    GetClientRect(s_hwnd, &r);
-    //    glViewport(0, 0, r.right - r.left, r.bottom - r.top);
-    //    glClear(GL_COLOR_BUFFER_BIT);
-
-    //    // ─── Draw “test_sprite” ─────────────────────────────────────────────────
-    //    if (auto opt = s_registry.get("test_sprite")) {
-    //        auto [globalSlot, u0, v0, u1, v1, px, py] = *opt;
-
-    //        // decode atlas index and local slot
-    //        int atlasIdx = globalSlot >> 16;
-    //        int local = globalSlot & 0xFFFF;
-
-    //        // fetch the correct Atlas (heap‐allocated)
-    //        Atlas& A = *s_atlases.at(atlasIdx);
-
-    //        // compute UV region
-    //        float du = u1 - u0;
-    //        float dv = v1 - v0;
-
-    //        // bind shader + texture + draw
-    //        glUseProgram(s_shader);
-    //        glUniform4f(
-    //            glGetUniformLocation(s_shader, "uRegion"),
-    //            u0, v0, du, dv
-    //        );
-    //        glActiveTexture(GL_TEXTURE0);
-    //        glBindTexture(GL_TEXTURE_2D, A.glHandle);
-    //        glBindVertexArray(s_vao);
-    //        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-    //    }
-
-    //    // ─── Present ────────────────────────────────────────────────────────────
-    //    SwapBuffers(s_hdc);
-   // }
-
-
-    //inline bool process(Context& ctx) //override
-    //{
-    //    opengl_process(Context & ctx);
-    //    return true;
-    //}
-
-	// Context state getters/setters
-    inline bool OpenGLGetIsRunning(std::shared_ptr<core::Context> ctx) { return s_openglstate.running; }
-    inline bool OpenGLSetIsRunning(std::shared_ptr<core::Context> ctx) { return s_openglstate.running = false; }
 
 } // namespace almond::opengl
 

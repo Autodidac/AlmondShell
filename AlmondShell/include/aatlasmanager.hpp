@@ -28,14 +28,20 @@
 #include "aatlastexture.hpp"
 #include "aspriteregistry.hpp"
 #include "aspritehandle.hpp"
+#include "acontexttype.hpp"
 
-#include <unordered_map>
-#include <string>
-#include <vector>
-#include <tuple>
-#include <optional>
-#include <iostream>
 #include <atomic>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <queue>
+#include <shared_mutex>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <vector>
 
 namespace almondnamespace::atlasmanager
 {
@@ -46,6 +52,10 @@ namespace almondnamespace::atlasmanager
 
     inline SpriteRegistry registry;
     inline std::unordered_map<std::string, TextureAtlas> atlas_map;
+
+    inline std::shared_mutex atlasMutex;
+    inline std::shared_mutex registrarMutex;
+
     inline std::atomic<int> nextAtlasIndex = 0; // unique atlas id allocator
 
     // --- Global atlas vector for direct atlasIndex lookup ---
@@ -58,6 +68,7 @@ namespace almondnamespace::atlasmanager
         explicit AtlasRegistrar(TextureAtlas& atlas_) noexcept
             : atlas(atlas_) {
         }
+
 
 		// Bulk registration from slices (name, x, y, w, h) when loading from a texture atlas file
         bool register_atlas_sprites_by_custom_sizes(const std::vector<std::tuple<std::string, int, int, int, int>>& sliceRects)
@@ -185,18 +196,7 @@ namespace almondnamespace::atlasmanager
                 return std::nullopt;
             }
             auto& added = *addedOpt;
-
-            int localIndex = -1;
-            for (int i = 0; i < static_cast<int>(sharedAtlas.entries.size()); ++i) {
-                if (sharedAtlas.entries[i].name == name) {
-                    localIndex = i;
-                    break;
-                }
-            }
-            if (localIndex < 0) {
-                std::cerr << "[AtlasRegistrar] Could not find local sprite index for '" << name << "'\n";
-                return std::nullopt;
-            }
+            const int localIndex = added.index;
 
             auto allocated = allocate();
             if (!allocated.is_valid()) {
@@ -221,7 +221,9 @@ namespace almondnamespace::atlasmanager
         }
     };
 
-    inline void update_atlas_vector()
+    inline std::unordered_map<std::string, std::unique_ptr<AtlasRegistrar>> registrar_map;
+
+    inline void update_atlas_vector_locked()
     {
         int maxIndex = -1;
         for (const auto& [name, atlas] : atlas_map) {
@@ -242,51 +244,214 @@ namespace almondnamespace::atlasmanager
         }
     }
 
-	inline std::unordered_map<std::string, AtlasRegistrar> registrar_map; // Registrar map for named atlases
+    namespace detail
+    {
+        struct PendingUpload
+        {
+            const TextureAtlas* atlas{ nullptr };
+            u64 version{ 0 };
+        };
 
- //   inline int get_next_atlas_index() noexcept
- //   {
- //       return nextAtlasIndex.load(std::memory_order_relaxed);
-	//}
+        struct BackendUploadState
+        {
+            std::function<void(const TextureAtlas&)> ensureFn{};
+            std::queue<const TextureAtlas*> pending{};
+            std::unordered_map<const TextureAtlas*, u64> uploadedVersions{};
+            std::unordered_map<const TextureAtlas*, u64> pendingVersions{};
+        };
+
+        inline std::mutex backendMutex;
+        inline std::unordered_map<core::ContextType, BackendUploadState> backendStates;
+        inline thread_local bool processingUploads = false;
+        inline thread_local std::optional<core::ContextType> activeBackend = std::nullopt;
+
+        inline void enqueue_locked(BackendUploadState& state, const TextureAtlas& atlas)
+        {
+            const u64 version = atlas.version;
+            auto [it, inserted] = state.pendingVersions.emplace(&atlas, version);
+            if (!inserted && it->second >= version)
+                return;
+
+            it->second = version;
+            state.pending.push(&atlas);
+        }
+    } // namespace detail
+
+    inline void notify_backends_of_new_atlas(const TextureAtlas& atlas)
+    {
+        std::scoped_lock lock(detail::backendMutex);
+        for (auto& [_, state] : detail::backendStates) {
+            if (!state.ensureFn)
+                continue;
+            detail::enqueue_locked(state, atlas);
+        }
+    }
 
     inline bool create_atlas(const AtlasConfig& config)
     {
         AtlasConfig copy = config;
-        copy.index = nextAtlasIndex++;  // Assign unique incremental index
+        copy.index = nextAtlasIndex.fetch_add(1, std::memory_order_relaxed);  // Assign unique incremental index
         TextureAtlas atlas = TextureAtlas::create(copy);
-        std::cerr << "[create_atlas] Created atlas index = " << atlas.index << "\n"; // MUST NOT BE -1
 
+        if (atlas.index < 0) {
+            std::cerr << "[create_atlas] Failed to initialize atlas '" << config.name << "'\n";
+            return false;
+        }
+
+        std::unique_lock atlasLock(atlasMutex);
         auto [it, inserted] = atlas_map.emplace(config.name, std::move(atlas));
         if (!inserted) {
             std::cerr << "[create_atlas] Atlas already exists: " << config.name << "\n";
             return false;
         }
 
-        registrar_map.emplace(config.name, AtlasRegistrar{ it->second });
+        TextureAtlas& storedAtlas = it->second;
+        update_atlas_vector_locked();
+        atlasLock.unlock();
 
-        update_atlas_vector();
+        {
+            std::unique_lock registrarLock(registrarMutex);
+            registrar_map.emplace(config.name, std::make_unique<AtlasRegistrar>(storedAtlas));
+        }
 
+        notify_backends_of_new_atlas(storedAtlas);
         return true;
     }
 
     inline AtlasRegistrar* get_registrar(const std::string& name)
     {
+        std::shared_lock lock(registrarMutex);
         auto it = registrar_map.find(name);
-        return (it != registrar_map.end()) ? &it->second : nullptr;
+        return (it != registrar_map.end()) ? it->second.get() : nullptr;
     }
 
     inline const std::vector<const TextureAtlas*>& get_atlas_vector()
     {
+        std::shared_lock lock(atlasMutex);
         return atlas_vector;
     }
 
-	// Function to set the backend for ensure_uploaded (context dependent texture function)
-    inline std::function<void(const TextureAtlas&)> ensure_uploaded_backend;
-    inline void ensure_uploaded(const TextureAtlas& atlas) {
-        if (ensure_uploaded_backend) {
-            ensure_uploaded_backend(atlas); }
-        else { 
-            throw std::runtime_error("[AtlasManager] No backend set for ensure_uploaded()"); }
+    inline void register_backend_uploader(core::ContextType type,
+        std::function<void(const TextureAtlas&)> ensureFn)
+    {
+        std::unique_lock backendLock(detail::backendMutex);
+        auto& state = detail::backendStates[type];
+        state.ensureFn = std::move(ensureFn);
+        state.pending = {};
+        state.pendingVersions.clear();
+        state.uploadedVersions.clear();
+
+        std::shared_lock atlasLock(atlasMutex);
+        for (auto& [_, atlas] : atlas_map) {
+            detail::enqueue_locked(state, atlas);
+        }
     }
 
-} // namespace almondnamespace
+    inline void unregister_backend_uploader(core::ContextType type)
+    {
+        std::scoped_lock lock(detail::backendMutex);
+        detail::backendStates.erase(type);
+    }
+
+    inline void enqueue_upload_for_all(const TextureAtlas& atlas)
+    {
+        std::scoped_lock lock(detail::backendMutex);
+        for (auto& [_, state] : detail::backendStates) {
+            if (!state.ensureFn)
+                continue;
+            detail::enqueue_locked(state, atlas);
+        }
+    }
+
+    inline void process_pending_uploads(core::ContextType type)
+    {
+        if (detail::processingUploads)
+            return;
+
+        std::vector<detail::PendingUpload> tasks;
+        std::function<void(const TextureAtlas&)> ensure;
+
+        {
+            std::scoped_lock lock(detail::backendMutex);
+            auto it = detail::backendStates.find(type);
+            if (it == detail::backendStates.end() || !it->second.ensureFn)
+                return;
+
+            ensure = it->second.ensureFn;
+            auto& state = it->second;
+
+            while (!state.pending.empty()) {
+                const TextureAtlas* atlas = state.pending.front();
+                state.pending.pop();
+                if (!atlas)
+                    continue;
+
+                u64 version = atlas->version;
+                if (auto pend = state.pendingVersions.find(atlas); pend != state.pendingVersions.end()) {
+                    version = pend->second;
+                    state.pendingVersions.erase(pend);
+                }
+
+                if (auto uploaded = state.uploadedVersions.find(atlas);
+                    uploaded != state.uploadedVersions.end() && uploaded->second >= version) {
+                    continue;
+                }
+
+                tasks.push_back({ atlas, version });
+            }
+        }
+
+        if (tasks.empty())
+            return;
+
+        const bool previousProcessing = detail::processingUploads;
+        auto previousBackend = detail::activeBackend;
+        detail::processingUploads = true;
+        detail::activeBackend = type;
+
+        std::vector<detail::PendingUpload> completed;
+        completed.reserve(tasks.size());
+
+        for (auto& task : tasks) {
+            try {
+                ensure(*task.atlas);
+                completed.push_back(task);
+            }
+            catch (const std::exception& e) {
+                std::cerr << "[AtlasManager] Texture upload failed for '" << task.atlas->name
+                    << "': " << e.what() << "\n";
+            }
+            catch (...) {
+                std::cerr << "[AtlasManager] Texture upload failed for '" << task.atlas->name
+                    << "' (unknown error)\n";
+            }
+        }
+
+        detail::processingUploads = previousProcessing;
+        detail::activeBackend = previousBackend;
+
+        if (completed.empty())
+            return;
+
+        {
+            std::scoped_lock lock(detail::backendMutex);
+            auto it = detail::backendStates.find(type);
+            if (it == detail::backendStates.end())
+                return;
+
+            for (const auto& task : completed) {
+                it->second.uploadedVersions[task.atlas] = task.version;
+            }
+        }
+    }
+
+    inline void ensure_uploaded(const TextureAtlas& atlas)
+    {
+        enqueue_upload_for_all(atlas);
+
+        if (detail::activeBackend && !detail::processingUploads) {
+            process_pending_uploads(*detail::activeBackend);
+        }
+    }
+
+} // namespace almondnamespace::atlasmanager

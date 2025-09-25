@@ -29,11 +29,7 @@
 
 #include "acontext.hpp"       // Context, ContextType
 #include "acontexttype.hpp"
-#include "aopenglcontext.hpp" // RendererContext, RenderMode
-#include "asdlcontext.hpp"    // SDLContext
-#include "asfmlcontext.hpp"   // SFMLContext
-#include "araylibcontext.hpp" // RaylibContext
-#include "asoftrenderer_context.hpp" // SoftwareContext
+#include "awindowdata.hpp"
 
 //#include <windows.h>
 //#include <windowsx.h>
@@ -62,12 +58,13 @@
 #define ALMOND_USING_DOCKING 1  // Enable docking features
 #define ALMOND_SHARED_CONTEXT 1 // Enable shared OpenGL context
 #endif
+
 namespace almondnamespace::core
 {
     // -----------------------------------------------------------------
     // Global thread table (key = HWND)
     // -----------------------------------------------------------------
-    static std::unordered_map<HWND, std::thread> gThreads;
+    extern std::unordered_map<HWND, std::thread> gThreads;
 
     // -----------------------------------------------------------------
     // Drag state (for child window docking/movement)
@@ -78,7 +75,7 @@ namespace almondnamespace::core
         HWND draggedWindow = nullptr;
         HWND originalParent = nullptr;
     };
-    static DragState gDragState;
+    extern DragState gDragState;
 
     // ======================================================
     // MultiContextManager : Main orchestrator
@@ -128,7 +125,7 @@ namespace almondnamespace::core
         static LRESULT CALLBACK ChildProc(HWND, UINT, WPARAM, LPARAM);
         void HandleDropFiles(HWND, HDROP);
 
-        void InitializeAllContexts();
+        //void InitializeAllContexts();
         static ATOM RegisterParentClass(HINSTANCE, LPCWSTR);
         static ATOM RegisterChildClass(HINSTANCE, LPCWSTR);
 
@@ -152,7 +149,7 @@ namespace almondnamespace::core
         int get_title_bar_thickness(const HWND window_handle);
 
         // ---- Static Shared ----
-        inline static std::shared_ptr<core::Context> currentContext;
+        inline static thread_local std::shared_ptr<core::Context> currentContext;
     };
 
     // ======================================================

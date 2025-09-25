@@ -199,8 +199,8 @@ namespace almondnamespace::raylibtextures
         s_generation.fetch_add(1, std::memory_order_relaxed);
     }
 
-    inline Handle load_atlas(TextureAtlas& atlas, int atlasIndex = 0) {
-        upload_atlas_to_gpu(atlas);
+    inline Handle load_atlas(const TextureAtlas& atlas, int atlasIndex = 0) {
+        atlasmanager::ensure_uploaded(atlas);
         return make_handle(atlasIndex, 0);
     }
 
@@ -214,14 +214,14 @@ namespace almondnamespace::raylibtextures
             .pixels = std::move(rgba.pixels)
         };
 
-        if (!atlas.add_entry(id, texture)) {
+        auto addedOpt = atlas.add_entry(id, texture);
+        if (!addedOpt) {
             throw std::runtime_error("atlas_add_texture: Failed to add texture: " + id);
         }
 
-        upload_atlas_to_gpu(atlas);
+        atlasmanager::ensure_uploaded(atlas);
 
-        int localIdx = static_cast<int>(atlas.entries.size() - 1);
-        return make_handle(0, localIdx);
+        return make_handle(0, addedOpt->index);
     }
 
 } // namespace almondnamespace::raylibcontext

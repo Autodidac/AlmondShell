@@ -38,6 +38,7 @@
 #include "aimageloader.hpp"
 #include "araylibtextures.hpp" // AtlasGPU, gpu_atlases, ensure_uploaded
 #include "araylibstate.hpp" // brings in the actual inline s_state
+#include "aatlasmanager.hpp"
 #include "araylibrenderer.hpp" // RendererContext, RenderMode
 #include "acommandline.hpp" // cli::window_width, cli::window_height
 #include "araylibcontextinput.hpp" // poll_input()
@@ -159,6 +160,12 @@ namespace almondnamespace::raylibcontext
         }
 
         s_raylibstate.running = true;
+
+        atlasmanager::register_backend_uploader(core::ContextType::RayLib,
+            [](const TextureAtlas& atlas) {
+                raylibtextures::ensure_uploaded(atlas);
+            });
+
         return true;
 
 //        //InitRaylibWindow();
@@ -239,6 +246,8 @@ namespace almondnamespace::raylibcontext
             s_raylibstate.running = false;
             return true;
         }
+
+        atlasmanager::process_pending_uploads(core::ContextType::RayLib);
 
         if (!wglMakeCurrent(s_raylibstate.hdc, s_raylibstate.glContext)) {
             s_raylibstate.running = false;

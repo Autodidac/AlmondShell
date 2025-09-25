@@ -34,6 +34,8 @@
 #include "acontext.hpp"
 #include "acontextwindow.hpp"
 #include "acommandline.hpp"
+#include "asfmltextures.hpp"
+#include "aatlasmanager.hpp"
 
 #include <iostream>
 #include <string>
@@ -244,6 +246,12 @@ namespace almondnamespace::sfmlcontext
         std::cout << "[SFML] HGLRC: " << sfmlcontext.glContext << "\n";
 
         sfmlcontext.running = true;
+
+        atlasmanager::register_backend_uploader(core::ContextType::SFML,
+            [](const TextureAtlas& atlas) {
+                sfmlcontext::ensure_uploaded(atlas);
+            });
+
         return true;
     }
 
@@ -295,6 +303,8 @@ namespace almondnamespace::sfmlcontext
 
 
         if (!sfmlcontext.running || !sfmlcontext.window || !sfmlcontext.window->isOpen()) return 1;
+
+        atlasmanager::process_pending_uploads(core::ContextType::SFML);
 
         // ⚠️ This makes the GL context active for SFML’s thread
         if (!wglMakeCurrent(sfmlcontext.hdc, sfmlcontext.glContext)) {

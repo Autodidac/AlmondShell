@@ -261,8 +261,8 @@ namespace almondnamespace::opengltextures
         s_generation.fetch_add(1, std::memory_order_relaxed);
     }
 
-    inline Handle load_atlas(TextureAtlas& atlas, int atlasIndex = 0) {
-        upload_atlas_to_gpu(atlas);
+    inline Handle load_atlas(const TextureAtlas& atlas, int atlasIndex = 0) {
+        atlasmanager::ensure_uploaded(atlas);
         return make_handle(atlasIndex, 0);
     }
 
@@ -276,14 +276,14 @@ namespace almondnamespace::opengltextures
             .pixels = std::move(rgba.pixels)
         };
 
-        if (!atlas.add_entry(id, texture)) {
+        auto addedOpt = atlas.add_entry(id, texture);
+        if (!addedOpt) {
             throw std::runtime_error("atlas_add_texture: Failed to add texture: " + id);
         }
 
-        upload_atlas_to_gpu(atlas);
+        atlasmanager::ensure_uploaded(atlas);
 
-        int localIdx = static_cast<int>(atlas.entries.size() - 1);
-        return make_handle(0, localIdx);
+        return make_handle(0, addedOpt->index);
     }
 
     inline uint32_t upload_texture(const uint8_t* pixels, int width, int height) 
@@ -339,7 +339,9 @@ namespace almondnamespace::opengltextures
             std::cerr << "[DrawSprite] Null atlas pointer at index: " << atlasIdx << '\n';
             return;
         }
-        if (localIdx < 0 || localIdx >= int(atlas->entries.size())) {
+        AtlasRegion region{};
+        std::string spriteName;
+        if (!atlas->try_get_entry_info(localIdx, region, &spriteName)) {
             std::cerr << "[DrawSprite] Sprite index out of bounds: " << localIdx << '\n';
             return;
         }
@@ -347,7 +349,7 @@ namespace almondnamespace::opengltextures
         std::cerr << "[DrawSprite] Using atlas index = " << atlasIdx
             << ", atlas name = '" << atlas->name << "'"
             << ", local sprite index = " << localIdx
-            << ", sprite name = '" << atlas->entries[localIdx].name << "'\n";
+            << ", sprite name = '" << spriteName << "'\n";
 
         std::cerr << "[DrawSprite] Pointer key: " << atlas
             << ", Atlas name: " << atlas->name << "\n";
@@ -386,23 +388,19 @@ namespace almondnamespace::opengltextures
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        const auto& entry = atlas->entries[localIdx];
-
         std::cerr << "[DrawSprite] RAW region: "
-            << "u1=" << entry.region.u1 << ", v1=" << entry.region.v1
-            << ", u2=" << entry.region.u2 << ", v2=" << entry.region.v2 << '\n';
+            << "u1=" << region.u1 << ", v1=" << region.v1
+            << ", u2=" << region.u2 << ", v2=" << region.v2 << '\n';
 
-        // Flip V coords for OpenGL (bottom-left origin)
-        float u0 = entry.region.u1;
-        float u1 = entry.region.u2;
-        float v0 = 1.0f - entry.region.v1;
-        float v1 = 1.0f - entry.region.v2;
+        const float u0 = region.u1;
+        const float du = region.u2 - region.u1;
+        // Image loader already provides vertically flipped data, so feed the
+        // shader a reversed V span to avoid a second flip on the GPU side.
+        const float v0 = region.v2;
+        const float dv = region.v1 - region.v2;
 
-        float du = u1 - u0;
-        float dv = v1 - v0;
-
-        std::cerr << "[DrawSprite] UVs: u0=" << u0 << ", u1=" << u1 << ", du=" << du << "\n";
-        std::cerr << "[DrawSprite] UVs: v0=" << v0 << ", v1=" << v1 << ", dv=" << dv << "\n";
+        std::cerr << "[DrawSprite] UVs: u0=" << u0 << ", du=" << du << "\n";
+        std::cerr << "[DrawSprite] UVs: v0=" << v0 << ", dv=" << dv << "\n";
 
         if (backend.glState.uUVRegionLoc >= 0)
             glUniform4f(backend.glState.uUVRegionLoc, u0, v0, du, dv);
@@ -417,18 +415,18 @@ namespace almondnamespace::opengltextures
         float ndc_h = (height / float(h)) * 2.f;
 
 #if defined(DEBUG_TEXTURE_RENDERING_VERY_VERBOSE)
-        std::cerr << "[DrawSprite] Atlas entries count: " << atlas->entries.size() << "\n";
+        std::cerr << "[DrawSprite] Atlas entries count: " << atlas->entry_count() << "\n";
         std::cerr << "[DrawSprite] Requested sprite index: " << localIdx << "\n";
 
         if (y < 0) {
             std::cerr << "[Warning] Negative y coordinate: " << y << '\n';
         }
 
-        std::cerr << "[DrawSprite] Using region for '" << entry.name << "': "
-            << "u1=" << entry.region.u1 << ", v1=" << entry.region.v1
-            << ", u2=" << entry.region.u2 << ", v2=" << entry.region.v2
-            << ", x=" << entry.region.x << ", y=" << entry.region.y
-            << ", w=" << entry.region.width << ", h=" << entry.region.height << '\n';
+        std::cerr << "[DrawSprite] Using region for '" << spriteName << "': "
+            << "u1=" << region.u1 << ", v1=" << region.v1
+            << ", u2=" << region.u2 << ", v2=" << region.v2
+            << ", x=" << region.x << ", y=" << region.y
+            << ", w=" << region.width << ", h=" << region.height << '\n';
 #endif
 
         std::cerr << "uUVRegionLoc=" << backend.glState.uUVRegionLoc << '\n';
@@ -449,7 +447,7 @@ namespace almondnamespace::opengltextures
 
 #if defined(DEBUG_TEXTURE_RENDERING_VERY_VERBOSE)
         std::cerr << "[DrawSprite] Atlas '" << atlas->name
-            << "' Sprite '" << entry.name
+            << "' Sprite '" << spriteName
             << "' AtlasIdx=" << atlasIdx
             << " SpriteIdx=" << localIdx << '\n';
 #endif

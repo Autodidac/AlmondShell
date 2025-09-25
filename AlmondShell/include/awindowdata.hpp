@@ -31,6 +31,9 @@ namespace almondnamespace::core
 
         CommandQueue commandQueue;
 
+        std::atomic<bool> paused{ false };
+        std::atomic<bool> quiesced{ false };
+
         WindowData() = default;
         WindowData(HWND h, HDC dc, HGLRC ctx, bool shared, almondnamespace::core::ContextType t)
             : hwnd(h), hdc(dc), glContext(ctx), usesSharedContext(shared), type(t) {
@@ -50,6 +53,7 @@ namespace almondnamespace::core
         bool DrainCommands() {
             return commandQueue.drain();
         }
+
     };
 
 } // namespace almondshell::core

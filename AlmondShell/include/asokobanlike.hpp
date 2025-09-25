@@ -81,10 +81,10 @@ namespace almondnamespace::sokoban
 
         // Load each sprite's image separately
         auto wallImg = almondnamespace::a_loadImage("assets/atestimage.ppm", false);
-        auto floorImg = almondnamespace::a_loadImage("assets/default.bmp", false);
+        auto floorImg = almondnamespace::a_loadImage("assets/defaults/default.ppm", false);
         auto goalImg = almondnamespace::a_loadImage("assets/atestimage.ppm", false);
         auto boxImg = almondnamespace::a_loadImage("assets/atestimage.ppm", false);
-        auto playerImg = almondnamespace::a_loadImage("assets/yellow.ppm", false);
+        auto playerImg = almondnamespace::a_loadImage("assets/defaults/yellow.ppm", false);
 
         // Verify all loaded
         if (wallImg.pixels.empty() || floorImg.pixels.empty() || goalImg.pixels.empty() ||

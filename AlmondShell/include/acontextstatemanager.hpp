@@ -29,22 +29,28 @@
 #include <memory>
 #include <stdexcept>
 
-namespace almondnamespace::state
-{
-    struct ContextState; // Forward declaration
-}
-
 namespace almondnamespace
 {
     class ContextManager
     {
     public:
-        static void setContext(std::shared_ptr<state::ContextState> ctx)
+        // Set the active context
+        static void setContext(std::shared_ptr<state::ContextState> ctx) noexcept
         {
             instance() = std::move(ctx);
         }
 
-        static state::ContextState& getContext()
+        // Get the active context (shared_ptr copy)
+        static const std::shared_ptr<state::ContextState> getContext()
+        {
+            auto& inst = instance();
+            if (!inst)
+                throw std::runtime_error("No active ContextState set");
+            return inst; // returns shared_ptr copy
+        }
+
+        // Get the active context by reference (unsafe if reset)
+        static state::ContextState& getContextRef()
         {
             auto& inst = instance();
             if (!inst)
@@ -52,17 +58,20 @@ namespace almondnamespace
             return *inst;
         }
 
-        static void resetContext()
+        // Reset the active context
+        static void resetContext() noexcept
         {
             instance().reset();
         }
 
-        static bool hasContext()
+        // Query if a context is set
+        static bool hasContext() noexcept
         {
             return static_cast<bool>(instance());
         }
 
     private:
+        // Singleton shared_ptr instance
         static std::shared_ptr<state::ContextState>& instance()
         {
             static std::shared_ptr<state::ContextState> s_instance;

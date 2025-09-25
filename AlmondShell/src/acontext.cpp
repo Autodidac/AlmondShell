@@ -29,6 +29,7 @@
 #include "acontext.hpp"
 #include "acontextwindow.hpp"
 #include "acontextmultiplexer.hpp"
+#include "acontextstatemanager.hpp"
 
 #ifdef ALMOND_USING_OPENGL
 #include "aopenglcontext.hpp"
@@ -73,6 +74,7 @@
 
 #include "aimageloader.hpp"
 #include "aatlastexture.hpp"
+#include "aatlasmanager.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -122,7 +124,7 @@ namespace almondnamespace::core {
     }
 
     // ─── Context::process_safe ────────────────────────────────
-    bool Context::process_safe(Context& ctx, CommandQueue& queue) {
+    bool Context::process_safe(std::shared_ptr<core::Context> ctx, CommandQueue& queue) {
         if (!process) return false;
         try {
             return process(ctx, queue);
@@ -162,35 +164,48 @@ namespace almondnamespace::core {
         }
     }
 
-    inline uint32_t AddAtlasThunk(TextureAtlas atlas, ContextType type) {
+    inline uint32_t AddAtlasThunk(const TextureAtlas& atlas, ContextType type) {
+        atlasmanager::ensure_uploaded(atlas);
+
+        uint32_t handle = 0;
         switch (type) {
 #ifdef ALMOND_USING_OPENGL
-        case ContextType::OpenGL: return opengltextures::load_atlas(atlas, 0);
+        case ContextType::OpenGL: handle = opengltextures::load_atlas(atlas, 0); break;
 #endif
 #ifdef ALMOND_USING_SDL
-        case ContextType::SDL:  return sdlcontext::load_atlas(atlas, 0);
+        case ContextType::SDL:  handle = sdlcontext::load_atlas(atlas, 0); break;
 #endif
 #ifdef ALMOND_USING_SFML
-        case ContextType::SFML: return sfmlcontext::load_atlas(atlas, 0);
+        case ContextType::SFML: handle = sfmlcontext::load_atlas(atlas, 0); break;
 #endif
 #ifdef ALMOND_USING_RAYLIB
-        case ContextType::RayLib: return raylibtextures::load_atlas(atlas, 0);
+        case ContextType::RayLib: handle = raylibtextures::load_atlas(atlas, 0); break;
 #endif
 #ifdef ALMOND_USING_VULKAN
-        case ContextType::Vulkan: return vulkancontext::load_atlas(atlas, 0);
+        case ContextType::Vulkan: handle = vulkancontext::load_atlas(atlas, 0); break;
 #endif
 #ifdef ALMOND_USING_DIRECTX
-        case ContextType::DirectX: return directxcontext::load_atlas(atlas, 0);
+        case ContextType::DirectX: handle = directxcontext::load_atlas(atlas, 0); break;
 #endif
-        default: (void)atlas; return 0;
+        default:
+            std::cerr << "[AddAtlasThunk] Unsupported context type\n";
+            break;
         }
+        if (handle != 0) {
+            atlasmanager::process_pending_uploads(type);
+        }
+        return handle;
     }
 
     // ─── Backend stubs (minimal no-op defaults) ──────────────
 #ifdef ALMOND_USING_OPENGL
     inline void opengl_initialize() {}
     inline void opengl_cleanup() {}
-    bool opengl_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool opengl_process(std::shared_ptr<core::Context> ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx->type);
+        queue.drain();
+        return true;
+    }
     inline void opengl_clear() {}
     inline void opengl_present() {}
     inline int  opengl_get_width() { return 1280; }
@@ -200,7 +215,11 @@ namespace almondnamespace::core {
 #ifdef ALMOND_USING_SDL
     inline void sdl_initialize() {}
     inline void sdl_cleanup() {}
-    bool sdl_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool sdl_process(Context& ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx.type);
+        queue.drain();
+        return true;
+    }
     inline void sdl_clear() {}
     inline void sdl_present() {}
     inline int  sdl_get_width() { return 1280; }
@@ -210,7 +229,11 @@ namespace almondnamespace::core {
 #ifdef ALMOND_USING_SFML
     inline void sfml_initialize() {}
     inline void sfml_cleanup() {}
-    bool sfml_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool sfml_process(Context& ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx.type);
+        queue.drain();
+        return true;
+    }
     inline void sfml_clear() {}
     inline void sfml_present() {}
     inline int  sfml_get_width() { return 1280; }
@@ -220,7 +243,11 @@ namespace almondnamespace::core {
 #ifdef ALMOND_USING_RAYLIB
     inline void raylib_initialize() {}
     inline void raylib_cleanup() {}
-    bool raylib_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool raylib_process(Context& ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx.type);
+        queue.drain();
+        return true;
+    }
     inline void raylib_clear() {}
     inline void raylib_present() {}
     inline int  raylib_get_width() { return 1280; }
@@ -230,7 +257,11 @@ namespace almondnamespace::core {
 #ifdef ALMOND_USING_VULKAN
     inline void vulkan_initialize() {}
     inline void vulkan_cleanup() {}
-    bool vulkan_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool vulkan_process(Context& ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx.type);
+        queue.drain();
+        return true;
+    }
     inline void vulkan_clear() {}
     inline void vulkan_present() {}
     inline int  vulkan_get_width() { return 1280; }
@@ -240,7 +271,11 @@ namespace almondnamespace::core {
 #ifdef ALMOND_USING_DIRECTX
     inline void directx_initialize() {}
     inline void directx_cleanup() {}
-    bool directx_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool directx_process(Context& ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx.type);
+        queue.drain();
+        return true;
+    }
     inline void directx_clear() {}
     inline void directx_present() {}
     inline int  directx_get_width() { return 1280; }
@@ -250,7 +285,11 @@ namespace almondnamespace::core {
 #ifdef ALMOND_USING_CUSTOM
     inline void custom_initialize() {}
     inline void custom_cleanup() {}
-    bool custom_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool custom_process(Context& ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx.type);
+        queue.drain();
+        return true;
+    }
     inline void custom_clear() {}
     inline void custom_present() {}
     inline int  custom_get_width() { return 1280; }
@@ -260,7 +299,11 @@ namespace almondnamespace::core {
 #ifdef ALMOND_USING_SOFTWARE_RENDERER
     inline void softrenderer_initialize() {}
     inline void softrenderer_cleanup() {}
-    bool softrenderer_process(Context& ctx, CommandQueue& queue) { queue.drain(); return true; }
+    bool softrenderer_process(Context& ctx, CommandQueue& queue) {
+        atlasmanager::process_pending_uploads(ctx.type);
+        queue.drain();
+        return true;
+    }
     inline void softrenderer_clear() {}
     inline void softrenderer_present() {}
     inline int  softrenderer_get_width() { return 800; }
@@ -269,17 +312,122 @@ namespace almondnamespace::core {
 
 
     // ─── Init all backends ───────────────────────────────────
+    namespace {
+        inline void copy_atomic_function(AlmondAtomicFunction<uint32_t(TextureAtlas&, std::string, const ImageData&)>& dst,
+            const AlmondAtomicFunction<uint32_t(TextureAtlas&, std::string, const ImageData&)>& src) {
+            dst.ptr.store(src.ptr.load(std::memory_order_acquire), std::memory_order_release);
+        }
+
+        inline void copy_atomic_function(AlmondAtomicFunction<uint32_t(const TextureAtlas&)>& dst,
+            const AlmondAtomicFunction<uint32_t(const TextureAtlas&)>& src) {
+            dst.ptr.store(src.ptr.load(std::memory_order_acquire), std::memory_order_release);
+        }
+
+#ifdef ALMOND_USING_OPENGL
+        void opengl_clear_adapter() {
+            if (auto ctx = MultiContextManager::GetCurrent()) {
+                almondnamespace::openglcontext::opengl_clear(ctx);
+            }
+        }
+
+        void opengl_cleanup_adapter() {
+            if (auto ctx = MultiContextManager::GetCurrent()) {
+                auto copy = ctx;
+                almondnamespace::openglcontext::opengl_cleanup(copy);
+            }
+        }
+#endif
+
+#ifdef ALMOND_USING_SOFTWARE_RENDERER
+        void softrenderer_cleanup_adapter() {
+            if (auto ctx = MultiContextManager::GetCurrent()) {
+                auto copy = ctx;
+                almondnamespace::anativecontext::softrenderer_cleanup(copy);
+            }
+        }
+#endif
+
+#ifdef ALMOND_USING_SDL
+        void sdl_cleanup_adapter() {
+            if (auto ctx = MultiContextManager::GetCurrent()) {
+                auto copy = ctx;
+                almondnamespace::sdlcontext::sdl_cleanup(copy);
+            }
+        }
+#endif
+
+#ifdef ALMOND_USING_SFML
+        void sfml_cleanup_adapter() {
+            if (auto ctx = MultiContextManager::GetCurrent()) {
+                auto copy = ctx;
+                almondnamespace::sfmlcontext::sfml_cleanup(copy);
+            }
+        }
+#endif
+
+#ifdef ALMOND_USING_RAYLIB
+        void raylib_cleanup_adapter() {
+            if (auto ctx = MultiContextManager::GetCurrent()) {
+                auto copy = ctx;
+                almondnamespace::raylibcontext::raylib_cleanup(copy);
+            }
+        }
+#endif
+    }
+
+    std::shared_ptr<Context> CloneContext(const Context& prototype) {
+        auto clone = std::make_shared<Context>();
+
+        clone->initialize = prototype.initialize;
+        clone->cleanup = prototype.cleanup;
+        clone->process = prototype.process;
+        clone->clear = prototype.clear;
+        clone->present = prototype.present;
+        clone->get_width = prototype.get_width;
+        clone->get_height = prototype.get_height;
+        clone->registry_get = prototype.registry_get;
+        clone->draw_sprite = prototype.draw_sprite;
+        clone->add_model = prototype.add_model;
+
+        clone->is_key_held = prototype.is_key_held;
+        clone->is_key_down = prototype.is_key_down;
+        clone->get_mouse_position = prototype.get_mouse_position;
+        clone->is_mouse_button_held = prototype.is_mouse_button_held;
+        clone->is_mouse_button_down = prototype.is_mouse_button_down;
+
+        copy_atomic_function(clone->add_texture, prototype.add_texture);
+        copy_atomic_function(clone->add_atlas, prototype.add_atlas);
+
+        clone->onResize = prototype.onResize;
+
+        clone->width = prototype.width;
+        clone->height = prototype.height;
+        clone->type = prototype.type;
+        clone->backendName = prototype.backendName;
+
+        // Window specific handles/state must be assigned later by the caller
+        clone->hwnd = nullptr;
+        clone->hdc = nullptr;
+        clone->hglrc = nullptr;
+        clone->windowData = nullptr;
+
+        return clone;
+    }
+
     void InitializeAllContexts() {
+        static bool s_initialized = false;
+        if (s_initialized) return;
+        s_initialized = true;
 
 #if defined(ALMOND_USING_OPENGL)
         auto openglContext = std::make_shared<Context>();
         openglContext->initialize = opengl_initialize;
-        openglContext->cleanup = opengl_cleanup;
-        openglContext->process = opengl_process;
-        openglContext->clear = opengl_clear;
-        openglContext->present = opengl_present;
-        openglContext->get_width = opengl_get_width;
-        openglContext->get_height = opengl_get_height;
+        openglContext->cleanup = opengl_cleanup_adapter;
+        openglContext->process = almondnamespace::openglcontext::opengl_process;
+        openglContext->clear = opengl_clear_adapter;
+        openglContext->present = almondnamespace::openglcontext::opengl_present;
+        openglContext->get_width = almondnamespace::openglcontext::opengl_get_width;
+        openglContext->get_height = almondnamespace::openglcontext::opengl_get_height;
 
         openglContext->is_key_held = [](input::Key k) { return input::is_key_held(k); };
         openglContext->is_key_down = [](input::Key k) { return input::is_key_down(k); };
@@ -302,17 +450,21 @@ namespace almondnamespace::core {
         openglContext->backendName = "OpenGL";
         openglContext->type = ContextType::OpenGL;
         AddContextForBackend(ContextType::OpenGL, openglContext);
+        atlasmanager::register_backend_uploader(ContextType::OpenGL,
+            [](const TextureAtlas& atlas) {
+                opengltextures::ensure_uploaded(atlas);
+            });
 #endif
 
 #if defined(ALMOND_USING_SDL)
         auto sdlContext = std::make_shared<Context>();
         sdlContext->initialize = sdl_initialize;
-        sdlContext->cleanup = sdl_cleanup;
-        sdlContext->process = sdl_process;
-        sdlContext->clear = sdl_clear;
-        sdlContext->present = sdl_present;
-        sdlContext->get_width = sdl_get_width;
-        sdlContext->get_height = sdl_get_height;
+        sdlContext->cleanup = sdl_cleanup_adapter;
+        sdlContext->process = almondnamespace::sdlcontext::sdl_process;
+        sdlContext->clear = almondnamespace::sdlcontext::sdl_clear;
+        sdlContext->present = almondnamespace::sdlcontext::sdl_present;
+        sdlContext->get_width = almondnamespace::sdlcontext::sdl_get_width;
+        sdlContext->get_height = almondnamespace::sdlcontext::sdl_get_height;
 
         sdlContext->is_key_held = [](input::Key k) { return input::is_key_held(k); };
         sdlContext->is_key_down = [](input::Key k) { return input::is_key_down(k); };
@@ -326,23 +478,29 @@ namespace almondnamespace::core {
         sdlContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::SDL);
             };
-        sdlContext->add_atlas = [](const TextureAtlas&) { return 1; };
+        sdlContext->add_atlas = [&](const TextureAtlas& a) {
+            return AddAtlasThunk(a, ContextType::SDL);
+        };
         sdlContext->add_model = [](const char*, const char*) { return 0; };
 
         sdlContext->backendName = "SDL";
         sdlContext->type = ContextType::SDL;
         AddContextForBackend(ContextType::SDL, sdlContext);
+        atlasmanager::register_backend_uploader(ContextType::SDL,
+            [](const TextureAtlas& atlas) {
+                sdlcontext::ensure_uploaded(atlas);
+            });
 #endif
 
 #if defined(ALMOND_USING_SFML)
         auto sfmlContext = std::make_shared<Context>();
         sfmlContext->initialize = sfml_initialize;
-        sfmlContext->cleanup = sfml_cleanup;
-        sfmlContext->process = sfml_process;
-        sfmlContext->clear = sfml_clear;
-        sfmlContext->present = sfml_present;
-        sfmlContext->get_width = sfml_get_width;
-        sfmlContext->get_height = sfml_get_height;
+        sfmlContext->cleanup = sfml_cleanup_adapter;
+        sfmlContext->process = almondnamespace::sfmlcontext::sfml_process;
+        sfmlContext->clear = almondnamespace::sfmlcontext::sfml_clear;
+        sfmlContext->present = almondnamespace::sfmlcontext::sfml_present;
+        sfmlContext->get_width = almondnamespace::sfmlcontext::sfml_get_width;
+        sfmlContext->get_height = almondnamespace::sfmlcontext::sfml_get_height;
 
         sfmlContext->is_key_held = [](input::Key k) { return input::is_key_held(k); };
         sfmlContext->is_key_down = [](input::Key k) { return input::is_key_down(k); };
@@ -356,23 +514,29 @@ namespace almondnamespace::core {
         sfmlContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::SFML);
             };
-        sfmlContext->add_atlas = [](const TextureAtlas&) { return 1; };
+        sfmlContext->add_atlas = [&](const TextureAtlas& a) {
+            return AddAtlasThunk(a, ContextType::SFML);
+        };
         sfmlContext->add_model = [](const char*, const char*) { return 0; };
 
         sfmlContext->backendName = "SFML";
         sfmlContext->type = ContextType::SFML;
         AddContextForBackend(ContextType::SFML, sfmlContext);
+        atlasmanager::register_backend_uploader(ContextType::SFML,
+            [](const TextureAtlas& atlas) {
+                sfmlcontext::ensure_uploaded(atlas);
+            });
 #endif
 
 #if defined(ALMOND_USING_RAYLIB)
         auto raylibContext = std::make_shared<Context>();
         raylibContext->initialize = raylib_initialize;
-        raylibContext->cleanup = raylib_cleanup;
-        raylibContext->process = raylib_process;
-        raylibContext->clear = raylib_clear;
-        raylibContext->present = raylib_present;
-        raylibContext->get_width = raylib_get_width;
-        raylibContext->get_height = raylib_get_height;
+        raylibContext->cleanup = raylib_cleanup_adapter;
+        raylibContext->process = almondnamespace::raylibcontext::raylib_process;
+        raylibContext->clear = almondnamespace::raylibcontext::raylib_clear;
+        raylibContext->present = almondnamespace::raylibcontext::raylib_present;
+        raylibContext->get_width = almondnamespace::raylibcontext::raylib_get_width;
+        raylibContext->get_height = almondnamespace::raylibcontext::raylib_get_height;
 
         raylibContext->is_key_held = [](input::Key k) { return input::is_key_held(k); };
         raylibContext->is_key_down = [](input::Key k) { return input::is_key_down(k); };
@@ -386,12 +550,18 @@ namespace almondnamespace::core {
         raylibContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::RayLib);
             };
-        raylibContext->add_atlas = [](const TextureAtlas&) { return 1; };
+        raylibContext->add_atlas = [&](const TextureAtlas& a) {
+            return AddAtlasThunk(a, ContextType::RayLib);
+        };
         raylibContext->add_model = [](const char*, const char*) { return 0; };
 
         raylibContext->backendName = "RayLib";
         raylibContext->type = ContextType::RayLib;
         AddContextForBackend(ContextType::RayLib, raylibContext);
+        atlasmanager::register_backend_uploader(ContextType::RayLib,
+            [](const TextureAtlas& atlas) {
+                raylibtextures::ensure_uploaded(atlas);
+            });
 #endif
 
 #if defined(ALMOND_USING_VULKAN)
@@ -416,7 +586,9 @@ namespace almondnamespace::core {
         vulkanContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::Vulkan);
             };
-        vulkanContext->add_atlas = [](const TextureAtlas&) { return 1; };
+        vulkanContext->add_atlas = [&](const TextureAtlas& a) {
+            return AddAtlasThunk(a, ContextType::Vulkan);
+        };
         vulkanContext->add_model = [](const char*, const char*) { return 0; };
 
         vulkanContext->backendName = "Vulkan";
@@ -446,7 +618,9 @@ namespace almondnamespace::core {
         directxContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::DirectX);
             };
-        directxContext->add_atlas = [](const TextureAtlas&) { return 1; };
+        directxContext->add_atlas = [&](const TextureAtlas& a) {
+            return AddAtlasThunk(a, ContextType::DirectX);
+        };
         directxContext->add_model = [](const char*, const char*) { return 0; };
 
         directxContext->backendName = "DirectX";
@@ -476,7 +650,9 @@ namespace almondnamespace::core {
         customContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::Custom);
             };
-        customContext->add_atlas = [](const TextureAtlas&) { return 1; };
+        customContext->add_atlas = [&](const TextureAtlas& a) {
+            return AddAtlasThunk(a, ContextType::Custom);
+        };
         customContext->add_model = [](const char*, const char*) { return 0; };
 
         customContext->backendName = "Custom";
@@ -487,12 +663,12 @@ namespace almondnamespace::core {
 #if defined(ALMOND_USING_SOFTWARE_RENDERER)
         auto softwareContext = std::make_shared<Context>();
         softwareContext->initialize = softrenderer_initialize;
-        softwareContext->cleanup = softrenderer_cleanup;
-        softwareContext->process = softrenderer_process;
-        softwareContext->clear = softrenderer_clear;
-        softwareContext->present = softrenderer_present;
-        softwareContext->get_width = softrenderer_get_width;
-        softwareContext->get_height = softrenderer_get_height;
+        softwareContext->cleanup = softrenderer_cleanup_adapter;
+        softwareContext->process = almondnamespace::anativecontext::softrenderer_process;
+        softwareContext->clear = nullptr;
+        softwareContext->present = nullptr;
+        softwareContext->get_width = almondnamespace::anativecontext::get_width;
+        softwareContext->get_height = almondnamespace::anativecontext::get_height;
 
         softwareContext->is_key_held = [](input::Key k) { return input::is_key_held(k); };
         softwareContext->is_key_down = [](input::Key k) { return input::is_key_down(k); };
@@ -506,13 +682,49 @@ namespace almondnamespace::core {
         softwareContext->add_texture = [&](TextureAtlas& a, const std::string& n, const ImageData& i) {
             return AddTextureThunk(a, n, i, ContextType::Software);
             };
-        softwareContext->add_atlas = [](const TextureAtlas&) { return 1; };
+        softwareContext->add_atlas = [&](const TextureAtlas& a) {
+            return AddAtlasThunk(a, ContextType::Software);
+        };
         softwareContext->add_model = [](const char*, const char*) { return 0; };
 
         softwareContext->backendName = "Software";
         softwareContext->type = ContextType::Software;
         AddContextForBackend(ContextType::Software, softwareContext);
 #endif
+    }
+
+    bool ProcessAllContexts() {
+        bool anyRunning = false;
+
+        auto process_context = [&](const std::shared_ptr<Context>& ctx) {
+            if (!ctx) {
+                return false;
+            }
+
+            CommandQueue localQueue;
+            CommandQueue& queue = ctx->windowData ? ctx->windowData->commandQueue : localQueue;
+
+            if (!ctx->process) {
+                queue.drain();
+                return ctx->windowData ? ctx->windowData->running : false;
+            }
+
+            return ctx->process_safe(ctx, queue);
+        };
+
+        for (auto& [type, state] : g_backends) {
+            (void)type;
+            if (process_context(state.master)) {
+                anyRunning = true;
+            }
+            for (auto& dup : state.duplicates) {
+                if (process_context(dup)) {
+                    anyRunning = true;
+                }
+            }
+        }
+
+        return anyRunning;
     }
 
 } // namespace almondnamespace::core

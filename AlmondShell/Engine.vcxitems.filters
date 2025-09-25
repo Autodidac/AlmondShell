@@ -348,9 +348,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)include\acommandline.hpp">
       <Filter>Header Files\core\utilities</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\aopenglcontextinput.hpp">
-      <Filter>Header Files\core\backbone\external\context\opengl</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)include\aopenglstate.hpp">
       <Filter>Header Files\core\backbone\external\context\opengl</Filter>
     </ClInclude>
@@ -408,9 +405,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)include\araylibcontextinput.hpp">
       <Filter>Header Files\core\backbone\external\context\raylib</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)include\araylibcontext_win32.hpp">
-      <Filter>Header Files\core\backbone\external\context\raylib</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)include\acontextwindow.hpp">
       <Filter>Header Files\core\backbone\external\context</Filter>
     </ClInclude>
@@ -457,6 +451,9 @@
       <Filter>Header Files\core\backbone\external\context</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)include\acontexttype.hpp">
+      <Filter>Header Files\core\backbone\external\context</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)include\acontextcontrol.hpp">
       <Filter>Header Files\core\backbone\external\context</Filter>
     </ClInclude>
   </ItemGroup>

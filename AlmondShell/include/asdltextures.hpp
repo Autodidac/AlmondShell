@@ -195,8 +195,8 @@ namespace almondnamespace::sdlcontext
         upload_atlas_to_gpu(atlas);
     }
 
-    inline Handle load_atlas(TextureAtlas& atlas, int atlasIndex = 0) {
-        upload_atlas_to_gpu(atlas);
+    inline Handle load_atlas(const TextureAtlas& atlas, int atlasIndex = 0) {
+        atlasmanager::ensure_uploaded(atlas);
         return make_handle(atlasIndex, 0);
     }
 
@@ -210,14 +210,14 @@ namespace almondnamespace::sdlcontext
             .pixels = std::move(rgba.pixels)
         };
 
-        if (!atlas.add_entry(id, texture)) {
+        auto addedOpt = atlas.add_entry(id, texture);
+        if (!addedOpt) {
             throw std::runtime_error("atlas_add_texture: Failed to add: " + id);
         }
 
-        upload_atlas_to_gpu(atlas);
+        atlasmanager::ensure_uploaded(atlas);
 
-        int localIdx = static_cast<int>(atlas.entries.size() - 1);
-        return make_handle(0, localIdx);
+        return make_handle(0, addedOpt->index);
     }
 
     inline void clear_gpu_atlases() noexcept 
@@ -263,7 +263,8 @@ namespace almondnamespace::sdlcontext
             std::cerr << "[SDL_DrawSprite] Null atlas pointer at index: " << atlasIdx << '\n';
             return;
         }
-        if (localIdx < 0 || localIdx >= int(atlas->entries.size())) {
+        AtlasRegion region{};
+        if (!atlas->try_get_entry_info(localIdx, region)) {
             std::cerr << "[SDL_DrawSprite] Sprite index out of bounds: " << localIdx << '\n';
             return;
         }
@@ -284,7 +285,6 @@ namespace almondnamespace::sdlcontext
             return;
         }
 
-        const auto& entry = atlas->entries[localIdx];
         SDL_FRect dstRect{
             static_cast<float>(x),
             static_cast<float>(y),
@@ -293,10 +293,10 @@ namespace almondnamespace::sdlcontext
         };
 
         SDL_FRect srcRect{
-            static_cast<float>(entry.region.x),
-            static_cast<float>(entry.region.y),
-            static_cast<float>(entry.region.width),
-            static_cast<float>(entry.region.height)
+            static_cast<float>(region.x),
+            static_cast<float>(region.y),
+            static_cast<float>(region.width),
+            static_cast<float>(region.height)
         };
 
 

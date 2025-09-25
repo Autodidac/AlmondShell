@@ -169,8 +169,8 @@ namespace almondnamespace::sfmlcontext
         s_generation.fetch_add(1, std::memory_order_relaxed);
     }
 
-    inline Handle load_atlas(TextureAtlas& atlas, int atlasIndex = 0) {
-        upload_atlas_to_gpu(atlas);
+    inline Handle load_atlas(const TextureAtlas& atlas, int atlasIndex = 0) {
+        atlasmanager::ensure_uploaded(atlas);
         return make_handle(atlasIndex, 0);
     }
 
@@ -183,14 +183,14 @@ namespace almondnamespace::sfmlcontext
             .pixels = std::move(rgba.pixels)
         };
 
-        if (!atlas.add_entry(id, texture)) {
+        auto addedOpt = atlas.add_entry(id, texture);
+        if (!addedOpt) {
             throw std::runtime_error("atlas_add_texture: Failed to add: " + id);
         }
 
-        upload_atlas_to_gpu(atlas);
+        atlasmanager::ensure_uploaded(atlas);
 
-        int localIdx = static_cast<int>(atlas.entries.size() - 1);
-        return make_handle(0, localIdx);
+        return make_handle(0, addedOpt->index);
     }
 
 
@@ -222,7 +222,8 @@ namespace almondnamespace::sfmlcontext
             return;
         }
 
-        if (localIdx < 0 || localIdx >= int(atlas->entries.size()))
+        AtlasRegion region{};
+        if (!atlas->try_get_entry_info(localIdx, region))
         {
             std::cerr << "[SFML_DrawSprite] Sprite index out of bounds: " << localIdx << '\n';
             return;
@@ -238,15 +239,14 @@ namespace almondnamespace::sfmlcontext
         }
 
         const auto& gpu = it->second;
-        const auto& entry = atlas->entries[localIdx];
 
         // SFML 3.x requires constructing sprite with texture — no default ctor
         sf::Sprite sprite(gpu.texture);
 
         // sf::IntRect doesn't accept unsigned types directly; convert explicitly
         sf::IntRect rect(
-            sf::Vector2i(static_cast<int>(entry.region.x), static_cast<int>(entry.region.y)),
-            sf::Vector2i(static_cast<int>(entry.region.width), static_cast<int>(entry.region.height))
+            sf::Vector2i(static_cast<int>(region.x), static_cast<int>(region.y)),
+            sf::Vector2i(static_cast<int>(region.width), static_cast<int>(region.height))
         );
 
         sprite.setTextureRect(rect);
@@ -254,8 +254,8 @@ namespace almondnamespace::sfmlcontext
 
         if (width > 0.f && height > 0.f)
         {
-            float scaleX = width / float(entry.region.width);
-            float scaleY = height / float(entry.region.height);
+            float scaleX = width / float(region.width);
+            float scaleY = height / float(region.height);
             sprite.setScale(sf::Vector2f(scaleX, scaleY));
         }
 

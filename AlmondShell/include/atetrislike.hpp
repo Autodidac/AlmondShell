@@ -199,7 +199,7 @@ namespace almondnamespace::tetris
 
         // Register sprite handle in registry
         registry.add("tetris_block", handle, 0.f, 0.f, 1.f, 1.f, 0.f, 0.f);
-        registry.atlas_ptr = &atlas;
+        registry.set_atlas(&atlas);
 
         return true;
     }
@@ -268,7 +268,7 @@ namespace almondnamespace::tetris
             float ch = float(ctx->get_height_safe()) / GRID_H;
 
             auto entry = registry.get("tetris_block");
-            if (entry && registry.atlas_ptr)
+            if (entry && registry.get_atlas())
             {
                 auto& [handle, u0, v0, u1, v1, px, py] = *entry;
 

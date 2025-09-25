@@ -31,7 +31,8 @@
 #include "aspritehandle.hpp"    // SpriteHandle type
 #include "aatomicfunction.hpp"  // AlmondAtomicFunction
 #include "acommandqueue.hpp"    // CommandQueue
-#include "awindowdata.hpp"      // WindowData
+//#include "awindowdata.hpp"      // WindowData
+#include "acontexttype.hpp"     // ContextType enum
 
 #include <map>
 #include <memory>
@@ -56,7 +57,7 @@ namespace almondnamespace::core
         // --- Backend render hooks (fast raw function pointers) ---
         using InitializeFunc = void(*)();
         using CleanupFunc = void(*)();
-        using ProcessFunc = bool(*)(Context&, CommandQueue&);
+        using ProcessFunc = bool(*)(std::shared_ptr<core::Context>, CommandQueue&);
         using ClearFunc = void(*)();
         using PresentFunc = void(*)();
         using GetWidthFunc = int(*)();
@@ -126,7 +127,7 @@ namespace almondnamespace::core
         // --- Safe wrappers ---
         inline void initialize_safe() const noexcept { if (initialize) initialize(); }
         inline void cleanup_safe()   const noexcept { if (cleanup) cleanup(); }
-        bool process_safe(Context& ctx, CommandQueue& queue);
+        bool process_safe(std::shared_ptr<core::Context> ctx, CommandQueue& queue);
 
         inline void clear_safe(std::shared_ptr<Context>) const noexcept { if (clear) clear(); }
         inline void present_safe() const noexcept { if (present) present(); }
@@ -192,6 +193,7 @@ namespace almondnamespace::core
     extern BackendMap g_backends;
 
     void InitializeAllContexts();
+    std::shared_ptr<Context> CloneContext(const Context& prototype);
     void AddContextForBackend(ContextType type, std::shared_ptr<Context> context);
     bool ProcessAllContexts();
 

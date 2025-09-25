@@ -41,6 +41,7 @@
 #include "acontextwindow.hpp"
 #include "asdlcontextrenderer.hpp"
 #include "asdltextures.hpp"
+#include "aatlasmanager.hpp"
 #include "asdlstate.hpp"
 
 #include <stdexcept>
@@ -189,6 +190,11 @@ namespace almondnamespace::sdlcontext
         SDL_ShowWindow(sdlcontext.window);
         sdlcontext.running = true;
 
+        atlasmanager::register_backend_uploader(core::ContextType::SDL,
+            [](const TextureAtlas& atlas) {
+                sdlcontext::ensure_uploaded(atlas);
+            });
+
 
         //SDL_Window* sdlParent = SDL_GetWindowParent(ctx.window);
         //if (sdlParent) {
@@ -252,7 +258,10 @@ namespace almondnamespace::sdlcontext
 
     inline bool sdl_process(core::Context& ctx, core::CommandQueue& queue) {
         if (!sdlcontext.running || !sdlcontext.renderer) return false;
-       // SDL_PumpEvents(); // Update SDL's internal state
+
+        atlasmanager::process_pending_uploads(core::ContextType::SDL);
+
+        // SDL_PumpEvents(); // Update SDL's internal state
         const bool* keys = SDL_GetKeyboardState(NULL);
         SDL_Event e;
         static int i = 0;

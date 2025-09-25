@@ -33,6 +33,7 @@
 #include "asoftrenderer_state.hpp"
 #include "asoftrenderer_textures.hpp"
 #include "asoftrenderer_renderer.hpp"
+#include "aatlasmanager.hpp"
 
 #include <memory>
 #include <chrono>
@@ -92,6 +93,14 @@ namespace almondnamespace::anativecontext
 #endif
 
         std::cout << "[SoftRenderer] Initialized on HWND=" << ctx->hwnd << "\n";
+
+        atlasmanager::register_backend_uploader(core::ContextType::Software,
+            [](const TextureAtlas& atlas) {
+                if (atlas.pixel_data.empty()) {
+                    const_cast<TextureAtlas&>(atlas).rebuild_pixels();
+                }
+            });
+
         return true;
     }
 
@@ -130,6 +139,8 @@ namespace almondnamespace::anativecontext
     // Main process loop
     inline bool softrenderer_process(core::Context& ctx, core::CommandQueue& queue) {
         auto& sr = s_softrendererstate;
+
+        atlasmanager::process_pending_uploads(core::ContextType::Software);
 
         // Clear framebuffer
         std::fill(sr.framebuffer.begin(), sr.framebuffer.end(), 0xFF000000);

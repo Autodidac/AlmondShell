@@ -3,8 +3,16 @@
 
 #include "acontextmultiplexer.hpp"
 
+#include "aopenglcontext.hpp"
+#include "asdlcontext.hpp"
+#include "asfmlcontext.hpp"
+#include "araylibcontext.hpp"
+#include "asoftrenderer_context.hpp"
+
 #include <stdexcept>
+#include <algorithm>
 #include <glad/glad.h>
+#include <memory>
 
 // -----------------------------------------------------------------
 // Helper definitions that must be visible to the linker
@@ -59,6 +67,9 @@ void MakeDockable(HWND hwnd, HWND parent) {
 namespace almondnamespace::core
 {
 
+    std::unordered_map<HWND, std::thread> gThreads{};
+    DragState gDragState{};
+
     WindowData* MultiContextManager::findWindowByHWND(HWND hwnd) {
         std::scoped_lock lock(windowsMutex);
         auto it = std::find_if(windows.begin(), windows.end(),
@@ -84,18 +95,22 @@ namespace almondnamespace::core
     // ---------------- MultiContextManager (static) ----------------
     //inline std::shared_ptr<core::Context> MultiContextManager::currentContext = nullptr;
 
-    inline void MultiContextManager::SetCurrent(std::shared_ptr<core::Context> ctx) {
-        currentContext = std::move(ctx); }
+    inline void almondnamespace::core::MultiContextManager::SetCurrent(std::shared_ptr<core::Context> ctx) {
+        currentContext = std::move(ctx);
+    }
 
-    inline std::shared_ptr<almondnamespace::core::Context> almondnamespace::core::MultiContextManager::GetCurrent() {
-        return currentContext; }
+    std::shared_ptr<almondnamespace::core::Context> almondnamespace::core::MultiContextManager::GetCurrent() {
+        return currentContext;
+    }
 
     // ---------------- MultiContextManager (public helpers) ----------------
     inline bool MultiContextManager::IsRunning() const noexcept {
-        return running.load(std::memory_order_acquire); }
+        return running.load(std::memory_order_acquire);
+    }
 
     inline void MultiContextManager::StopRunning() noexcept {
-        running.store(false, std::memory_order_release); }
+        running.store(false, std::memory_order_release);
+    }
 
     inline void MultiContextManager::EnqueueRenderCommand(HWND hwnd, RenderCommand cmd) {
         std::scoped_lock lock(windowsMutex);
@@ -233,6 +248,8 @@ namespace almondnamespace::core
         RegisterParentClass(hInst, L"AlmondParent");
         RegisterChildClass(hInst, L"AlmondChild");
 
+        InitializeAllContexts();
+
         // ---------------- Parent (dock container) ----------------
         if (parented) {
             int cols = 1, rows = 1;
@@ -329,34 +346,60 @@ namespace almondnamespace::core
             BackendState& state = g_backends[type];
 
             if (!state.master) {
-                state.master = std::make_shared<Context>();
-                for (int i = 1; i < count; ++i)
-                    state.duplicates.push_back(std::make_shared<Context>());
+                std::cerr << "[Init] Missing prototype context for backend type "
+                    << static_cast<int>(type) << "\n";
+                return;
             }
 
             std::vector<std::shared_ptr<Context>> ctxs;
+            ctxs.reserve(static_cast<size_t>(count));
             ctxs.push_back(state.master);
-            for (auto& d : state.duplicates) ctxs.push_back(d);
+
+            auto ensure_duplicate = [&](size_t index) -> std::shared_ptr<Context> {
+                if (index < state.duplicates.size()) {
+                    auto& candidate = state.duplicates[index];
+                    if (candidate && candidate->initialize) {
+                        return candidate;
+                    }
+                    candidate = CloneContext(*state.master);
+                    return candidate;
+                }
+                auto dup = CloneContext(*state.master);
+                state.duplicates.push_back(dup);
+                return dup;
+            };
+
+            while (ctxs.size() < static_cast<size_t>(count)) {
+                ctxs.push_back(ensure_duplicate(ctxs.size() - 1));
+            }
 
             const size_t n = std::min(created.size(), ctxs.size());
             for (size_t i = 0; i < n; ++i) {
                 HWND hwnd = created[i];
                 auto* w = findWindowByHWND(hwnd);
                 auto& ctx = ctxs[i];
+                if (!ctx) continue;
 
                 ctx->type = type;
                 ctx->hwnd = hwnd;
-                if (w) {
-                    ctx->hdc = w->hdc;
-                    ctx->hglrc = w->glContext;
-                    w->context = ctx;
-                }
-
                 RECT rc{};
                 if (parent) GetClientRect(parent, &rc);
                 else GetClientRect(hwnd, &rc);
-                ctx->width = std::max<LONG>(1, rc.right - rc.left);
-                ctx->height = std::max<LONG>(1, rc.bottom - rc.top);
+                const int width = std::max<LONG>(1, rc.right - rc.left);
+                const int height = std::max<LONG>(1, rc.bottom - rc.top);
+                ctx->width = width;
+                ctx->height = height;
+
+                if (w) {
+                    ctx->hdc = w->hdc;
+                    ctx->hglrc = w->glContext;
+                    ctx->windowData = w;
+                    w->context = ctx;
+                    w->width = width;
+                    w->height = height;
+                    if (!ctx->onResize && w->onResize)
+                        ctx->onResize = w->onResize;
+                }
 
                 // ---------------- Immediate backend initialization ----------------
                 switch (type) {
@@ -468,19 +511,59 @@ namespace almondnamespace::core
         // Make window dockable if a parent is provided
         if (parent) MakeDockable(hwnd, parent);
 
-        // --- Create Context object ---
-        auto ctx = std::make_shared<core::Context>();
+        if (g_backends.empty()) {
+            InitializeAllContexts();
+        }
+
+        auto acquire_context = [&]() -> std::shared_ptr<core::Context> {
+            auto& state = g_backends[type];
+            if (!state.master) {
+                return nullptr;
+            }
+
+            if (!state.master->windowData) {
+                return state.master;
+            }
+
+            for (auto& dup : state.duplicates) {
+                if (dup && !dup->windowData) {
+                    return dup;
+                }
+            }
+
+            auto dup = CloneContext(*state.master);
+            state.duplicates.push_back(dup);
+            return dup;
+        };
+
+        auto ctx = acquire_context();
+        if (!ctx) {
+            ctx = std::make_shared<core::Context>();
+            ctx->type = type;
+            g_backends[type].master = ctx;
+        }
+
         ctx->hwnd = hwnd;
         ctx->hdc = hdc;
         ctx->hglrc = glContext;
         ctx->type = type;
-        //ctx->running = true;
 
         // Prepare WindowData (unique_ptr)
         auto winPtr = std::make_unique<WindowData>(hwnd, hdc, glContext, usesSharedContext, type);
         winPtr->onResize = std::move(onResize);
         winPtr->context = ctx;  // <-- hook it up
         ctx->windowData = winPtr.get(); // set the back-pointer immediately
+
+        RECT rc{};
+        GetClientRect(hwnd, &rc);
+        const int width = std::max<LONG>(1, rc.right - rc.left);
+        const int height = std::max<LONG>(1, rc.bottom - rc.top);
+        ctx->width = width;
+        ctx->height = height;
+        winPtr->width = width;
+        winPtr->height = height;
+        if (!ctx->onResize && winPtr->onResize) ctx->onResize = winPtr->onResize;
+        if (!winPtr->onResize && ctx->onResize) winPtr->onResize = ctx->onResize;
 
         // Keep raw pointer for thread use
         WindowData* rawWinPtr = winPtr.get();
@@ -543,6 +626,18 @@ namespace almondnamespace::core
 
             // Mark the window as no longer running
             (*it)->running = false;
+
+            if ((*it)->context) {
+                auto ctx = (*it)->context;
+                if (ctx->windowData == it->get()) {
+                    ctx->windowData = nullptr;
+                }
+                if (ctx->hwnd == hwnd) {
+                    ctx->hwnd = nullptr;
+                    ctx->hdc = nullptr;
+                    ctx->hglrc = nullptr;
+                }
+            }
 
             // Take ownership of the unique_ptr out of the vector
             removedWindow = std::move(*it);
@@ -668,152 +763,45 @@ namespace almondnamespace::core
     }
 
     void MultiContextManager::RenderLoop(WindowData& win) {
-        // Make context aware of its owning window
-        if (win.context) {
-            win.context->windowData = &win;
+        auto ctx = win.context;
+        if (!ctx) {
+            win.running = false;
+            return;
         }
 
-        // Ensure per-thread initialization flags are outside switch
-        static thread_local bool glInit = false;
-        static thread_local bool swInit = false;
-        static thread_local bool sdlInit = false;
-        static thread_local bool sfmlInit = false;
-        static thread_local bool rayInit = false;
+        ctx->windowData = &win;
+        SetCurrent(ctx);
+        [[maybe_unused]] const auto resetCurrent = std::unique_ptr<void, void(*)(void*)>{
+            nullptr,
+            [](void*) { MultiContextManager::SetCurrent(nullptr); }
+        };
 
-        switch (win.type) {
-        case ContextType::OpenGL:
-#ifdef ALMOND_USING_OPENGL
-            if (!wglMakeCurrent(win.hdc, win.glContext)) return;
+        // backend-specific initialization is triggered during AddWindow, but
+        // if an explicit initialize callback exists we invoke it once.
+        if (ctx->initialize) {
+            ctx->initialize_safe();
+        }
 
-            if (!glInit && win.context) {
-                std::cerr << "[OpenGL] Initializing VAO/VBO/EBO for hwnd=" << win.hwnd << "\n";
-                almondnamespace::openglcontext::opengl_initialize(
-                    win.context,      // shared_ptr<Context>
-                    win.hwnd,         // HWND
-                    win.width,
-                    win.height,
-                    win.onResize
-                );
-                glInit = true;
+        while (running && win.running) {
+            bool keepRunning = true;
+
+            if (ctx->process) {
+                keepRunning = ctx->process_safe(ctx, win.commandQueue);
+            }
+            else {
+                win.commandQueue.drain();
             }
 
-            while (running && win.running) {
-                if (win.context) {
-                    if (!almondnamespace::openglcontext::opengl_process(*win.context,
-                        win.commandQueue)) {
-                        std::cerr << "[OpenGL] process returned false\n";
-                        break;
-                    }
-                  //  std::cout << "[OpenGL] Processed context for hwnd=" << win.hwnd << "\n";
-                }
-                else {
-                    glClearColor(1.f, 0.f, 1.f, 1.f); // magenta fallback
-                    glClear(GL_COLOR_BUFFER_BIT);
-                    SwapBuffers(win.hdc);
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(16));
-            }
-            wglMakeCurrent(nullptr, nullptr);
-#endif
-            break;
-
-        case ContextType::Software:
-#ifdef ALMOND_USING_SOFTWARE_RENDERER
-            if (!swInit && win.context) {
-                std::cerr << "[Software] Initializing renderer for hwnd=" << win.hwnd << "\n";
-                almondnamespace::anativecontext::softrenderer_initialize(win.context);
-                swInit = true;
+            if (!keepRunning) {
+                win.running = false;
+                break;
             }
 
-            while (running && win.running) {
-                if (win.context) {
-                    if (!almondnamespace::anativecontext::softrenderer_process(*win.context,
-                        win.commandQueue)) {
-                        std::cerr << "[Software] process returned false\n";
-                        break;
-                    }
-                   // std::cout << "[Software] Processed context for hwnd=" << win.hwnd << "\n";
-                }
-                else {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(16));
-                }
-            }
-#endif
-            break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(16));
+        }
 
-        case ContextType::SDL:
-#ifdef ALMOND_USING_SDL
-            if (!sdlInit && win.context) {
-                std::cerr << "[SDL] Initializing context for hwnd=" << win.hwnd << "\n";
-                almondnamespace::sdlcontext::sdl_initialize(win.context);
-                sdlInit = true;
-            }
-
-            while (running && win.running) {
-                if (win.context) {
-                    if (!almondnamespace::sdlcontext::sdl_process(*win.context,
-                        win.commandQueue)) {
-                        std::cerr << "[SDL] process returned false\n";
-                        break;
-                    }
-                  //  std::cout << "[SDL] Processed context for hwnd=" << win.hwnd << "\n";
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(16));
-            }
-#endif
-            break;
-
-        case ContextType::SFML:
-#ifdef ALMOND_USING_SFML
-            if (!sfmlInit && win.context) {
-                std::cerr << "[SFML] Initializing context for hwnd=" << win.hwnd << "\n";
-                almondnamespace::sfmlcontext::sfml_initialize(win.context);
-                sfmlInit = true;
-            }
-
-            while (running && win.running) {
-                if (win.context) {
-                    if (!almondnamespace::sfmlcontext::sfml_process(*win.context,
-                        win.commandQueue)) {
-                        std::cerr << "[SFML] process returned false\n";
-                        break;
-                    }
-                //    std::cout << "[SFML] Processed context for hwnd=" << win.hwnd << "\n";
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(16));
-            }
-#endif
-            break;
-
-        case ContextType::RayLib:
-#ifdef ALMOND_USING_RAYLIB
-            if (!rayInit && win.context) {
-                std::cerr << "[RayLib] Initializing context for hwnd=" << win.hwnd << "\n";
-                almondnamespace::raylibcontext::raylib_initialize(win.context);
-                rayInit = true;
-            }
-
-            while (running && win.running) {
-                if (win.context) {
-                    if (!almondnamespace::raylibcontext::raylib_process(*win.context,
-                        win.commandQueue)) {
-                        std::cerr << "[RayLib] process returned false\n";
-                        break;
-                    }
-                 //   std::cout << "[RayLib] Processed context for hwnd=" << win.hwnd << "\n";
-                }
-                std::this_thread::sleep_for(std::chrono::milliseconds(16));
-            }
-#endif
-            break;
-
-        case ContextType::Custom:
-            // TODO: custom backend loop
-            break;
-
-        case ContextType::Noop:
-        default:
-            break;
+        if (ctx->cleanup) {
+            ctx->cleanup_safe();
         }
     }
 
