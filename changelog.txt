@@ -1,0 +1,115 @@
+# Changelog
+
+## [Unreleased]
+- Fix menu rendering on SDL, Raylib, and OpenGL backends.
+
+## [v0.57.13]
+- Adjusted size metadata.
+- Made the Unix README responsive.
+- Fixed software renderer resize handling.
+- Fixed the updater directory move on Unix.
+
+## [v0.57.12]
+- Fixed texture rendering across backends.
+- Fixed atlas handle indexing across renderers.
+
+## [v0.57.11]
+- Improved thread safety around backend context texture handling.
+- Applied hotfixes for context initialization issues.
+- Avoided linking dependencies on SFML RenderStates defaults.
+- Fixed menu atlas rendering in SDL and Raylib contexts.
+
+## [v0.57.10]
+- Fixed resize propagation and synchronized input polling.
+- Fixed input coordinate handling and hid the menu during gameplay.
+- Fixed thread-safe mouse queries in safe context helpers.
+
+## [v0.57.8]
+- Version bump only.
+
+## [v0.57.7]
+- Fixed software renderer texture sampling.
+- Fixed Win32 mouse button polling mapping.
+- Handled reused snake atlases without crashing.
+- Updated the update script bug.
+- Updated the version number to 0.57.7.
+- Fixed atlas resizing for software and OpenGL contexts.
+- Reverted the fix for context resize handling for OpenGL and software atlases.
+
+## [v0.57.4]
+- Aligned embedded contexts and wired sprite rendering.
+
+## [v0.57.3]
+- Unlocked semi-working contexts.
+- Protected the input polling thread and released the SFML context.
+- Ensured the main thread polls input state.
+
+## [v0.57.0]
+- Fixed stub context process signatures.
+- Enabled only the working contexts in multiplexer builds.
+- Fixed docking for SDL and Raylib contexts.
+- Reverted keeping SDL and Raylib child windows docked in the multi-context manager.
+- Ensured Raylib and SDL dock to child windows.
+- Reverted ensuring Raylib and SDL dock to child windows after regressions.
+
+## [v0.43.5]
+- Converted the match-3 mini-game to the scene framework.
+- Added scene-based sliding puzzle and minesweeper implementations.
+- Updated image file paths.
+- Refactored legacy games to the scene-based architecture.
+- Fixed menu layout and render queue integration.
+- Reverted the game rendering queue integration and responsive menu layout change.
+
+## [v0.43.3]
+- Fixed menu button ordering.
+- Fixed menu button column ordering.
+- Highlighted atlas system investment in the README.
+
+## [v0.43.0]
+- Added the initial AlmondShell project files via bulk uploads.
+- Renamed WinResource.aps to AlmondShell/WinResource.aps.
+- Updated and renamed WinResource.rc to AlmondShell/WinResource.rc.
+- Updated and renamed acomponentmanager.h to AlmondShell/acomponentmanager.h.
+- Updated and renamed resource.h to AlmondShell/resource.h.
+- Updated and renamed acontext.h to AlmondShell/acontext.h.
+- Updated and renamed pch.h to AlmondShell/pch.h.
+- Updated and renamed acontextcreator.cpp to AlmondShell/acontextcreator.cpp.
+- Updated and renamed acontextwindow.h to AlmondShell/acontextwindow.h.
+- Updated and renamed acoroutine.h to AlmondShell/acoroutine.h.
+- Updated and renamed aengine.cpp to AlmondShell/aengine.cpp.
+- Updated and renamed aengine.h to AlmondShell/aengine.h.
+- Applied a generic fix pass across the project.
+- Added additional uploaded assets for AlmondShell.
+- Updated and renamed runcommands.bat to x64/Release/runcommands.bat.
+- Added multi-context textures and atlases scaffolding.
+- Implemented the multi-context texture upload service.
+- Updated menu assets.
+- Fixed menu sprite UVs and handled OpenGL context loss.
+- Fixed the atlas manager namespace comment.
+- Applied a hotfix after the previous merge.
+- Wired multiplexer windows to centralized contexts.
+- Reverted wiring multiplexer windows to centralized contexts after regressions.
+- Fixed context cloning for the multiplexer.
+- Turned off extra contexts to focus on the OpenGL path.
+- Fixed OpenGL sprite V orientation.
+- Reverted the OpenGL sprite V orientation fix temporarily.
+- Reapplied the OpenGL sprite V orientation fix.
+- Applied a small rendering patch and updated textures.
+- Ensured atlas entry access is thread-safe.
+- Restored missing images.
+- Updated the README description.
+- Documented vcpkg manifest dependencies in the README.
+- Updated the README with additional clarifications.
+- Updated the README again with further adjustments.
+- Updated the README to refine wording and structure.
+- Improved README formatting and included a file tree.
+- Documented Visual Studio vcpkg integration steps.
+- Documented engine configuration switches.
+- Emphasized architectural pillars within the README.
+- Updated the README after earlier documentation passes.
+- Refined multi-context runtime management.
+- Reverted the multi-context runtime management refinement after issues.
+- Refined the context multiplexer threading spine.
+- Applied miscellaneous adjustments and cleanup.
+- Fixed the menu button grid layout.
+
