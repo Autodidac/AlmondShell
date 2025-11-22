@@ -1,0 +1,5 @@
+run the bat for automated console setup (I ran out of tokens so might be a little broken) but that's how that works.
+
+the gui version works but you need to right click it and that doesn't run as admin so is probably also broken.
+
+man i wish i tokens to write this... sad lol

@@ -1,0 +1,78 @@
+AlmondShell Completion Roadmap Prompt
+====================================
+
+Objective
+---------
+Create a production-ready release of the AlmondShell runtime that can bootstrap AlmondEngine end-to-end across supported platforms.
+
+Guiding Principles
+------------------
+1. Preserve the engine's static, header-first architecture.
+2. Prioritise developer ergonomics: fast iteration, self-diagnosing tooling, and rich documentation.
+3. Maintain deterministic builds with reproducible dependency management via vcpkg and CMake.
+
+Execution Plan
+--------------
+Use the following phases as a step-by-step prompt for future automation or assistant runs. Each phase is framed as a checklist that an assistant can execute sequentially.
+
+Phase 1 – Repository Audit & Build Health
+----------------------------------------
+**Goal:** establish deterministic builds across platforms.
+- [ ] Clone repo, install prerequisites (CMake, Ninja/MSVC, vcpkg).
+- [ ] Configure CI-compatible build presets for Windows, Linux, macOS (`CMakePresets.json`).
+- [ ] Restore vcpkg dependencies in manifest mode and cache the install tree.
+- [ ] Build `updater` target in Debug and Release on all platforms; capture build logs.
+- [ ] Create a smoke test harness that launches the updater, exercises script reload, and swaps renderers headlessly.
+
+Phase 2 – Core Runtime Stabilisation
+------------------------------------
+**Goal:** make the runtime resilient to reload, resize, and multi-context stress.
+- [x] Review `include/aengineconfig.hpp` flags; document supported combinations in `/AlmondShell/docs`. *(v0.58.2 adds `docs/aengineconfig_flags.md` covering supported renderer/context mixes.)*
+- [ ] Implement regression tests for each renderer backend (OpenGL, Raylib, SDL software) using headless validation scenes (see `AlmondShell/docs/renderer_regression_plan.md` for smoke coverage, tooling, and acceptance checks).
+  - [ ] Cover Raylib child-window scaling by docking/undocking panes, capturing parent/child dimensions, and asserting the design canvas persists while the GL context remains bound.
+- [x] Harden multi-context window management with assertions, telemetry counters, and leak detection hooks in `acontextmultiplexer`. *(v0.57.16 prevents the main thread from re-entering active render threads, removing a long-standing race in `ProcessAllContexts`; v0.59.0 gates the Win32-only multiplexer implementation and provides cross-platform stubs so Linux/macOS builds stop failing.)*
+- [x] Cache per-window narrow titles so SDL and Raylib initialisers can resolve their pane labels without relying on loop-local state. *(v0.59.3 persists the `narrowTitle` metadata in the multiplexer before backend initialisation, repairing the Windows build.)*
+- [x] Route both the automatic `RunEngine()` entry point and `wWinMain` through the same multi-context loop so every startup path spins up the full renderer/task orchestration stack.
+- [x] Fix Raylib resize propagation so OS-driven window changes update context dimensions and client callbacks without recursion. *(v0.59.1 coalesces Raylib resize notifications and forwards them through guarded callbacks.)*
+- [x] Restore SDL3 and Raylib docking by reattaching Win32 subclasses during backend initialisation and fix Raylib HiDPI sprite scaling so docked menus keep consistent sizing. *(v0.59.4 reapplies the docking subclass hook and normalises Raylib draw commands to render-pixel space; v0.59.5 keeps Raylib child windows and their framebuffers in lock-step during dock/undock transitions so UI scaling remains stable; v0.59.6 guards the Raylib sprite scaler so large windows stop shrinking button quads; v0.59.7 makes Raylib windowing fully HiDPI-aware by consuming framebuffer dimensions for layout and pointer scaling.)*
+- [ ] Finalise task scheduler/coroutine orchestration; stress-test script reload storms and fix deadlocks.
+- [x] Optimise hot-reload pipeline to recompile scripts incrementally with clear diagnostics (see `src/ascriptingsystem.cpp`). *(v0.58.0 introduces `ScriptLoadReport`, synchronous reload waits, and task pruning to surface failures deterministically.)*
+- [ ] Integrate automated smoke coverage for the script reload flow using the new diagnostics surface.
+
+Phase 3 – Feature Completion
+----------------------------
+**Goal:** ship feature parity with the planned AlmondEngine hand-off.
+- [ ] Ship the asset pipeline tooling for atlases, shaders, and script packaging with CLI entry points.
+- [ ] Flesh out networking: Steam backend primary, ASIO fallback with reconnect/backoff logic surfaced in telemetry.
+- [ ] Implement cross-backend input abstraction with remapping profiles and virtual device support.
+- [ ] Provide a metrics overlay (frame time, job queue depth, memory usage) toggled via scripting API.
+- [ ] Integrate save/load checkpoints into the scene framework for each bundled mini-game.
+
+Phase 4 – Tooling & Automation
+------------------------------
+**Goal:** enable one-click workflows and CI coverage.
+- [ ] Add `scripts/` commands for build, test, package, and release flows (POSIX + PowerShell).
+- [ ] Create editor automation templates under `src/scripts/` demonstrating UI bootstrapping for future editor work.
+- [ ] Set up GitHub Actions/CI pipelines for build + test + artifact upload (matrix across supported OS/toolchains).
+- [x] Generate API documentation from headers (Doxygen/Sphinx) and publish via GitHub Pages. *(Doxygen configuration + build integration generates HTML artefacts under `docs/api/` ready for GitHub Pages publishing.)*
+- [ ] Implement crash reporting with symbol upload and minidump collection.
+
+Phase 5 – Documentation & Release Readiness
+-------------------------------------------
+**Goal:** prepare the release and onboarding collateral.
+- [ ] Update README with latest setup steps, feature matrix, and platform support table.
+- [ ] Write migration guide for integrators upgrading from prior snapshots.
+- [ ] Produce quickstart tutorials (text + video) using example projects.
+- [x] Draft release notes summarising new features, known issues, and roadmap alignment. *(v0.62.1 introduces `Changes/release_notes_v0.62.1.md` with highlights, known issues, and roadmap context.)*
+- [ ] Run a final release candidate dry run: build, package, sign, and verify checksums.
+
+Acceptance Criteria
+-------------------
+- All build targets succeed on supported platforms with automated verification.
+- Regression test suite covers rendering, scripting, networking, and updater flows.
+- Documentation enables new contributors to build, extend, and deploy the engine within one working day.
+- Release artifacts are reproducible, signed, and accompanied by validated checksums.
+
+Next Steps Prompt
+-----------------
+"You are assisting with finalising the AlmondShell engine. Determine the active roadmap phase, enumerate actionable subtasks using the checklists above, execute them, and report progress with references to code changes, tests, and documentation updates."

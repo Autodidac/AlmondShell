@@ -1,0 +1,75 @@
+#pragma once
+
+#include <memory>
+#include <functional>
+#include <atomic>
+#include <string>
+
+#if defined(_WIN32)
+#    include <windows.h>
+#else
+#    include <cstdint>
+using HWND = void*;
+using HDC = void*;
+using HGLRC = void*;
+#endif
+
+#include "acontexttype.hpp"  // for ContextType
+#include "acommandqueue.hpp" // for CommandQueue
+
+namespace almondnamespace::core 
+{
+    struct Context; // forward declaration
+    class MultiContextManager; // Forward declare MultiContextManager for ResizeCallback
+
+    struct WindowData
+    {
+        HWND hwnd{};
+        HDC  hdc{};
+        HGLRC glContext{};
+        bool running = true;
+        bool clicked = false;
+        bool usesSharedContext = false;
+        std::shared_ptr<Context> context;
+        almondnamespace::core::ContextType type { almondnamespace::core::ContextType::OpenGL };
+
+        std::wstring titleWide;
+        std::string  titleNarrow;
+
+        int width = 0;
+        int height = 0;
+
+        using ResizeCallback = std::function<void(int, int)>;
+        ResizeCallback onResize;
+
+        using ThreadInitializeCallback = std::function<bool(const std::shared_ptr<Context>&)>;
+        ThreadInitializeCallback threadInitialize;
+
+        CommandQueue commandQueue;
+
+        std::atomic<bool> paused{ false };
+        std::atomic<bool> quiesced{ false };
+
+        WindowData() = default;
+        WindowData(HWND h, HDC dc, HGLRC ctx, bool shared, almondnamespace::core::ContextType t)
+            : hwnd(h), hdc(dc), glContext(ctx), usesSharedContext(shared), type(t) {
+        }
+
+        // Non-copyable, non-movable
+        WindowData(const WindowData&) = delete;
+        WindowData& operator=(const WindowData&) = delete;
+        WindowData(WindowData&&) = delete;
+        WindowData& operator=(WindowData&&) = delete;
+
+        // Forwarding convenience
+        void EnqueueCommand(std::function<void()> cmd) {
+            commandQueue.enqueue(std::move(cmd));
+        }
+
+        bool DrainCommands() {
+            return commandQueue.drain();
+        }
+
+    };
+
+} // namespace almondshell::core

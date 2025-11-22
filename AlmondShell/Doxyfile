@@ -1,0 +1,14 @@
+# Doxyfile for AlmondShell API documentation
+PROJECT_NAME           = "AlmondShell API"
+OUTPUT_DIRECTORY       = docs/api
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+INPUT                  = include
+FILE_PATTERNS          = *.h \
+                         *.hpp
+RECURSIVE              = YES
+EXTRACT_ALL            = YES
+FULL_PATH_NAMES        = NO
+WARN_IF_UNDOCUMENTED   = NO
+QUIET                  = YES

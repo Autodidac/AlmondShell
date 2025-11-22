@@ -1,0 +1,47 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "AlmondShell\Engine.vcxitems", "{B2F62625-ABDC-43C1-9AC0-379C96B52A74}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StaticLib1", "AlmondShell\examples\StaticLib1\StaticLib1.vcxproj", "{BBA639B7-2B54-4E38-90AC-667FC3303475}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleApplication1", "AlmondShell\examples\ConsoleApplication1\ConsoleApplication1.vcxproj", "{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BBA639B7-2B54-4E38-90AC-667FC3303475} = {BBA639B7-2B54-4E38-90AC-667FC3303475}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Debug|x64.ActiveCfg = Debug|x64
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Debug|x64.Build.0 = Debug|x64
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Debug|x86.ActiveCfg = Debug|Win32
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Debug|x86.Build.0 = Debug|Win32
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Release|x64.ActiveCfg = Release|x64
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Release|x64.Build.0 = Release|x64
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Release|x86.ActiveCfg = Release|Win32
+		{BBA639B7-2B54-4E38-90AC-667FC3303475}.Release|x86.Build.0 = Release|Win32
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Debug|x64.ActiveCfg = Debug|x64
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Debug|x64.Build.0 = Debug|x64
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Debug|x86.ActiveCfg = Debug|Win32
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Debug|x86.Build.0 = Debug|Win32
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Release|x64.ActiveCfg = Release|x64
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Release|x64.Build.0 = Release|x64
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Release|x86.ActiveCfg = Release|Win32
+		{A27860EC-F347-4945-ACA3-E0E8CE35F8F2}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		AlmondShell\Engine.vcxitems*{b2f62625-abdc-43c1-9ac0-379c96b52a74}*SharedItemsImports = 9
+		AlmondShell\Engine.vcxitems*{bba639b7-2b54-4e38-90ac-667fc3303475}*SharedItemsImports = 4
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,22 @@
+{
+  "builtin-baseline": "74ec888e385d189b42d6b398d0bbaa6f1b1d3b0e",
+  "dependencies": [
+    "asio",
+    "fmt",
+    "glad",
+    "glm",
+    "opengl",
+    "sdl3",
+    "sdl3-image",
+    "zlib",
+		"raylib",
+    {
+      "name": "libx11",
+      "platform": "linux"
+    },
+    {
+      "name": "libxrandr",
+      "platform": "linux"
+    }
+  ]
+}

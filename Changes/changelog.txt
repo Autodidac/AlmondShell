@@ -1,0 +1,220 @@
+# Changelog
+
+## [v0.71.0]
+- Adopted the C++23 module toolchain and documented the migration steps (fresh build trees, module-aware CMake configuration,
+  and compiler requirements) so downstream packagers can rebuild AlmondShell with BMI-aware generators.
+- Raised the documented prerequisites to C++23-era compilers and CMake releases with module scanning enabled, refreshing the
+  README, configuration guide, and engine analysis to align with the v0.71.0 snapshot.
+
+## [v0.70.3]
+- Re-synchronised every build entry point (CMake, shell scripts, VS Code tasks) to link against the standalone glad loader so Linux targets resolve `gladLoadGLLoader` without bespoke flags.
+- Bumped the engine metadata and documentation (README snapshot, engine analysis, and configuration guide) to v0.70.3 so diagnostics, launcher manifests, and downstream packagers advertise the correct version in lockstep with the release.
+
+## [v0.70.2]
+- Eliminated duplicate glad symbol definitions when bundling both the Raylib loader and standalone artefacts, tightening the default linkage rules.
+- Relaxed the CMake option flow so distributors can toggle glad packaging without tripping Raylib's built-in loader assumptions, and bumped metadata to v0.70.2.
+
+## [v0.70.1]
+- Fixed Linux builds by always linking the glad OpenGL loader so `gladLoadGLLoader` resolves even when Raylib is active.
+- Documented the new build workflow, refreshed the Linux quickstart instructions, and bumped engine metadata to v0.70.1.
+
+## [v0.59.11]
+- Expanded the immediate-mode GUI with image buttons, editable text fields, multiline text boxes, and a ready-made console window helper while plumbing keyboard/text input through `agui`'s event queue.
+
+## [v0.59.10]
+- Added `agui.hpp` as the shared immediate-mode GUI layer, generating a built-in font atlas and wiring Raylib + SDL3 draw paths so every backend can render consistent windows, labels, and buttons without bespoke setup.
+
+## [v0.59.9]
+- Normalised Raylib GUI scaling when panes dock or undock by tracking logical window dimensions separately from framebuffer sizes, keeping buttons consistent during DPI-aware resizes.
+
+## [v0.59.8]
+- Removed the extra placeholder Win32 shells after SDL3 and Raylib contexts hand back their native window handles, so the multiplexer now docks the real backends without spawning blank white host panes.
+- Scaled Raylib sprites and mouse input from the live framebuffer ratio, keeping menu buttons proportional as windows grow instead of shrinking against the viewport.
+
+## [v0.59.7]
+- Enabled Raylib HiDPI windowing by setting the high-DPI flag, mirroring framebuffer dimensions into context state, and rescaling mouse input so docked overlays stay pixel-correct on scaled displays.
+- Synced post-docking framebuffer sizes into resize dispatch to stop multi-monitor layouts from inheriting stale logical dimensions when native scaling changes mid-session.
+
+## [v0.59.6]
+- Prevented Raylib UI elements from shrinking when windows scale beyond their backing framebuffer by skipping downscaling passes and only applying HiDPI growth, keeping docked buttons readable at any size.
+
+## [v0.59.5]
+- Normalised Raylib child window resizing so docked panes keep the same scale as they move between parents, preventing UI shrinking or collapsing during docking transitions.
+
+## [v0.59.4]
+- Reattached the docking subclass hook when SDL3 and Raylib backends create child windows so docked panes drag and resize correctly again.
+- Normalised Raylib sprite coordinates to account for render-to-screen DPI scaling, preventing menu buttons from shrinking as windows scale up.
+
+## [v0.59.3]
+- Fixed the Windows build by persisting each window's narrow title in the multiplexer so SDL and Raylib backends receive the pane label during initialisation.
+- Documented the regression fix in the engine analysis and roadmap, and bumped the engine version metadata.
+
+## [v0.59.2]
+- Fixed SDL3 initialisation by correcting the success check and avoiding bogus error throws, so docked SDL contexts spawn again.
+- Removed references to the deprecated Win32 parent property path for SDL3 and tightened the embedding flow around native parenting.
+- Added backend labels to every docked window, threading them through to SDL and Raylib so each renderer advertises its pane title.
+- Documented the docking label update and bumped the engine version helpers.
+
+## [v0.59.1]
+- Coalesced Raylib window resize notifications so engine contexts and client callbacks stay in sync with OS window dimensions without recursive loops.
+- Updated the roadmap and engine analysis documentation to capture the Raylib backend stability work.
+
+## [v0.59.0]
+- Restricted the Win32 multi-context manager implementation and threading hooks to Windows builds while providing a no-op stub for other platforms, unblocking POSIX consumers.
+- Replaced the unconditional `<windows.h>` include in `awindowdata.hpp` with lightweight handle aliases so cross-platform and headless tooling builds avoid Win32 dependency errors.
+
+## [v0.58.3]
+- Hooked the shared runtime loop into `RunEngine()` and `wWinMain` so non-updater entry points launch the full multi-context
+  manager instead of returning immediately.
+- Refactored the Windows engine bootstrap to reuse the same helper from both entry paths, keeping renderer lifecycle and scene
+  selection logic in one place.
+
+## [v0.58.2]
+- Made `GetEngineVersion()` thread-safe by switching to a `thread_local` buffer and exposing helper views for tooling.
+- Sourced updater configuration version strings from the engine's version helpers and taught the updater to fall back to `aversion.hpp` when parsing remote releases.
+- Documented supported `aengineconfig.hpp` flag combinations for multi-backend builds.
+
+## [v0.58.0]
+- Added `ScriptLoadReport` diagnostics so script reload failures surface actionable messaging and status flags.
+- Made script reload scheduling synchronous via `WaitAll()` with finished-node pruning to avoid dangling coroutines.
+- Cleaned up coroutine handles after execution to prevent leaked frames in the task graph worker pool.
+- Updated roadmap and engine analysis documentation to reflect the hardened hot-reload workflow.
+
+## [v0.57.16]
+- Prevented `ProcessAllContexts` from re-entering contexts already driven by render threads, eliminating a crash-prone race in the multi-context manager.
+- Marked the roadmap milestone for hardened multi-context management with notes on the concurrency fix.
+
+## [v0.57.15]
+- Harden script hot-reload by validating source and output artefacts before loading.
+- Added an engine analysis brief and roadmap checklists to guide completion planning.
+
+## [v0.57.14]
+- Fix menu rendering on SDL, Raylib, and OpenGL backends.
+
+## [v0.57.13]
+- Adjusted size metadata.
+- Made the Unix README responsive.
+- Fixed software renderer resize handling.
+- Fixed the updater directory move on Unix.
+
+## [v0.57.12]
+- Fixed texture rendering across backends.
+- Fixed atlas handle indexing across renderers.
+
+## [v0.57.11]
+- Improved thread safety around backend context texture handling.
+- Applied hotfixes for context initialization issues.
+- Avoided linking dependencies on SFML RenderStates defaults.
+- Fixed menu atlas rendering in SDL and Raylib contexts.
+
+## [v0.57.10]
+- Fixed resize propagation and synchronized input polling.
+- Fixed input coordinate handling and hid the menu during gameplay.
+- Fixed thread-safe mouse queries in safe context helpers.
+
+## [v0.57.8]
+- Version bump only.
+
+## [v0.57.7]
+- Fixed software renderer texture sampling.
+- Fixed Win32 mouse button polling mapping.
+- Handled reused snake atlases without crashing.
+- Updated the update script bug.
+- Updated the version number to 0.57.7.
+- Fixed atlas resizing for software and OpenGL contexts.
+- Reverted the fix for context resize handling for OpenGL and software atlases.
+
+## [v0.57.4]
+- Aligned embedded contexts and wired sprite rendering.
+
+## [v0.57.3]
+- Unlocked semi-working contexts.
+- Protected the input polling thread and released the SFML context.
+- Ensured the main thread polls input state.
+
+## [v0.57.0]
+- Fixed stub context process signatures.
+- Enabled only the working contexts in multiplexer builds.
+- Fixed docking for SDL and Raylib contexts.
+- Reverted keeping SDL and Raylib child windows docked in the multi-context manager.
+- Ensured Raylib and SDL dock to child windows.
+- Reverted ensuring Raylib and SDL dock to child windows after regressions.
+
+## [v0.43.5]
+- Converted the match-3 mini-game to the scene framework.
+- Added scene-based sliding puzzle and minesweeper implementations.
+- Updated image file paths.
+- Refactored legacy games to the scene-based architecture.
+- Fixed menu layout and render queue integration.
+- Reverted the game rendering queue integration and responsive menu layout change.
+
+## [v0.43.3]
+- Fixed menu button ordering.
+- Fixed menu button column ordering.
+- Highlighted atlas system investment in the README.
+
+## [v0.43.0]
+- Added the initial AlmondShell project files via bulk uploads.
+- Renamed WinResource.aps to AlmondShell/WinResource.aps.
+- Updated and renamed WinResource.rc to AlmondShell/WinResource.rc.
+- Updated and renamed acomponentmanager.h to AlmondShell/acomponentmanager.h.
+- Updated and renamed resource.h to AlmondShell/resource.h.
+- Updated and renamed acontext.h to AlmondShell/acontext.h.
+- Updated and renamed pch.h to AlmondShell/pch.h.
+- Updated and renamed acontextcreator.cpp to AlmondShell/acontextcreator.cpp.
+- Updated and renamed acontextwindow.h to AlmondShell/acontextwindow.h.
+- Updated and renamed acoroutine.h to AlmondShell/acoroutine.h.
+- Updated and renamed aengine.cpp to AlmondShell/aengine.cpp.
+- Updated and renamed aengine.h to AlmondShell/aengine.h.
+- Applied a generic fix pass across the project.
+- Added additional uploaded assets for AlmondShell.
+- Updated and renamed runcommands.bat to x64/Release/runcommands.bat.
+- Added multi-context textures and atlases scaffolding.
+- Implemented the multi-context texture upload service.
+- Updated menu assets.
+- Fixed menu sprite UVs and handled OpenGL context loss.
+- Fixed the atlas manager namespace comment.
+- Applied a hotfix after the previous merge.
+- Wired multiplexer windows to centralized contexts.
+- Reverted wiring multiplexer windows to centralized contexts after regressions.
+- Fixed context cloning for the multiplexer.
+- Turned off extra contexts to focus on the OpenGL path.
+- Fixed OpenGL sprite V orientation.
+- Reverted the OpenGL sprite V orientation fix temporarily.
+- Reapplied the OpenGL sprite V orientation fix.
+- Applied a small rendering patch and updated textures.
+- Ensured atlas entry access is thread-safe.
+- Restored missing images.
+- Updated the README description.
+- Documented vcpkg manifest dependencies in the README.
+- Updated the README with additional clarifications.
+- Updated the README again with further adjustments.
+- Updated the README to refine wording and structure.
+- Improved README formatting and included a file tree.
+- Documented Visual Studio vcpkg integration steps.
+- Documented engine configuration switches.
+- Emphasized architectural pillars within the README.
+- Updated the README after earlier documentation passes.
+- Refined multi-context runtime management.
+- Reverted the multi-context runtime management refinement after issues.
+- Refined the context multiplexer threading spine.
+- Applied miscellaneous adjustments and cleanup.
+- Fixed the menu button grid layout.
+- Corrected Raylib viewport offsets so atlas-driven UI no longer clips or drifts inside letterboxed windows.
+- Adjusted the SDL3 renderer to honour the active viewport, keeping GUI overlays centered across aspect ratios.
+- Bumped the engine version to v0.60.0 and refreshed the analysis notes with new focus areas.
+- Cached Raylib viewport fit data and reused it during sprite draws to remove the remaining atlas clipping regressions.
+- Synced SDL3 context dimensions with the renderer output so menu layouts stay centered after window resizes.
+- Added a configurable `--menu-columns` cap for the main overlay grid and documented the runtime flag.
+- Bumped the engine version to v0.61.0 and updated the engine analysis focus areas.
+- Wired the CLI `--update` command into the modular updater flow, requiring `--force` to install builds, and bumped the engine version to v0.62.0.
+- Ensured updater download failures print diagnostics on a fresh line, documented the release, and bumped the engine version to v0.62.1.
+- Documented that forced updater runs rehydrate the AlmondShell source tree, added Windows 11 guidance for running uncertified builds, and refreshed the README accordingly.
+- Seeded Raylib's viewport metrics during resize dispatch so atlas menus stay centred from the very first frame, documented the release, and bumped the engine version to v0.62.2.
+- Added a scissor pass to Raylib's fitted viewport so GUI sprites stay clipped, made the software renderer cleanup idempotent to stop duplicate shutdown logs, documented the release, and bumped the engine version to v0.62.3.
+- Re-seeded Raylib's fitted viewport from the live framebuffer during context creation so GUI overlays align before docking completes, documented the change, and bumped the engine version to v0.62.4.
+- Cached Raylib's bootstrapped WGL handles and gated context reacquisition so standalone Raylib sessions can make the GL context current reliably, documented the change, and bumped the engine version to v0.62.5.
+- Documented the child-window scaling alignment and context refresh smoke coverage for Raylib, ensuring docked panes keep the design canvas while contexts rebound, and bumped the engine version to v0.62.6.
+- Fixed the OpenGL renderer to reference the shared context state when issuing quad and debug-outline draws, restored successful builds, refreshed the documentation, and bumped the engine version to v0.62.7.
+- Initialised the Linux software renderer alongside the multiplexer so menu runs stop crashing after Raylib boots, documented the workflow changes, and bumped the engine version to v0.70.0.
+
